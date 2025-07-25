@@ -2,13 +2,5 @@ package org.interkambio.SistemaInventarioBackend.service;
 
 import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface UserPreferenceService {
-    UserPreferenceDTO save(UserPreferenceDTO userPreferenceDTO);
-    List<UserPreferenceDTO> listAll();
-    Optional<UserPreferenceDTO> searchById(Long id);
-    Optional<UserPreferenceDTO> update(Long id, UserPreferenceDTO dto);
-    boolean delete(Long id);
+public interface UserPreferenceService extends GenericService<UserPreferenceDTO, Long> {
 }

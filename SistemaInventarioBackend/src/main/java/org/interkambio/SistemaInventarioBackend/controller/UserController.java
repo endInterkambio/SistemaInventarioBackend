@@ -1,51 +1,49 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.interkambio.SistemaInventarioBackend.service.UserService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserService service;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserService service) {
+        this.service = service;
     }
 
-    // Listar todos los usuarios
-    @GetMapping("users")
-    public List<UserDTO> listUsers() {
-        return userService.listAll();
+    @GetMapping
+    public List<UserDTO> getAll() {
+        return service.findAll();
     }
 
-    // Crear un nuevo usuario
-    @PostMapping("users")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        UserDTO created = userService.save(userDTO);
-        return ResponseEntity.ok(created);
-    }
-
-    // Actualizar usuario existente
-    @PutMapping("users/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        return userService.update(id, userDTO)
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getById(@PathVariable Long id) {
+        return service.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Eliminar usuario por ID
-    @DeleteMapping("users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.delete(id);
-        if (deleted) {
-            return ResponseEntity.ok("El registro ID: " + id + " se eliminó correctamente");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PostMapping
+    public ResponseEntity<UserDTO> create(@RequestBody UserDTO dto) {
+        return ResponseEntity.ok(service.save(dto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO dto) {
+        return service.update(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

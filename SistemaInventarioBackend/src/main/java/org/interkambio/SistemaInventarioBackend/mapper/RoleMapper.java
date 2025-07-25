@@ -2,20 +2,21 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.model.Role;
+import org.springframework.stereotype.Component;
 
-public class RoleMapper {
-    public static RoleDTO toDTO(Role role) {
-        return new RoleDTO(
-                role.getId(),
-                role.getName()
-        );
-    }
+@Component
+public class RoleMapper implements GenericMapper<Role, RoleDTO> {
 
-    public static Role toEntity(RoleDTO dto) {
+    @Override
+    public Role toEntity(RoleDTO dto) {
         Role role = new Role();
         role.setId(dto.getId());
         role.setName(dto.getName());
-
         return role;
+    }
+
+    @Override
+    public RoleDTO toDTO(Role entity) {
+        return new RoleDTO(entity.getId(), entity.getName());
     }
 }

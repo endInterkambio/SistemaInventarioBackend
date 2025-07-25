@@ -8,42 +8,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api/preferences")
 public class UserPreferenceController {
 
-    private final UserPreferenceService userPreferenceService;
+    private final UserPreferenceService service;
 
-    public UserPreferenceController(UserPreferenceService userPreferenceService) {
-        this.userPreferenceService = userPreferenceService;
+    public UserPreferenceController(UserPreferenceService service) {
+        this.service = service;
     }
 
-    // Listar todas las preferencias de usuario
-    @GetMapping("user_preferences")
-    public List<UserPreferenceDTO> listUsers() {
-        return userPreferenceService.listAll();
+    @GetMapping
+    public List<UserPreferenceDTO> getAll() {
+        return service.findAll();
     }
 
-    // Crear una nueva preferencia de usuario
-    @PostMapping("user_preferences")
-    public ResponseEntity<UserPreferenceDTO> createUser(@RequestBody UserPreferenceDTO userPreferenceDTO) {
-        UserPreferenceDTO created = userPreferenceService.save(userPreferenceDTO);
-        return ResponseEntity.ok(created);
-    }
-
-    // Actualizar preferencia de usuario existente
-    @PutMapping("user_preferences/{id}")
-    public ResponseEntity<UserPreferenceDTO> updateUser(@PathVariable Long id, @RequestBody UserPreferenceDTO userPreferenceDTO) {
-        return userPreferenceService.update(id, userPreferenceDTO)
+    @GetMapping("/{id}")
+    public ResponseEntity<UserPreferenceDTO> getById(@PathVariable Long id) {
+        return service.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Eliminar preferencia de usuario por ID
-    @DeleteMapping("user_preferences/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        boolean deleted = userPreferenceService.delete(id);
+    @PostMapping
+    public ResponseEntity<UserPreferenceDTO> create(@RequestBody UserPreferenceDTO dto) {
+        return ResponseEntity.ok(service.save(dto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserPreferenceDTO> update(@PathVariable Long id, @RequestBody UserPreferenceDTO dto) {
+        return service.update(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        boolean deleted = service.delete(id);
         if (deleted) {
-            return ResponseEntity.ok("El registro ID: " + id + " se eliminó correctamente");
+            return ResponseEntity.ok("Eliminado correctamente.");
         } else {
             return ResponseEntity.notFound().build();
         }
