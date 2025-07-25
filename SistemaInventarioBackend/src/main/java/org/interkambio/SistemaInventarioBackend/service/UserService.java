@@ -10,5 +10,5 @@ public interface UserService {
     List<UserDTO> listAll();
     Optional<UserDTO> searchById(Long id);
     Optional<UserDTO> update(Long id, UserDTO dto);
-    void delete(Long id);
+    boolean delete(Long id);
 }

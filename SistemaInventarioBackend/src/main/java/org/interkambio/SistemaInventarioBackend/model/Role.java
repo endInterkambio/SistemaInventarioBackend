@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name="Role")
+@Table(name="Roles")
 @NoArgsConstructor
 
 public class Role {

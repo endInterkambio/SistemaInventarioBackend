@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Entity(name = "UserPreference")
+@Entity(name = "User_preferences")
 @NoArgsConstructor
 
 public class UserPreference {
