@@ -49,7 +49,11 @@ public class UserPreferenceImpl implements UserPreferenceService {
     }
 
     @Override
-    public void delete(Long id) {
-        userPreferenceRepository.deleteById(id);
+    public boolean delete(Long id) {
+        if (userPreferenceRepository.existsById(id)) {
+            userPreferenceRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

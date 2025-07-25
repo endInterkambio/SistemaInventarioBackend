@@ -41,7 +41,11 @@ public class RoleController {
     // Eliminar rol por ID
     @DeleteMapping("roles/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        roleService.delete(id);
-        return ResponseEntity.ok("El registro ID: " + id + "se eliminó correctamente");
+        boolean deleted = roleService.delete(id);
+        if (deleted) {
+            return ResponseEntity.ok("El registro ID: " + id + " se eliminó correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

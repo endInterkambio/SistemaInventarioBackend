@@ -41,7 +41,11 @@ public class UserPreferenceController {
     // Eliminar preferencia de usuario por ID
     @DeleteMapping("user_preferences/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        userPreferenceService.delete(id);
-        return ResponseEntity.ok("El registro ID: " + id + "se eliminó correctamente");
+        boolean deleted = userPreferenceService.delete(id);
+        if (deleted) {
+            return ResponseEntity.ok("El registro ID: " + id + " se eliminó correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

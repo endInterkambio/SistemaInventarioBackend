@@ -10,5 +10,5 @@ public interface RoleService {
     List<RoleDTO> listAll();
     Optional<RoleDTO> searchById(Long id);
     Optional<RoleDTO> update(Long id, RoleDTO dto);
-    void delete(Long id);
+    boolean delete(Long id);
 }
