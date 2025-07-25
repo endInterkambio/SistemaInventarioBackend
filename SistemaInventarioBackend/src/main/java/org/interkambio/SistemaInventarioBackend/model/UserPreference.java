@@ -1,4 +1,4 @@
-package model;
+package org.interkambio.SistemaInventarioBackend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,6 +18,6 @@ public class UserPreference {
     private String preferenceValue;
 
     @OneToOne
-    @JoinColumn(name="userId", referencedColumnName = "id")
+    @JoinColumn(name="user_id", referencedColumnName = "id")
     private User user;
 }

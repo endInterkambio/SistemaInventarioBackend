@@ -1,4 +1,4 @@
-package DTO;
+package org.interkambio.SistemaInventarioBackend.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

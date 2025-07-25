@@ -1,9 +1,9 @@
-package controller;
+package org.interkambio.SistemaInventarioBackend.controller;
 
-import DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import service.UserService;
+import org.interkambio.SistemaInventarioBackend.service.UserService;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     // Eliminar usuario por ID
-    @DeleteMapping("users//{id}")
+    @DeleteMapping("users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.ok("El registro ID: " + id + "se eliminó correctamente");

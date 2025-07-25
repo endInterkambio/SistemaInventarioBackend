@@ -1,8 +1,8 @@
-package mapper;
+package org.interkambio.SistemaInventarioBackend.mapper;
 
-import DTO.UserDTO;
-import model.Role;
-import model.User;
+import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.model.Role;
+import org.interkambio.SistemaInventarioBackend.model.User;
 
 public class UserMapper {
 

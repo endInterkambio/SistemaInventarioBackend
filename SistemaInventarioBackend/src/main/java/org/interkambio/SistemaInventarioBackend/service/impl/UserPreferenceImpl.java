@@ -1,12 +1,12 @@
-package service.impl;
+package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import DTO.UserPreferenceDTO;
-import mapper.UserPreferenceMapper;
-import model.UserPreference;
+import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
+import org.interkambio.SistemaInventarioBackend.mapper.UserPreferenceMapper;
+import org.interkambio.SistemaInventarioBackend.model.UserPreference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repository.UserPreferenceRepository;
-import service.UserPreferenceService;
+import org.interkambio.SistemaInventarioBackend.repository.UserPreferenceRepository;
+import org.interkambio.SistemaInventarioBackend.service.UserPreferenceService;
 
 import java.util.List;
 import java.util.Optional;

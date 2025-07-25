@@ -1,6 +1,6 @@
-package service;
+package org.interkambio.SistemaInventarioBackend.service;
 
-import DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
 
 import java.util.List;
 import java.util.Optional;

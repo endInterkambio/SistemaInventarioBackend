@@ -1,9 +1,8 @@
-package mapper;
+package org.interkambio.SistemaInventarioBackend.mapper;
 
-import DTO.UserPreferenceDTO;
-import model.Role;
-import model.User;
-import model.UserPreference;
+import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
+import org.interkambio.SistemaInventarioBackend.model.User;
+import org.interkambio.SistemaInventarioBackend.model.UserPreference;
 
 public class UserPreferenceMapper {
 

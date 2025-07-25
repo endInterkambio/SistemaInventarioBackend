@@ -1,12 +1,12 @@
-package service.impl;
+package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import DTO.UserDTO;
-import mapper.UserMapper;
-import model.User;
+import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.mapper.UserMapper;
+import org.interkambio.SistemaInventarioBackend.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repository.UserRepository;
-import service.UserService;
+import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
+import org.interkambio.SistemaInventarioBackend.service.UserService;
 
 import java.util.List;
 import java.util.Optional;

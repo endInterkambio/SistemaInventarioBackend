@@ -1,4 +1,4 @@
-package model;
+package org.interkambio.SistemaInventarioBackend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

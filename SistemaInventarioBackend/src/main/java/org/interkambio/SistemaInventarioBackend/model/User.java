@@ -1,4 +1,4 @@
-package model;
+package org.interkambio.SistemaInventarioBackend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,6 +19,6 @@ public class User {
     private String password;
 
     @OneToOne
-    @JoinColumn(name="roleId", referencedColumnName = "id")
+    @JoinColumn(name="role_id", referencedColumnName = "id")
     private Role role;
 }

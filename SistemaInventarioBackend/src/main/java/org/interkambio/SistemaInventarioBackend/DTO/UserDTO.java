@@ -1,4 +1,4 @@
-package DTO;
+package org.interkambio.SistemaInventarioBackend.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

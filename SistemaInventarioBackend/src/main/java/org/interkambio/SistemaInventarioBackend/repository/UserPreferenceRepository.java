@@ -1,6 +1,6 @@
-package repository;
+package org.interkambio.SistemaInventarioBackend.repository;
 
-import model.UserPreference;
+import org.interkambio.SistemaInventarioBackend.model.UserPreference;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserPreferenceRepository extends JpaRepository<UserPreference, Long> {

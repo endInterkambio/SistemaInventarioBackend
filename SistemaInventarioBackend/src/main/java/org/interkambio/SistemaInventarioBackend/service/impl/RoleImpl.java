@@ -1,12 +1,12 @@
-package service.impl;
+package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import DTO.RoleDTO;
-import mapper.RoleMapper;
-import model.Role;
+import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
+import org.interkambio.SistemaInventarioBackend.mapper.RoleMapper;
+import org.interkambio.SistemaInventarioBackend.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repository.RoleRepository;
-import service.RoleService;
+import org.interkambio.SistemaInventarioBackend.repository.RoleRepository;
+import org.interkambio.SistemaInventarioBackend.service.RoleService;
 
 import java.util.List;
 import java.util.Optional;
