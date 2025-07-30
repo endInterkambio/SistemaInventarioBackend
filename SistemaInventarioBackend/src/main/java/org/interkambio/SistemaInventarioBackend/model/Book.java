@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,10 +23,10 @@ public class Book {
     private Long id;
 
     @Column(unique = true)
-    private String SKU;
+    private String sku;
 
     private String title;
-    private String ISBN;
+    private String isbn;
     private String author;
     private String publisher;
     private String description;
@@ -51,11 +52,9 @@ public class Book {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", referencedColumnName = "id", updatable = false)
-    private User createdBy;
+    @Column(name = "created_by", updatable = false)
+    private Long createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 }

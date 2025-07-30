@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
@@ -37,10 +38,31 @@ public class BookController {
         return ResponseEntity.ok(bookService.save(bookDTO));
     }
 
-    // Actualizar un libro
+    // Carga de datos masiva
+    @PostMapping("/batch")
+    public ResponseEntity<List<BookDTO>> createBatch(@RequestBody List<BookDTO> books) {
+        return ResponseEntity.ok(bookService.saveAll(books));
+    }
+
+    // Actualizar todos los campos del libro
     @PutMapping("/{id}")
-    public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
+    public ResponseEntity<BookDTO> updateBook(
+            @PathVariable Long id,
+            @RequestBody BookDTO bookDTO
+    ) {
         return bookService.update(id, bookDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+    // Actualización parcial
+    @PatchMapping("/{id}")
+    public ResponseEntity<BookDTO> partialUpdate(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates
+    ) {
+        return bookService.partialUpdate(id, updates)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

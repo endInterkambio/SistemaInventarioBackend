@@ -3,7 +3,6 @@ package org.interkambio.SistemaInventarioBackend.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.model.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,13 +10,12 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class BookDTO {
 
     private Long id;
-    private String SKU;
+    private String sku;
     private String title;
-    private String ISBN;
+    private String isbn;
     private String author;
     private String publisher;
     private String description;
@@ -37,6 +35,6 @@ public class BookDTO {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private User createdBy;
-    private User updatedBy;
+    private Long createdBy;
+    private Long updatedBy;
 }

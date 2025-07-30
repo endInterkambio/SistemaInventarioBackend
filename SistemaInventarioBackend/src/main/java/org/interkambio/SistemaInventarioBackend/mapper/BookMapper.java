@@ -11,14 +11,14 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
     public Book toEntity(BookDTO dto) {
         Book book = new Book();
         book.setId(dto.getId());
-        book.setSKU(dto.getSKU());
+        book.setSku(dto.getSku());
         book.setTitle(dto.getTitle());
-        book.setISBN(dto.getISBN());
+        book.setIsbn(dto.getIsbn());
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
         book.setDescription(dto.getDescription());
         book.setCategory(dto.getCategory());
-        book.setSubjects(dto.getSubjects()); // corregido
+        book.setSubjects(dto.getSubjects());
         book.setFormat(dto.getFormat());
         book.setLanguage(dto.getLanguage());
         book.setImageUrl(dto.getImageUrl());
@@ -30,9 +30,10 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setPurchasePrice(dto.getPurchasePrice());
         book.setSellingPrice(dto.getSellingPrice());
         book.setFilter(dto.getFilter());
+
         book.setCreatedBy(dto.getCreatedBy());
         book.setUpdatedBy(dto.getUpdatedBy());
-        // createdAt y updatedAt son automáticos por anotaciones @CreationTimestamp y @UpdateTimestamp
+
         return book;
     }
 
@@ -40,9 +41,9 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
     public BookDTO toDTO(Book entity) {
         return new BookDTO(
                 entity.getId(),
-                entity.getSKU(),
+                entity.getSku(),
                 entity.getTitle(),
-                entity.getISBN(),
+                entity.getIsbn(),
                 entity.getAuthor(),
                 entity.getPublisher(),
                 entity.getDescription(),
