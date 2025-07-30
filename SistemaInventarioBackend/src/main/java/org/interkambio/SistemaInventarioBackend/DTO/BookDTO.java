@@ -1,29 +1,21 @@
-package org.interkambio.SistemaInventarioBackend.model;
+package org.interkambio.SistemaInventarioBackend.DTO;
 
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.interkambio.SistemaInventarioBackend.model.User;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
-@Table(name="books")
+@AllArgsConstructor
 @NoArgsConstructor
 
-public class Book {
+public class BookDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true)
     private String SKU;
-
     private String title;
     private String ISBN;
     private String author;
@@ -43,19 +35,8 @@ public class Book {
     private BigDecimal sellingPrice;
     private String filter;
 
-    @Column(name = "created_at", updatable = false)
-    @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", referencedColumnName = "id", updatable = false)
     private User createdBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     private User updatedBy;
 }
