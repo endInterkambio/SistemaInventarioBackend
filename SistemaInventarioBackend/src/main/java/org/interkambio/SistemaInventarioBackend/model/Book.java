@@ -1,6 +1,5 @@
 package org.interkambio.SistemaInventarioBackend.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 
 @Data
@@ -30,7 +28,8 @@ public class Book {
     private String isbn;
     private String author;
     private String publisher;
-    private String condition;
+    private Integer stockOnHand;
+    private String book_condition;
     private String description;
     private String category;
     private String subjects;
@@ -48,6 +47,10 @@ public class Book {
     private BigDecimal fairPrice;
     private String filter;
 
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
+
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -59,6 +62,6 @@ public class Book {
     @Column(name = "created_by", updatable = false)
     private Long createdBy;
 
-    @Column(name = "updated_by")
+    @Column(name = "updated_by", nullable = true)
     private Long updatedBy;
 }

@@ -16,7 +16,8 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setIsbn(dto.getIsbn());
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
-        book.setCondition(dto.getCondition());
+        book.setStockOnHand(dto.getStockOnHand());
+        book.setBook_condition(dto.getBook_condition());
         book.setDescription(dto.getDescription());
         book.setCategory(dto.getCategory());
         book.setSubjects(dto.getSubjects());
@@ -49,7 +50,8 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                 entity.getIsbn(),
                 entity.getAuthor(),
                 entity.getPublisher(),
-                entity.getCondition(),
+                entity.getStockOnHand(),
+                entity.getBook_condition(),
                 entity.getDescription(),
                 entity.getCategory(),
                 entity.getSubjects(),

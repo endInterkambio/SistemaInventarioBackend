@@ -18,7 +18,8 @@ public class BookDTO {
     private String isbn;
     private String author;
     private String publisher;
-    private String condition;
+    private Integer stockOnHand;
+    private String book_condition;
     private String description;
     private String category;
     private String subjects;
