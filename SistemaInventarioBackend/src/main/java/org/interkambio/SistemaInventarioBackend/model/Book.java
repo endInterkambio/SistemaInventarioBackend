@@ -22,13 +22,15 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
     @Column(unique = true)
     private String sku;
 
-    private String title;
     private String isbn;
     private String author;
     private String publisher;
+    private String condition;
     private String description;
     private String category;
     private String subjects;
@@ -37,11 +39,13 @@ public class Book {
     private String imageUrl;
     private String websiteUrl;
     private String tag;
+    private String productSaleType;
     private Integer bookcase;
     private Integer bookcaseFloor;
     private BigDecimal coverPrice;
     private BigDecimal purchasePrice;
     private BigDecimal sellingPrice;
+    private BigDecimal fairPrice;
     private String filter;
 
     @Column(name = "created_at", updatable = false)

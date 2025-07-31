@@ -11,11 +11,12 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
     public Book toEntity(BookDTO dto) {
         Book book = new Book();
         book.setId(dto.getId());
-        book.setSku(dto.getSku());
         book.setTitle(dto.getTitle());
+        book.setSku(dto.getSku());
         book.setIsbn(dto.getIsbn());
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
+        book.setCondition(dto.getCondition());
         book.setDescription(dto.getDescription());
         book.setCategory(dto.getCategory());
         book.setSubjects(dto.getSubjects());
@@ -24,11 +25,13 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setImageUrl(dto.getImageUrl());
         book.setWebsiteUrl(dto.getWebsiteUrl());
         book.setTag(dto.getTag());
+        book.setProductSaleType(dto.getProductSaleType());
         book.setBookcase(dto.getBookcase());
         book.setBookcaseFloor(dto.getBookcaseFloor());
         book.setCoverPrice(dto.getCoverPrice());
         book.setPurchasePrice(dto.getPurchasePrice());
         book.setSellingPrice(dto.getSellingPrice());
+        book.setFairPrice(dto.getFairPrice());
         book.setFilter(dto.getFilter());
 
         book.setCreatedBy(dto.getCreatedBy());
@@ -41,11 +44,12 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
     public BookDTO toDTO(Book entity) {
         return new BookDTO(
                 entity.getId(),
-                entity.getSku(),
                 entity.getTitle(),
+                entity.getSku(),
                 entity.getIsbn(),
                 entity.getAuthor(),
                 entity.getPublisher(),
+                entity.getCondition(),
                 entity.getDescription(),
                 entity.getCategory(),
                 entity.getSubjects(),
@@ -54,11 +58,13 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                 entity.getImageUrl(),
                 entity.getWebsiteUrl(),
                 entity.getTag(),
+                entity.getProductSaleType(),
                 entity.getBookcase(),
                 entity.getBookcaseFloor(),
                 entity.getCoverPrice(),
                 entity.getPurchasePrice(),
                 entity.getSellingPrice(),
+                entity.getFairPrice(),
                 entity.getFilter(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
