@@ -59,8 +59,6 @@ public class BookExcelImporter {
                 book.setCreatedAt(getDateTime(row, 23));
                 book.setUpdatedAt(getDateTime(row, 24));
 
-                System.out.println("Row " + row.getRowNum() + " -> updatedBy: " + book.getUpdatedBy());
-
                 book.setCreatedBy(getLong(row, 25));
                 book.setUpdatedBy(getLong(row, 26));
                 book.setFilter(getString(row, 27));
