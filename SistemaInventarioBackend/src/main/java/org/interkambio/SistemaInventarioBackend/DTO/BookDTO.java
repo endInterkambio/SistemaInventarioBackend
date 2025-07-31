@@ -27,6 +27,7 @@ public class BookDTO {
     private String language;
     private String imageUrl;
     private String websiteUrl;
+    private Long warehouseId;
     private String tag;
     private String productSaleType;
     private Integer bookcase;

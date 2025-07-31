@@ -47,22 +47,23 @@ public class BookExcelImporter {
                 book.setLanguage(getString(row, 11));
                 book.setImageUrl(getString(row, 12));
                 book.setWebsiteUrl(getString(row, 13));
-                book.setTag(getString(row, 14));
-                book.setProductSaleType(getString(row, 15));
-                book.setBookcase(getInt(row, 16));
-                book.setBookcaseFloor(getInt(row, 17));
-                book.setCoverPrice(getBigDecimal(row, 18));
-                book.setPurchasePrice(getBigDecimal(row, 19));
-                book.setSellingPrice(getBigDecimal(row, 20));
-                book.setFairPrice(getBigDecimal(row, 21));
-                book.setCreatedBy(getLong(row, 22));
-                book.setUpdatedBy(getLong(row, 23));
+                book.setWarehouseId(getLong(row, 14));
+                book.setTag(getString(row, 15));
+                book.setProductSaleType(getString(row, 16));
+                book.setBookcase(getInt(row, 17));
+                book.setBookcaseFloor(getInt(row, 18));
+                book.setCoverPrice(getBigDecimal(row, 19));
+                book.setPurchasePrice(getBigDecimal(row, 20));
+                book.setSellingPrice(getBigDecimal(row, 21));
+                book.setFairPrice(getBigDecimal(row, 22));
+                book.setCreatedAt(getDateTime(row, 23));
+                book.setUpdatedAt(getDateTime(row, 24));
 
                 System.out.println("Row " + row.getRowNum() + " -> updatedBy: " + book.getUpdatedBy());
 
-                book.setCreatedAt(getDateTime(row, 24));
-                book.setUpdatedAt(getDateTime(row, 25));
-                book.setFilter(getString(row, 26));
+                book.setCreatedBy(getLong(row, 25));
+                book.setUpdatedBy(getLong(row, 26));
+                book.setFilter(getString(row, 27));
 
                 books.add(book);
             }

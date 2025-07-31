@@ -2,6 +2,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,6 +26,15 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setLanguage(dto.getLanguage());
         book.setImageUrl(dto.getImageUrl());
         book.setWebsiteUrl(dto.getWebsiteUrl());
+
+        if (dto.getWarehouseId() != null) {
+            Warehouse warehouse = new Warehouse();
+            warehouse.setId(dto.getWarehouseId());
+            book.setWarehouse(warehouse);
+        } else {
+            book.setWarehouse(null);
+        }
+
         book.setTag(dto.getTag());
         book.setProductSaleType(dto.getProductSaleType());
         book.setBookcase(dto.getBookcase());
@@ -59,6 +69,7 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                 entity.getLanguage(),
                 entity.getImageUrl(),
                 entity.getWebsiteUrl(),
+                entity.getWarehouse() != null ? entity.getWarehouse().getId() : null,
                 entity.getTag(),
                 entity.getProductSaleType(),
                 entity.getBookcase(),
