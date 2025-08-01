@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.importer;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderHeaderAware;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.springframework.stereotype.Component;
@@ -8,91 +9,61 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
 
 @Component
 @RequiredArgsConstructor
-public class BookCsvImporter {
+public class BookCsvImporter implements BookFileImporter {
 
+    @Override
     public List<BookDTO> parse(MultipartFile file) throws Exception {
         List<BookDTO> books = new ArrayList<>();
 
         try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-             var csvReader = new CSVReader(reader)) {
+             var csvReader = new CSVReaderHeaderAware(reader)) {
 
-            List<String[]> records = csvReader.readAll();
-
-            for (int i = 1; i < records.size(); i++) { // Saltar encabezado
-                String[] row = records.get(i);
+            Map<String, String> row;
+            while ((row = csvReader.readMap()) != null) {
                 BookDTO book = new BookDTO();
 
-                book.setTitle(row[0]);
-                book.setSku(row[1]);
-                book.setIsbn(row[2]);
-                book.setAuthor(row[3]);
-                book.setPublisher(row[4]);
-                book.setStockOnHand(parseInt(row[5]));
-                book.setBook_condition(row[6]);
-                book.setDescription(row[7]);
-                book.setCategory(row[8]);
-                book.setSubjects(row[9]);
-                book.setFormat(row[10]);
-                book.setLanguage(row[11]);
-                book.setImageUrl(row[12]);
-                book.setWebsiteUrl(row[13]);
-                book.setTag(row[14]);
-                book.setProductSaleType(row[15]);
-                book.setBookcase(parseInt(row[16]));
-                book.setBookcaseFloor(parseInt(row[17]));
-                book.setCoverPrice(parseBigDecimal(row[18]));
-                book.setPurchasePrice(parseBigDecimal(row[19]));
-                book.setSellingPrice(parseBigDecimal(row[20]));
-                book.setFairPrice(parseBigDecimal(row[21]));
-                book.setCreatedBy(parseLong(row[22]));
-                book.setUpdatedBy(parseLong(row[23]));
-                book.setCreatedAt(parseDateTime(row[24]));
-                book.setUpdatedAt(parseDateTime(row[25]));
-                book.setFilter(row[26]);
+                book.setTitle(parseString(row.get("Title")));
+                book.setSku(parseString(row.get("SKU")));
+                book.setIsbn(parseString(row.get("ISBN")));
+                book.setAuthor(parseString(row.get("Author")));
+                book.setPublisher(parseString(row.get("Publisher")));
+                book.setStockOnHand(parseInt(row.get("StockOnHand")));
+                book.setBook_condition(parseString(row.get("BookCondition")));
+                book.setDescription(parseString(row.get("Description")));
+                book.setCategory(parseString(row.get("Category")));
+                book.setSubjects(parseString(row.get("Subjects")));
+                book.setFormat(parseString(row.get("Format")));
+                book.setLanguage(parseString(row.get("Language")));
+                book.setImageUrl(parseString(row.get("ImageUrl")));
+                book.setWebsiteUrl(parseString(row.get("WebsiteUrl")));
+                book.setWarehouseId(parseLong(row.get("WarehouseId")));
+                book.setTag(parseString(row.get("Tag")));
+                book.setProductSaleType(parseString(row.get("ProductSaleType")));
+                book.setBookcase(parseInt(row.get("Bookcase")));
+                book.setBookcaseFloor(parseInt(row.get("BookcaseFloor")));
+                book.setCoverPrice(parseBigDecimal(row.get("CoverPrice")));
+                book.setPurchasePrice(parseBigDecimal(row.get("PurchasePrice")));
+                book.setSellingPrice(parseBigDecimal(row.get("SellingPrice")));
+                book.setFairPrice(parseBigDecimal(row.get("FairPrice")));
+                book.setCreatedBy(parseLong(row.get("CreatedBy")));
+                book.setUpdatedBy(parseLong(row.get("UpdatedBy")));
+                book.setCreatedAt(parseDateTime(row.get("CreatedAt")));
+                book.setUpdatedAt(parseDateTime(row.get("UpdatedAt")));
+                book.setFilter(parseString(row.get("Filter")));
 
                 books.add(book);
             }
         }
 
         return books;
-    }
-
-    private Integer parseInt(String value) {
-        try {
-            return (value != null && !value.trim().isEmpty()) ? Integer.parseInt(value.trim()) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private BigDecimal parseBigDecimal(String value) {
-        try {
-            return (value != null && !value.trim().isEmpty()) ? new BigDecimal(value.trim()) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private Long parseLong(String value) {
-        try {
-            return (value != null && !value.trim().isEmpty()) ? Long.parseLong(value.trim()) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private LocalDateTime parseDateTime(String value) {
-        try {
-            return (value != null && !value.trim().isEmpty()) ? LocalDateTime.parse(value.trim()) : null;
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

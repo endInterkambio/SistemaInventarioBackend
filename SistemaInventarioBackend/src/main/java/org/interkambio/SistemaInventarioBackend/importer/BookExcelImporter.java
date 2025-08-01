@@ -8,16 +8,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
 
 @Component
 @RequiredArgsConstructor
-public class BookExcelImporter {
+public class BookExcelImporter implements BookFileImporter {
 
+    @Override
     public List<BookDTO> parse(MultipartFile file) throws Exception {
         List<BookDTO> books = new ArrayList<>();
 
@@ -25,109 +24,54 @@ public class BookExcelImporter {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
 
-            if (rowIterator.hasNext()) {
-                rowIterator.next(); // Saltar encabezado
+            if (!rowIterator.hasNext()) {
+                return books; // Excel vacío
+            }
+
+            // Crear mapa dinámico de nombre de columna -> índice
+            Row headerRow = rowIterator.next();
+            Map<String, Integer> columnIndex = new HashMap<>();
+            for (Cell cell : headerRow) {
+                columnIndex.put(cell.getStringCellValue().trim(), cell.getColumnIndex());
             }
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 BookDTO book = new BookDTO();
 
-                book.setTitle(getString(row, 0));
-                book.setSku(getString(row, 1));
-                book.setIsbn(getString(row, 2));
-                book.setAuthor(getString(row, 3));
-                book.setPublisher(getString(row, 4));
-                book.setStockOnHand(getInt(row, 5));
-                book.setBook_condition(getString(row, 6));
-                book.setDescription(getString(row, 7));
-                book.setCategory(getString(row, 8));
-                book.setSubjects(getString(row, 9));
-                book.setFormat(getString(row, 10));
-                book.setLanguage(getString(row, 11));
-                book.setImageUrl(getString(row, 12));
-                book.setWebsiteUrl(getString(row, 13));
-                book.setWarehouseId(getLong(row, 14));
-                book.setTag(getString(row, 15));
-                book.setProductSaleType(getString(row, 16));
-                book.setBookcase(getInt(row, 17));
-                book.setBookcaseFloor(getInt(row, 18));
-                book.setCoverPrice(getBigDecimal(row, 19));
-                book.setPurchasePrice(getBigDecimal(row, 20));
-                book.setSellingPrice(getBigDecimal(row, 21));
-                book.setFairPrice(getBigDecimal(row, 22));
-                book.setCreatedAt(getDateTime(row, 23));
-                book.setUpdatedAt(getDateTime(row, 24));
-
-                book.setCreatedBy(getLong(row, 25));
-                book.setUpdatedBy(getLong(row, 26));
-                book.setFilter(getString(row, 27));
+                book.setTitle(getCellString(row, columnIndex.get("Title")));
+                book.setSku(getCellString(row, columnIndex.get("SKU")));
+                book.setIsbn(getCellString(row, columnIndex.get("ISBN")));
+                book.setAuthor(getCellString(row, columnIndex.get("Author")));
+                book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
+                book.setStockOnHand(getCellInt(row, columnIndex.get("Stock")));
+                book.setBook_condition(getCellString(row, columnIndex.get("BookCondition")));
+                book.setDescription(getCellString(row, columnIndex.get("Description")));
+                book.setCategory(getCellString(row, columnIndex.get("Category")));
+                book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
+                book.setFormat(getCellString(row, columnIndex.get("Format")));
+                book.setLanguage(getCellString(row, columnIndex.get("Language")));
+                book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
+                book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
+                book.setWarehouseId(getCellLong(row, columnIndex.get("WarehouseId")));
+                book.setTag(getCellString(row, columnIndex.get("Tag")));
+                book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
+                book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
+                book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
+                book.setCoverPrice(getCellBigDecimal(row, columnIndex.get("CoverPrice")));
+                book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
+                book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));
+                book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
+                book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
+                book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
+                book.setCreatedBy(getCellLong(row, columnIndex.get("CreatedBy")));
+                book.setUpdatedBy(getCellLong(row, columnIndex.get("UpdatedBy")));
+                book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
                 books.add(book);
             }
         }
 
         return books;
-    }
-
-    private String getString(Row row, int col) {
-        try {
-            Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            return (cell != null) ? cell.toString().trim() : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Integer getInt(Row row, int col) {
-        try {
-            Cell cell = row.getCell(col);
-            return (cell != null) ? (int) cell.getNumericCellValue() : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Long getLong(Row row, int col) {
-        try {
-            Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null) return null;
-
-            if (cell.getCellType() == CellType.NUMERIC) {
-                long value = (long) cell.getNumericCellValue();
-                return value > 0 ? value : null;
-            } else if (cell.getCellType() == CellType.STRING) {
-                String stringValue = cell.getStringCellValue().trim();
-                if (stringValue.isEmpty()) return null;
-                long value = Long.parseLong(stringValue);
-                return value > 0 ? value : null;
-            }
-
-        } catch (Exception e) {
-            // Logueo opcional
-        }
-        return null;
-    }
-
-    private BigDecimal getBigDecimal(Row row, int col) {
-        try {
-            Cell cell = row.getCell(col);
-            return (cell != null) ? BigDecimal.valueOf(cell.getNumericCellValue()) : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private LocalDateTime getDateTime(Row row, int col) {
-        try {
-            Cell cell = row.getCell(col);
-            if (cell != null && cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                return cell.getLocalDateTimeCellValue();
-            } else if (cell != null && cell.getCellType() == CellType.STRING) {
-                return LocalDateTime.parse(cell.getStringCellValue().trim());
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
     }
 }

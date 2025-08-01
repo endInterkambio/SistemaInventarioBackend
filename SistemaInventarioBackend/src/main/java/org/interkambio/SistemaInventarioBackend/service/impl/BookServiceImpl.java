@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.importer.BookCsvImporter;
 import org.interkambio.SistemaInventarioBackend.importer.BookExcelImporter;
+import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
@@ -17,19 +18,16 @@ import java.util.List;
 public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> implements BookService {
 
     private final BookRepository bookRepository;
-    private final BookCsvImporter csvImporter;
-    private final BookExcelImporter excelImporter;
+    private final UnifiedBookImporter bookImporter;
 
     public BookServiceImpl(
             BookRepository bookRepository,
             BookMapper bookMapper,
-            BookCsvImporter csvImporter,
-            BookExcelImporter excelImporter
+            UnifiedBookImporter bookImporter
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
-        this.csvImporter = csvImporter;
-        this.excelImporter = excelImporter;
+        this.bookImporter = bookImporter;
     }
 
     @Override
@@ -59,16 +57,8 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     // Método para importar archivo
     @Override
     public List<BookDTO> importBooksFromFile(MultipartFile file) throws Exception {
-        List<BookDTO> books;
-
-        if (file.getOriginalFilename().endsWith(".csv")) {
-            books = csvImporter.parse(file);
-        } else if (file.getOriginalFilename().endsWith(".xlsx") || file.getOriginalFilename().endsWith(".xls")) {
-            books = excelImporter.parse(file);
-        } else {
-            throw new IllegalArgumentException("Formato de archivo no soportado");
-        }
-
-        return saveAll(books);
+        List<BookDTO> books = bookImporter.parse(file); // Usa UnifiedBookImporter
+        return saveAll(books); // Guarda en BD si tu GenericServiceImpl lo soporta
     }
+
 }
