@@ -12,32 +12,46 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookDTO {
 
+    // 1. Identificación básica
     private Long id;
     private String sku;
     private String title;
     private String isbn;
+
+    // 2. Información de autoría
     private String author;
     private String publisher;
-    private Integer stockOnHand;
-    private String book_condition;
+
+    // 3. Detalles descriptivos
+    private Integer stock;
+    private String bookCondition;
     private String description;
     private String category;
     private String subjects;
     private String format;
     private String language;
+
+    // 4. Recursos multimedia
     private String imageUrl;
     private String websiteUrl;
-    private Long warehouseId;
-    private String tag;
-    private String productSaleType;
-    private Integer bookcase;
-    private Integer bookcaseFloor;
+
+    // 5. Precios
     private BigDecimal coverPrice;
     private BigDecimal purchasePrice;
     private BigDecimal sellingPrice;
     private BigDecimal fairPrice;
-    private String filter;
 
+    // 6. Clasificación y filtros
+    private String tag;
+    private String filter;
+    private String productSaleType;
+
+    // 7. Ubicación física
+    private Integer bookcase;
+    private Integer bookcaseFloor;
+    private Long warehouseId;
+
+    // 8. Auditoría
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long createdBy;

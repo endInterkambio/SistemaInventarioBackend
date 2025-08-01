@@ -5,6 +5,8 @@ import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class BookMapper implements GenericMapper<Book, BookDTO> {
 
@@ -12,13 +14,13 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
     public Book toEntity(BookDTO dto) {
         Book book = new Book();
         book.setId(dto.getId());
-        book.setTitle(dto.getTitle());
         book.setSku(dto.getSku());
+        book.setTitle(dto.getTitle());
         book.setIsbn(dto.getIsbn());
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
-        book.setStockOnHand(dto.getStockOnHand());
-        book.setBook_condition(dto.getBook_condition());
+        book.setStock(dto.getStock());
+        book.setBookCondition(dto.getBookCondition());
         book.setDescription(dto.getDescription());
         book.setCategory(dto.getCategory());
         book.setSubjects(dto.getSubjects());
@@ -26,6 +28,15 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setLanguage(dto.getLanguage());
         book.setImageUrl(dto.getImageUrl());
         book.setWebsiteUrl(dto.getWebsiteUrl());
+        book.setCoverPrice(dto.getCoverPrice());
+        book.setPurchasePrice(dto.getPurchasePrice());
+        book.setSellingPrice(dto.getSellingPrice());
+        book.setFairPrice(dto.getFairPrice());
+        book.setTag(dto.getTag());
+        book.setFilter(dto.getFilter());
+        book.setProductSaleType(dto.getProductSaleType());
+        book.setBookcase(dto.getBookcase());
+        book.setBookcaseFloor(dto.getBookcaseFloor());
 
         if (dto.getWarehouseId() != null) {
             Warehouse warehouse = new Warehouse();
@@ -35,16 +46,8 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
             book.setWarehouse(null);
         }
 
-        book.setTag(dto.getTag());
-        book.setProductSaleType(dto.getProductSaleType());
-        book.setBookcase(dto.getBookcase());
-        book.setBookcaseFloor(dto.getBookcaseFloor());
-        book.setCoverPrice(dto.getCoverPrice());
-        book.setPurchasePrice(dto.getPurchasePrice());
-        book.setSellingPrice(dto.getSellingPrice());
-        book.setFairPrice(dto.getFairPrice());
-        book.setFilter(dto.getFilter());
-
+        book.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
+        book.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt() : LocalDateTime.now());
         book.setCreatedBy(dto.getCreatedBy());
         book.setUpdatedBy(dto.getUpdatedBy());
 
@@ -53,36 +56,36 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
 
     @Override
     public BookDTO toDTO(Book entity) {
-        return new BookDTO(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getSku(),
-                entity.getIsbn(),
-                entity.getAuthor(),
-                entity.getPublisher(),
-                entity.getStockOnHand(),
-                entity.getBook_condition(),
-                entity.getDescription(),
-                entity.getCategory(),
-                entity.getSubjects(),
-                entity.getFormat(),
-                entity.getLanguage(),
-                entity.getImageUrl(),
-                entity.getWebsiteUrl(),
-                entity.getWarehouse() != null ? entity.getWarehouse().getId() : null,
-                entity.getTag(),
-                entity.getProductSaleType(),
-                entity.getBookcase(),
-                entity.getBookcaseFloor(),
-                entity.getCoverPrice(),
-                entity.getPurchasePrice(),
-                entity.getSellingPrice(),
-                entity.getFairPrice(),
-                entity.getFilter(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt(),
-                entity.getCreatedBy(),
-                entity.getUpdatedBy()
-        );
+        BookDTO dto = new BookDTO();
+        dto.setId(entity.getId());
+        dto.setSku(entity.getSku());
+        dto.setTitle(entity.getTitle());
+        dto.setIsbn(entity.getIsbn());
+        dto.setAuthor(entity.getAuthor());
+        dto.setPublisher(entity.getPublisher());
+        dto.setStock(entity.getStock());
+        dto.setBookCondition(entity.getBookCondition());
+        dto.setDescription(entity.getDescription());
+        dto.setCategory(entity.getCategory());
+        dto.setSubjects(entity.getSubjects());
+        dto.setFormat(entity.getFormat());
+        dto.setLanguage(entity.getLanguage());
+        dto.setImageUrl(entity.getImageUrl());
+        dto.setWebsiteUrl(entity.getWebsiteUrl());
+        dto.setCoverPrice(entity.getCoverPrice());
+        dto.setPurchasePrice(entity.getPurchasePrice());
+        dto.setSellingPrice(entity.getSellingPrice());
+        dto.setFairPrice(entity.getFairPrice());
+        dto.setTag(entity.getTag());
+        dto.setFilter(entity.getFilter());
+        dto.setProductSaleType(entity.getProductSaleType());
+        dto.setBookcase(entity.getBookcase());
+        dto.setBookcaseFloor(entity.getBookcaseFloor());
+        dto.setWarehouseId(entity.getWarehouse() != null ? entity.getWarehouse().getId() : null);
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        dto.setCreatedBy(entity.getCreatedBy());
+        dto.setUpdatedBy(entity.getUpdatedBy());
+        return dto;
     }
 }

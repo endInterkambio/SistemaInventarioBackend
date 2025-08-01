@@ -37,38 +37,44 @@ public class BookExcelImporter implements BookFileImporter {
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                BookDTO book = new BookDTO();
+                try {
+                    BookDTO book = new BookDTO();
 
-                book.setTitle(getCellString(row, columnIndex.get("Title")));
-                book.setSku(getCellString(row, columnIndex.get("SKU")));
-                book.setIsbn(getCellString(row, columnIndex.get("ISBN")));
-                book.setAuthor(getCellString(row, columnIndex.get("Author")));
-                book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
-                book.setStockOnHand(getCellInt(row, columnIndex.get("Stock")));
-                book.setBook_condition(getCellString(row, columnIndex.get("BookCondition")));
-                book.setDescription(getCellString(row, columnIndex.get("Description")));
-                book.setCategory(getCellString(row, columnIndex.get("Category")));
-                book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
-                book.setFormat(getCellString(row, columnIndex.get("Format")));
-                book.setLanguage(getCellString(row, columnIndex.get("Language")));
-                book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
-                book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
-                book.setWarehouseId(getCellLong(row, columnIndex.get("WarehouseId")));
-                book.setTag(getCellString(row, columnIndex.get("Tag")));
-                book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
-                book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
-                book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
-                book.setCoverPrice(getCellBigDecimal(row, columnIndex.get("CoverPrice")));
-                book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
-                book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));
-                book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
-                book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
-                book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
-                book.setCreatedBy(getCellLong(row, columnIndex.get("CreatedBy")));
-                book.setUpdatedBy(getCellLong(row, columnIndex.get("UpdatedBy")));
-                book.setFilter(getCellString(row, columnIndex.get("Filter")));
+                    book.setTitle(getCellString(row, columnIndex.get("Title")));
+                    book.setSku(getCellString(row, columnIndex.get("SKU")));
+                    book.setIsbn(getCellString(row, columnIndex.get("ISBN")));
+                    book.setAuthor(getCellString(row, columnIndex.get("Author")));
+                    book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
+                    book.setStock(getCellInt(row, columnIndex.get("Stock")));
+                    book.setBookCondition(getCellString(row, columnIndex.get("Condition")));
+                    book.setDescription(getCellString(row, columnIndex.get("Description")));
+                    book.setCategory(getCellString(row, columnIndex.get("Category")));
+                    book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
+                    book.setFormat(getCellString(row, columnIndex.get("Format")));
+                    book.setLanguage(getCellString(row, columnIndex.get("Language")));
+                    book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
+                    book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
+                    book.setWarehouseId(getCellLong(row, columnIndex.get("WarehouseId")));
+                    book.setTag(getCellString(row, columnIndex.get("Tag")));
+                    book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
+                    book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
+                    book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
+                    book.setCoverPrice(getCellBigDecimal(row, columnIndex.get("CoverPrice")));
+                    book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
+                    book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));
+                    book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
+                    book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
+                    book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
+                    book.setCreatedBy(getCellLong(row, columnIndex.get("CreatedBy")));
+                    book.setUpdatedBy(getCellLong(row, columnIndex.get("UpdatedBy")));
+                    book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
-                books.add(book);
+                    books.add(book);
+                } catch (Exception e) {
+                    String sku = getCellString(row, columnIndex.get("SKU"));
+                    throw new IllegalArgumentException("Error en fila con SKU: " + sku + " → " + e.getMessage());
+                }
+
             }
         }
 

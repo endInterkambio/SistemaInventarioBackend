@@ -57,8 +57,13 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     // Método para importar archivo
     @Override
     public List<BookDTO> importBooksFromFile(MultipartFile file) throws Exception {
-        List<BookDTO> books = bookImporter.parse(file); // Usa UnifiedBookImporter
-        return saveAll(books); // Guarda en BD si tu GenericServiceImpl lo soporta
+        try {
+            List<BookDTO> books = bookImporter.parse(file);
+            return saveAll(books);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Error al importar libros: " + ex.getMessage(), ex);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error general al procesar el archivo. Verifica que los datos sean válidos y el formato correcto.", ex);
+        }
     }
-
 }
