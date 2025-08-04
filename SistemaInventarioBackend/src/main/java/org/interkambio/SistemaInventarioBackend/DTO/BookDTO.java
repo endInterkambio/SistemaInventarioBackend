@@ -49,11 +49,11 @@ public class BookDTO {
     // 7. Ubicación física
     private Integer bookcase;
     private Integer bookcaseFloor;
-    private Long warehouseId;
+    private SimpleIdNameDTO warehouse;
 
     // 8. Auditoría
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
+    private SimpleIdNameDTO createdBy;
+    private SimpleIdNameDTO updatedBy;
 }

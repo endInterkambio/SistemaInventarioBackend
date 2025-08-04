@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,7 +55,7 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setLanguage(getCellString(row, columnIndex.get("Language")));
                     book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
                     book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
-                    book.setWarehouseId(getCellLong(row, columnIndex.get("WarehouseId")));
+                    book.setWarehouse(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("WarehouseId")), null));
                     book.setTag(getCellString(row, columnIndex.get("Tag")));
                     book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
                     book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
@@ -65,8 +66,8 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
                     book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
                     book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
-                    book.setCreatedBy(getCellLong(row, columnIndex.get("CreatedBy")));
-                    book.setUpdatedBy(getCellLong(row, columnIndex.get("UpdatedBy")));
+                    book.setCreatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("CreatedBy")), null));
+                    book.setUpdatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("UpdatedBy")), null));
                     book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
                     books.add(book);

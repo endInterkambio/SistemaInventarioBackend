@@ -117,11 +117,9 @@ public class Book {
     // 8. Auditoría
     // ========================
     @Column(name = "created_at", updatable = false)
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @Column(name = "created_by", updatable = false)

@@ -1,14 +1,22 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
+import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
+import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 public class BookMapper implements GenericMapper<Book, BookDTO> {
+    private final UserRepository userRepository;
+    private final WarehouseRepository warehouseRepository;
+
+    public BookMapper(UserRepository userRepository, WarehouseRepository warehouseRepository) {
+        this.userRepository = userRepository;
+        this.warehouseRepository = warehouseRepository;
+    }
 
     @Override
     public Book toEntity(BookDTO dto) {
@@ -38,18 +46,17 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setBookcase(dto.getBookcase());
         book.setBookcaseFloor(dto.getBookcaseFloor());
 
-        if (dto.getWarehouseId() != null) {
+        if (dto.getWarehouse() != null && dto.getWarehouse().getId() != null) {
             Warehouse warehouse = new Warehouse();
-            warehouse.setId(dto.getWarehouseId());
+            warehouse.setId(dto.getWarehouse().getId());
             book.setWarehouse(warehouse);
         } else {
             book.setWarehouse(null);
         }
 
-        book.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
-        book.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt() : LocalDateTime.now());
-        book.setCreatedBy(dto.getCreatedBy());
-        book.setUpdatedBy(dto.getUpdatedBy());
+        book.setCreatedAt(dto.getCreatedAt());
+        book.setUpdatedAt(dto.getUpdatedAt());
+        book.setUpdatedBy(dto.getUpdatedBy() != null ? dto.getUpdatedBy().getId() : null);
 
         return book;
     }
@@ -81,11 +88,33 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         dto.setProductSaleType(entity.getProductSaleType());
         dto.setBookcase(entity.getBookcase());
         dto.setBookcaseFloor(entity.getBookcaseFloor());
-        dto.setWarehouseId(entity.getWarehouse() != null ? entity.getWarehouse().getId() : null);
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
-        dto.setCreatedBy(entity.getCreatedBy());
-        dto.setUpdatedBy(entity.getUpdatedBy());
+
+        // warehouse
+        if (entity.getWarehouse() != null) {
+            dto.setWarehouse(new SimpleIdNameDTO(
+                    entity.getWarehouse().getId(),
+                    warehouseRepository.findNameById(entity.getWarehouse().getId())
+            ));
+        }
+
+        // createdBy
+        if (entity.getCreatedBy() != null) {
+            dto.setCreatedBy(new SimpleIdNameDTO(
+                    entity.getCreatedBy(),
+                    userRepository.findNameById(entity.getCreatedBy())
+            ));
+        }
+
+        // updatedBy
+        if (entity.getUpdatedBy() != null) {
+            dto.setUpdatedBy(new SimpleIdNameDTO(
+                    entity.getUpdatedBy(),
+                    userRepository.findNameById(entity.getUpdatedBy())
+            ));
+        }
+
         return dto;
     }
 }

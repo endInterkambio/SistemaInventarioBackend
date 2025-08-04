@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.importer;
 import com.opencsv.CSVReaderHeaderAware;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,7 +45,7 @@ public class BookCsvImporter implements BookFileImporter {
                     book.setLanguage(parseString(row.get("Language")));
                     book.setImageUrl(parseString(row.get("ImageUrl")));
                     book.setWebsiteUrl(parseString(row.get("WebsiteUrl")));
-                    book.setWarehouseId(parseLong(row.get("WarehouseId")));
+                    book.setWarehouse(new SimpleIdNameDTO(parseLong(row.get("WarehouseId")), null));
                     book.setTag(parseString(row.get("Tag")));
                     book.setProductSaleType(parseString(row.get("ProductSaleType")));
                     book.setBookcase(parseInt(row.get("Bookcase")));
@@ -53,8 +54,8 @@ public class BookCsvImporter implements BookFileImporter {
                     book.setPurchasePrice(parseBigDecimal(row.get("PurchasePrice")));
                     book.setSellingPrice(parseBigDecimal(row.get("SellingPrice")));
                     book.setFairPrice(parseBigDecimal(row.get("FairPrice")));
-                    book.setCreatedBy(parseLong(row.get("CreatedBy")));
-                    book.setUpdatedBy(parseLong(row.get("UpdatedBy")));
+                    book.setCreatedBy(new SimpleIdNameDTO(parseLong(row.get("CreatedBy")), null));
+                    book.setUpdatedBy(new SimpleIdNameDTO(parseLong(row.get("UpdatedBy")), null));
                     book.setCreatedAt(parseDateTime(row.get("CreatedAt")));
                     book.setUpdatedAt(parseDateTime(row.get("UpdatedAt")));
                     book.setFilter(parseString(row.get("Filter")));
