@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.User;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
 import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
@@ -56,7 +57,18 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
 
         book.setCreatedAt(dto.getCreatedAt());
         book.setUpdatedAt(dto.getUpdatedAt());
-        book.setUpdatedBy(dto.getUpdatedBy() != null ? dto.getUpdatedBy().getId() : null);
+
+        if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
+            User createdBy = new User();
+            createdBy.setId(dto.getCreatedBy().getId());
+            book.setCreatedBy(createdBy);
+        }
+
+        if (dto.getUpdatedBy() != null && dto.getUpdatedBy().getId() != null) {
+            User updatedBy = new User();
+            updatedBy.setId(dto.getUpdatedBy().getId());
+            book.setUpdatedBy(updatedBy);
+        }
 
         return book;
     }
@@ -95,23 +107,21 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         if (entity.getWarehouse() != null) {
             dto.setWarehouse(new SimpleIdNameDTO(
                     entity.getWarehouse().getId(),
-                    warehouseRepository.findNameById(entity.getWarehouse().getId())
+                    entity.getWarehouse().getName()
             ));
         }
 
-        // createdBy
         if (entity.getCreatedBy() != null) {
             dto.setCreatedBy(new SimpleIdNameDTO(
-                    entity.getCreatedBy(),
-                    userRepository.findNameById(entity.getCreatedBy())
+                    entity.getCreatedBy().getId(),
+                    entity.getCreatedBy().getUsername()
             ));
         }
 
-        // updatedBy
         if (entity.getUpdatedBy() != null) {
             dto.setUpdatedBy(new SimpleIdNameDTO(
-                    entity.getUpdatedBy(),
-                    userRepository.findNameById(entity.getUpdatedBy())
+                    entity.getUpdatedBy().getId(),
+                    entity.getUpdatedBy().getUsername()
             ));
         }
 

@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> implements BookService {
 
     private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
     private final UnifiedBookImporter bookImporter;
 
     public BookServiceImpl(
@@ -25,6 +27,7 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
+        this.bookMapper = bookMapper;
         this.bookImporter = bookImporter;
     }
 
@@ -51,6 +54,15 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         }
         return super.saveAll(books);
     }
+
+    @Override
+    public List<BookDTO> findAllBooks() {
+        List<Book> books = bookRepository.findAllWithRelations(); // ya viene con warehouse y users cargados
+        return books.stream()
+                .map(bookMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 
     // Método para importar archivo
     @Override
