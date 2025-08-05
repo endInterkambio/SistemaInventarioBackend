@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,14 @@ public class BookController {
         return bookService.findAllBooks(pageable);
     }
 
+    // ✅ Búsqueda con filtros y ordenamiento
+    @GetMapping("/search")
+    public Page<BookDTO> searchBooks(
+            @ModelAttribute BookSearchCriteria criteria,
+            Pageable pageable
+    ) {
+        return bookService.searchBooks(criteria, pageable);
+    }
 
     // Obtener libro por ID
     @GetMapping("/{id}")
@@ -81,4 +90,3 @@ public class BookController {
         }
     }
 }
-

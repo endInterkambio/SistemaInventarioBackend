@@ -1,13 +1,19 @@
+
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.transaction.Transactional;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
+import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +43,27 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     protected void setId(Book entity, Long id) {
         entity.setId(id);
     }
+
+    @Override
+    public Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable) {
+        Specification<Book> specification = BookSpecification.withFilters(criteria);
+
+        Pageable sortedPageable = pageable;
+        if (criteria.getSortBy() != null && !criteria.getSortBy().isEmpty()) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(criteria.getSortDirection())
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+            sortedPageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(direction, criteria.getSortBy())
+            );
+        }
+
+        Page<Book> bookPage = bookRepository.findAll(specification, sortedPageable);
+        return bookPage.map(bookMapper::toDTO);
+    }
+
 
     @Override
     public BookDTO save(BookDTO dto) {
