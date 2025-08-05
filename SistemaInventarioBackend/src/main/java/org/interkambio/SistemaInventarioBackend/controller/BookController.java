@@ -23,13 +23,7 @@ public class BookController {
 
     // Obtener todos los libros
     @GetMapping
-    public Page<BookDTO> getBooks(Pageable pageable) {
-        return bookService.findAllBooks(pageable);
-    }
-
-    // ✅ Búsqueda con filtros y ordenamiento
-    @GetMapping("/search")
-    public Page<BookDTO> searchBooks(
+    public Page<BookDTO> getBooks(
             @ModelAttribute BookSearchCriteria criteria,
             Pageable pageable
     ) {
