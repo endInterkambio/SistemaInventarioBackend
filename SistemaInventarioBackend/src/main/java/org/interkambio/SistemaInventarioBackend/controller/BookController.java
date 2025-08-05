@@ -2,6 +2,8 @@ package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +22,10 @@ public class BookController {
 
     // Obtener todos los libros
     @GetMapping
-    public List<BookDTO> listBooks() {
-        return bookService.findAll();
+    public Page<BookDTO> getBooks(Pageable pageable) {
+        return bookService.findAllBooks(pageable);
     }
+
 
     // Obtener libro por ID
     @GetMapping("/{id}")

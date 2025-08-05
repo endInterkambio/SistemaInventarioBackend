@@ -7,8 +7,10 @@ import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,12 +58,11 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
-    public List<BookDTO> findAllBooks() {
-        List<Book> books = bookRepository.findAllWithRelations(); // ya viene con warehouse y users cargados
-        return books.stream()
-                .map(bookMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<BookDTO> findAllBooks(Pageable pageable) {
+        Page<Book> books = bookRepository.findAll(pageable); // paginado y con relaciones
+        return books.map(bookMapper::toDTO);
     }
+
 
 
     // Método para importar archivo
