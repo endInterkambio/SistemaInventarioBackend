@@ -18,11 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import static org.interkambio.SistemaInventarioBackend.util.DecimalUtils.toBigDecimal;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> implements BookService {
@@ -91,30 +88,6 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     public Page<BookDTO> findAllBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable); // paginado y con relaciones
         return books.map(bookMapper::toDTO);
-    }
-
-    @Override
-    public Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates) {
-        return bookRepository.findById(id).map(book -> {
-
-            List<String> priceFields = List.of("purchasePrice", "sellingPrice", "coverPrice", "fairPrice");
-
-            for (String field : priceFields) {
-                if (updates.containsKey(field)) {
-                    Object val = updates.get(field);
-                    BigDecimal decimalValue = BigDecimal.valueOf(((Number) val).doubleValue());
-                    switch (field) {
-                        case "purchasePrice" -> book.setPurchasePrice(decimalValue);
-                        case "sellingPrice" -> book.setSellingPrice(decimalValue);
-                        case "coverPrice" -> book.setCoverPrice(decimalValue);
-                        case "fairPrice" -> book.setFairPrice(decimalValue);
-                    }
-                }
-            }
-
-            Book saved = bookRepository.save(book);
-            return bookMapper.toDTO(saved);
-        });
     }
 
 

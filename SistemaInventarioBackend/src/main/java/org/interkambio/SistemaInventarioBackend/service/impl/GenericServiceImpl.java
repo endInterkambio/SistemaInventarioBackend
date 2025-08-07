@@ -67,7 +67,11 @@ public abstract class GenericServiceImpl<TEntity, TDTO, ID>
                 Field field = ReflectionUtils.findField(existingEntity.getClass(), key);
                 if (field != null) {
                     field.setAccessible(true);
-                    ReflectionUtils.setField(field, existingEntity, value);
+
+                    Class<?> fieldType = field.getType();
+
+                    Object convertedValue = convertValue(value, fieldType);
+                    ReflectionUtils.setField(field, existingEntity, convertedValue);
                 }
             });
 
@@ -76,24 +80,23 @@ public abstract class GenericServiceImpl<TEntity, TDTO, ID>
         });
     }
 
-    // Utilidad de conversión de tipos
-    private Object convertValueIfNeeded(Class<?> targetType, Object value) {
+    private Object convertValue(Object value, Class<?> targetType) {
         if (value == null) return null;
-        if (targetType.isAssignableFrom(value.getClass())) return value;
 
-        try {
-            if (targetType == BigDecimal.class) return new BigDecimal(value.toString());
-            if (targetType == Integer.class || targetType == int.class) return Integer.parseInt(value.toString());
-            if (targetType == Long.class || targetType == long.class) return Long.parseLong(value.toString());
-            if (targetType == Double.class || targetType == double.class) return Double.parseDouble(value.toString());
-            if (targetType == Boolean.class || targetType == boolean.class) return Boolean.parseBoolean(value.toString());
-            if (targetType == String.class) return value.toString();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error al convertir campo: " + value + " a tipo " + targetType.getName(), e);
+        if (targetType.equals(BigDecimal.class)) {
+            if (value instanceof Number) {
+                return BigDecimal.valueOf(((Number) value).doubleValue());
+            } else if (value instanceof String) {
+                try {
+                    return new BigDecimal((String) value);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid BigDecimal value: " + value);
+                }
+            }
         }
-
         return value;
     }
+
 
     @Override
     public boolean delete(ID id) {
