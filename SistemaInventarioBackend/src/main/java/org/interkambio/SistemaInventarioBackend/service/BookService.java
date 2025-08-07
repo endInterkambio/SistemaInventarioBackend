@@ -7,9 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface BookService extends GenericService<BookDTO, Long> {
     Page<BookDTO> findAllBooks(Pageable pageable);
+    Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates);
     Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable);
     List<BookDTO> importBooksFromFile(MultipartFile file) throws Exception;
 }
