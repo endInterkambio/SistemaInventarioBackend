@@ -23,8 +23,6 @@ public class BookDTO {
     private String publisher;
 
     // 3. Detalles descriptivos
-    private Integer stock;
-    private String bookCondition;
     private String description;
     private String category;
     private String subjects;
@@ -45,11 +43,6 @@ public class BookDTO {
     private String tag;
     private String filter;
     private String productSaleType;
-
-    // 7. Ubicación física
-    private Integer bookcase;
-    private Integer bookcaseFloor;
-    private SimpleIdNameDTO warehouse;
 
     // 8. Auditoría
     private LocalDateTime createdAt;

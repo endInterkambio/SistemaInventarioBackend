@@ -10,10 +10,20 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
 
-    @EntityGraph(attributePaths = {"warehouse", "createdBy", "updatedBy"})
+    @EntityGraph(attributePaths = {
+            "createdBy",
+            "updatedBy",
+            "stockLocations",
+            "stockLocations.warehouse"
+    })
     Page<Book> findAll(Pageable pageable); // Sin filtro
 
-    @EntityGraph(attributePaths = {"warehouse", "createdBy", "updatedBy"})
+    @EntityGraph(attributePaths = {
+            "createdBy",
+            "updatedBy",
+            "stockLocations",
+            "stockLocations.warehouse"
+    })
     Page<Book> findAll(Specification<Book> spec, Pageable pageable);
 
     boolean existsBySku(String sku);
