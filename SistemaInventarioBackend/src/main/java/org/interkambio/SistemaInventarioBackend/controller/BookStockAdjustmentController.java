@@ -1,7 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockAdjustmentDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.BookStockAdjustmentSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.BookStockAdjustmentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +22,11 @@ public class BookStockAdjustmentController {
     }
 
     @GetMapping
-    public List<BookStockAdjustmentDTO> getAll() {
-        return adjustmentService.findAll();
+    public Page<BookStockAdjustmentDTO> searchAdjustments(
+            @ModelAttribute BookStockAdjustmentSearchCriteria criteria,
+            Pageable pageable
+    ) {
+        return adjustmentService.searchAdjustments(criteria, pageable);
     }
 
     @GetMapping("/{id}")
@@ -70,4 +76,3 @@ public class BookStockAdjustmentController {
         }
     }
 }
-
