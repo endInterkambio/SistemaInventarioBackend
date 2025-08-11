@@ -18,13 +18,10 @@ public class BookStockAdjustmentController {
         this.adjustmentService = adjustmentService;
     }
 
-    /*@GetMapping
-    public Page<BookStockAdjustmentDTO> getAdjustments(
-            @ModelAttribute BookStockAdjustmentSearchCriteria criteria,
-            Pageable pageable
-    ) {
-        return adjustmentService.searchAdjustments(criteria, pageable);
-    }*/
+    @GetMapping
+    public List<BookStockAdjustmentDTO> getAll() {
+        return adjustmentService.findAll();
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookStockAdjustmentDTO> getById(@PathVariable Long id) {

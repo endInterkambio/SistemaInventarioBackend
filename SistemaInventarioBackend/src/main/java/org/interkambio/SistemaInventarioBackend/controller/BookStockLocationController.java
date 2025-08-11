@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.BookStockLocationSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.BookStockLocationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,13 +21,13 @@ public class BookStockLocationController {
         this.locationService = locationService;
     }
 
-    /*@GetMapping
+    @GetMapping
     public Page<BookStockLocationDTO> getLocations(
             @ModelAttribute BookStockLocationSearchCriteria criteria,
             Pageable pageable
     ) {
         return locationService.searchLocations(criteria, pageable);
-    }*/
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookStockLocationDTO> getById(@PathVariable Long id) {
