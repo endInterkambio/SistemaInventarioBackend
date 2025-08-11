@@ -93,7 +93,8 @@ public class BookStockAdjustmentServiceImpl implements BookStockAdjustmentServic
 
     @Override
     public Page<BookStockAdjustmentDTO> searchAdjustments(BookStockAdjustmentSearchCriteria criteria, Pageable pageable) {
-        return repository.findAll(BookStockAdjustmentSpecification.withFilters(criteria), pageable)
+        BookStockAdjustmentSpecification spec = new BookStockAdjustmentSpecification();
+        return repository.findAll(spec.build(criteria), pageable)
                 .map(mapper::toDTO);
     }
 }
