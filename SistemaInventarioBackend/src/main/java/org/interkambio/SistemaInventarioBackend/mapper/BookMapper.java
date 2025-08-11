@@ -1,13 +1,14 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.User;
-import org.interkambio.SistemaInventarioBackend.model.Warehouse;
-import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
-import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class BookMapper implements GenericMapper<Book, BookDTO> {
@@ -96,11 +97,37 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
             ));
         }
 
-        // Aquí podrías setear info de stock si haces fetch de BookStockLocation
-        // dto.setStock(...);
-        // dto.setWarehouse(...);
+        // 📌 Mapear ubicaciones
+        if (entity.getStockLocations() != null) {
+            dto.setLocations(
+                    entity.getStockLocations().stream()
+                            .map(location -> new BookStockLocationDTO(
+                                    location.getId(),
+                                    entity.getSku(),
+                                    location.getWarehouse() != null
+                                            ? new SimpleIdNameDTO(location.getWarehouse().getId(), location.getWarehouse().getName())
+                                            : null,
+                                    location.getBookcase(),
+                                    location.getBookcaseFloor(),
+                                    location.getStock(),
+                                    location.getBookCondition() != null ? location.getBookCondition().name() : null
+                            ))
+                            .toList()
+            );
+
+            // 📌 Calcular totalStock
+            dto.setTotalStock(
+                    entity.getStockLocations().stream()
+                            .mapToInt(BookStockLocation::getStock)
+                            .sum()
+            );
+        } else {
+            dto.setLocations(List.of());
+            dto.setTotalStock(0);
+        }
 
         return dto;
     }
+
 }
 

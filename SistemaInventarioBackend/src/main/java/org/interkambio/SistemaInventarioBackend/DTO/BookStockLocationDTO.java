@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookStockLocationDTO {
     private Long id;
-    private String bookSku;  // Solo el SKU, no el objeto Book completo
-    private Long warehouseId;
+    private String bookSku;
+    private SimpleIdNameDTO warehouse; // en lugar de warehouseId
     private Integer bookcase;
     private Integer bookcaseFloor;
     private int stock;
     private String bookCondition;
 }
+
 

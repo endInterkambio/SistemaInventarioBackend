@@ -23,7 +23,7 @@ public class BookStockLocation {
 
     // Relación con Book usando SKU como referencia
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_sku", referencedColumnName = "sku", nullable = false)
+    @JoinColumn(name = "book_SKU", referencedColumnName = "sku", nullable = false)
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)

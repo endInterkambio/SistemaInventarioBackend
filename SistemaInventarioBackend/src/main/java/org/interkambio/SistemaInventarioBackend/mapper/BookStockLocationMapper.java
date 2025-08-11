@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.BookCondition;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
@@ -21,9 +22,9 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
             entity.setBook(book);
         }
 
-        if (dto.getWarehouseId() != null) {
+        if (dto.getWarehouse() != null && dto.getWarehouse().getId() != null) {
             Warehouse warehouse = new Warehouse();
-            warehouse.setId(dto.getWarehouseId());
+            warehouse.setId(dto.getWarehouse().getId());
             entity.setWarehouse(warehouse);
         }
 
@@ -43,7 +44,9 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
         return new BookStockLocationDTO(
                 entity.getId(),
                 entity.getBook() != null ? entity.getBook().getSku() : null,
-                entity.getWarehouse() != null ? entity.getWarehouse().getId() : null,
+                entity.getWarehouse() != null
+                        ? new SimpleIdNameDTO(entity.getWarehouse().getId(), entity.getWarehouse().getName())
+                        : null,
                 entity.getBookcase(),
                 entity.getBookcaseFloor(),
                 entity.getStock(),
@@ -51,4 +54,3 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
         );
     }
 }
-
