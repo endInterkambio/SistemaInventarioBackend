@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookStockAdjustmentDTO {
-
     private Long id;
-    private SimpleIdNameDTO book;
-    private SimpleIdNameDTO location;
+    private String bookSku; // Para identificar el libro
+    private Long locationId; // 🔹 ID directo de la ubicación
     private Integer adjustmentQuantity;
     private String reason;
     private SimpleIdNameDTO performedBy;
