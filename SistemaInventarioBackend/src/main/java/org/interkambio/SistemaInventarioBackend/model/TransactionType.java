@@ -1,10 +1,13 @@
 package org.interkambio.SistemaInventarioBackend.model;
 
-public enum TransactionType {
-    purchase,
-    sale,
-    adjustment,
-    return_in,
-    return_out
-}
+import lombok.Getter;
 
+@Getter
+public enum TransactionType {
+    PURCHASE,
+    SALE,
+    ADJUSTMENT,
+    RETURN_IN,
+    RETURN_OUT,
+    TRANSFER
+}

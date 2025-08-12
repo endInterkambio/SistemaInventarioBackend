@@ -4,6 +4,8 @@ import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class InventoryTransactionMapper {
 
@@ -48,7 +50,9 @@ public class InventoryTransactionMapper {
         InventoryTransaction entity = new InventoryTransaction();
         entity.setId(dto.getId());
 
-        if (dto.getTransactionDate() != null) {
+        if (dto.getTransactionDate() == null) {
+            entity.setTransactionDate(LocalDateTime.now());
+        } else {
             entity.setTransactionDate(dto.getTransactionDate());
         }
 

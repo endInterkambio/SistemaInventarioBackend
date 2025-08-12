@@ -16,7 +16,7 @@ public class InventoryTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "transaction_date")
+    @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
     // Relación con Book usando SKU

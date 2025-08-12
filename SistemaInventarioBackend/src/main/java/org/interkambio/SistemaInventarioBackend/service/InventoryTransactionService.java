@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface InventoryTransactionService {
     Page<InventoryTransactionDTO> searchTransactions(InventoryTransactionSearchCriteria criteria, Pageable pageable);
+    InventoryTransactionDTO createTransaction(InventoryTransactionDTO dto);
 }
