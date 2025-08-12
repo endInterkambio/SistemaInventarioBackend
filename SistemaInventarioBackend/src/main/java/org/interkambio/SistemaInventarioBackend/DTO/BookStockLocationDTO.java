@@ -15,6 +15,7 @@ public class BookStockLocationDTO {
     private Integer bookcaseFloor;
     private int stock;
     private String bookCondition;
+    private String locationType;
 }
 
 

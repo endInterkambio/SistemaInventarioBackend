@@ -43,6 +43,10 @@ public class BookStockLocation {
     @Column(name = "book_condition", nullable = false, length = 1)
     private BookCondition bookCondition = BookCondition.U;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location_type", nullable = false, length = 50)
+    private LocationType locationType = LocationType.MAIN_STORAGE;
+
     @Column(name = "last_updated_at", insertable = false, updatable = false)
     private LocalDateTime lastUpdatedAt;
 

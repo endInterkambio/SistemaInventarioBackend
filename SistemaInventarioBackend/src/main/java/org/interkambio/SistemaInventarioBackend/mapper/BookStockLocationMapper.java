@@ -2,10 +2,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
-import org.interkambio.SistemaInventarioBackend.model.Book;
-import org.interkambio.SistemaInventarioBackend.model.BookCondition;
-import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
-import org.interkambio.SistemaInventarioBackend.model.Warehouse;
+import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,6 +33,10 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
             entity.setBookCondition(BookCondition.valueOf(dto.getBookCondition()));
         }
 
+        if (dto.getLocationType() != null) {
+            entity.setLocationType(LocationType.valueOf(dto.getLocationType()));
+        }
+
         return entity;
     }
 
@@ -50,7 +51,8 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
                 entity.getBookcase(),
                 entity.getBookcaseFloor(),
                 entity.getStock(),
-                entity.getBookCondition() != null ? entity.getBookCondition().name() : null
+                entity.getBookCondition() != null ? entity.getBookCondition().name() : null,
+                entity.getLocationType() != null ? entity.getLocationType().name() : null
         );
     }
 }
