@@ -10,12 +10,16 @@ import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +46,12 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
+    public Optional<Book> findBySku(String sku) {
+        return bookRepository.findBySku(sku);
+    }
+
+
+    @Override
     public Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable) {
         Specification<Book> specification = BookSpecification.withFilters(criteria);
 
@@ -57,23 +67,8 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
             );
         }
 
-        // Paso 1: obtener solo IDs paginados
-        Page<Long> idPage = bookRepository.findAll(specification, sortedPageable)
-                .map(Book::getId);
-
-        if (idPage.isEmpty()) {
-            return Page.empty(sortedPageable);
-        }
-
-        // Paso 2: traer los libros con todas las relaciones en 1 query
-        List<Book> books = bookRepository.findAllWithRelations(idPage.getContent());
-
-        return new PageImpl<>(books.stream()
-                .map(bookMapper::toDTO)
-                .collect(Collectors.toList()),
-                sortedPageable,
-                idPage.getTotalElements()
-        );
+        Page<Book> bookPage = bookRepository.findAll(specification, sortedPageable);
+        return bookPage.map(bookMapper::toDTO);
     }
 
 

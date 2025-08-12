@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
 
@@ -25,6 +26,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
             """)
     List<Book> findAllWithRelations(@Param("ids") List<Long> ids);
 
+    Optional<Book> findBySku(String sku);
 
     boolean existsBySku(String sku);
 }
