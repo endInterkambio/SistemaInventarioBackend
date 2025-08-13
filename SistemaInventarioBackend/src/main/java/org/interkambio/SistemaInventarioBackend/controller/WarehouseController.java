@@ -1,11 +1,13 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
 import org.interkambio.SistemaInventarioBackend.service.WarehouseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/warehouses")
@@ -30,6 +32,17 @@ public class WarehouseController {
     @PutMapping("/{id}")
     public ResponseEntity<WarehouseDTO> update(@PathVariable Long id, @RequestBody WarehouseDTO dto) {
         return warehouseService.update(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Actualización parcial
+    @PatchMapping("/{id}")
+    public ResponseEntity<WarehouseDTO> partialUpdate(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates
+    ) {
+        return warehouseService.partialUpdate(id, updates)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -7,15 +7,26 @@ import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.interkambio.SistemaInventarioBackend.service.WarehouseService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class WarehouseServiceImpl extends GenericServiceImpl<Warehouse, WarehouseDTO, Long> implements WarehouseService {
 
-    public WarehouseServiceImpl(WarehouseRepository warehouseRepository) {
-        super(warehouseRepository, new WarehouseMapper());
+    private final WarehouseRepository warehouseRepository;
+
+    public WarehouseServiceImpl(WarehouseRepository warehouseRepository,
+                                WarehouseMapper warehouseMapper) {
+        super(warehouseRepository, warehouseMapper);
+        this.warehouseRepository = warehouseRepository;
     }
 
     @Override
     protected void setId(Warehouse entity, Long id) {
         entity.setId(id);
+    }
+
+    @Override
+    public List<WarehouseDTO> findAll() {
+        return warehouseRepository.findAllWithTotalBooks();
     }
 }
