@@ -5,6 +5,8 @@ import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class BookStockLocationMapper implements GenericMapper<BookStockLocation, BookStockLocationDTO> {
 
@@ -37,6 +39,10 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
             entity.setLocationType(LocationType.valueOf(dto.getLocationType()));
         }
 
+        if (dto.getLastUpdatedAt() != null) {
+            entity.setLastUpdatedAt(LocalDateTime.now());
+        }
+
         return entity;
     }
 
@@ -52,7 +58,8 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
                 entity.getBookcaseFloor(),
                 entity.getStock(),
                 entity.getBookCondition() != null ? entity.getBookCondition().name() : null,
-                entity.getLocationType() != null ? entity.getLocationType().name() : null
+                entity.getLocationType() != null ? entity.getLocationType().name() : null,
+                entity.getLastUpdatedAt()
         );
     }
 }

@@ -111,7 +111,8 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                                     location.getBookcaseFloor(),
                                     location.getStock(),
                                     location.getBookCondition() != null ? location.getBookCondition().name() : null,
-                                    location.getLocationType() != null ? location.getLocationType().name() : null
+                                    location.getLocationType() != null ? location.getLocationType().name() : null,
+                                    location.getLastUpdatedAt()
                             ))
                             .toList()
             );
