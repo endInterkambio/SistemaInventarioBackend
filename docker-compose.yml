@@ -2,7 +2,7 @@ services:
   sistema_inventario_backend:
     build:
       context: D:/Enmanuel/SistemaInventarioBackend/SistemaInventarioBackend
-      dockerfile: src/main/DockerFile
+      dockerfile: Dockerfile
     container_name: sistema_inventario_backend
     ports:
       - "8080:8080"
@@ -24,7 +24,7 @@ services:
     image: mysql:8.0.33
     container_name: sistema_inventario_db
     ports:
-      - "3307:3306"
+      - "3307:3306"  # puerto host 3307 para no chocar con MySQL local
     environment:
       MYSQL_ROOT_PASSWORD: 5670268
       MYSQL_DATABASE: gusanitolectordb
