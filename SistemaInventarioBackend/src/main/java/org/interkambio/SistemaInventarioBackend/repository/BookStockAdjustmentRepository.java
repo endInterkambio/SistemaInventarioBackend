@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Optional;
+
 public interface BookStockAdjustmentRepository extends
         JpaRepository<BookStockAdjustment, Long>,
         JpaSpecificationExecutor<BookStockAdjustment> {
@@ -25,4 +27,6 @@ public interface BookStockAdjustmentRepository extends
             "performedBy"
     })
     Page<BookStockAdjustment> findAll(Specification<BookStockAdjustment> spec, Pageable pageable);
+
+    Optional<BookStockAdjustment> findTopByLocationIdOrderByPerformedAtDesc(Long locationId);
 }

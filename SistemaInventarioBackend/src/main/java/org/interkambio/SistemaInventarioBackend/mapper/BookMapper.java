@@ -13,7 +13,10 @@ import java.util.List;
 @Component
 public class BookMapper implements GenericMapper<Book, BookDTO> {
 
-    public BookMapper() {
+    private final BookStockLocationMapper stockLocationMapper;
+
+    public BookMapper(BookStockLocationMapper stockLocationMapper) {
+        this.stockLocationMapper = stockLocationMapper;
     }
 
     @Override
@@ -97,24 +100,18 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
             ));
         }
 
-        // 📌 Mapear ubicaciones
+        // 📌 Reutilizar mapper de locations
         if (entity.getStockLocations() != null) {
             dto.setLocations(
                     entity.getStockLocations().stream()
-                            .map(location -> new BookStockLocationDTO(
-                                    location.getId(),
-                                    entity.getSku(),
-                                    location.getWarehouse() != null
-                                            ? new SimpleIdNameDTO(location.getWarehouse().getId(), location.getWarehouse().getName())
-                                            : null,
-                                    location.getBookcase(),
-                                    location.getBookcaseFloor(),
-                                    location.getStock(),
-                                    location.getBookCondition() != null ? location.getBookCondition().name() : null,
-                                    location.getLocationType() != null ? location.getLocationType().name() : null,
-                                    location.getLastUpdatedAt()
-                            ))
+                            .map(stockLocationMapper::toDTO)
                             .toList()
+            );
+
+            dto.setTotalStock(
+                    entity.getStockLocations().stream()
+                            .mapToInt(BookStockLocation::getStock)
+                            .sum()
             );
 
             // 📌 Calcular totalStock
