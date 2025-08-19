@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface BookStockLocationRepository extends
         JpaRepository<BookStockLocation, Long>,
@@ -29,4 +31,11 @@ public interface BookStockLocationRepository extends
             "book"
     })
     Page<BookStockLocation> findAll(Specification<BookStockLocation> spec, Pageable pageable);
+
+    /**
+     * Recargar una ubicación por ID con warehouse y book
+     */
+    @EntityGraph(attributePaths = { "warehouse", "book" })
+    Optional<BookStockLocation> findById(Long id);
+
 }

@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookStockLocationSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exception.LocationDeleteException;
@@ -49,6 +50,23 @@ public class BookStockLocationServiceImpl
     @Override
     protected void setId(BookStockLocation entity, Long id) {
         entity.setId(id);
+    }
+
+    @Override
+    @Transactional
+    public BookStockLocationDTO create(BookStockLocationDTO dto) {
+        // 1️⃣ Convertir DTO a entidad (solo ID de warehouse)
+        BookStockLocation entity = mapper.toEntity(dto);
+
+        // 2️⃣ Guardar la entidad
+        BookStockLocation saved = repository.save(entity);
+
+        // 3️⃣ Recargar la entidad completa con join fetch de warehouse y book
+        BookStockLocation reloaded = repository.findById(saved.getId())
+                .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
+
+        // 4️⃣ Mapear a DTO con name de warehouse correctamente cargado
+        return mapper.toDTO(reloaded);
     }
 
     @Override
