@@ -68,12 +68,17 @@ public class BookStockLocationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        boolean deleted = locationService.delete(id);
-        if (deleted) {
-            return ResponseEntity.ok("Ubicación eliminada correctamente.");
-        } else {
-            return ResponseEntity.notFound().build();
+        try {
+            boolean deleted = locationService.delete(id);
+            if (deleted) {
+                return ResponseEntity.ok("Ubicación eliminada correctamente.");
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(e.getMessage()); // 409 Conflict
         }
     }
+
 }
 

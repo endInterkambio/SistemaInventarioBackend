@@ -12,6 +12,9 @@ public interface InventoryTransactionRepository extends
         JpaRepository<InventoryTransaction, Long>,
         JpaSpecificationExecutor<InventoryTransaction> {
 
+    boolean existsByFromLocationId(Long fromLocationId);
+    boolean existsByToLocationId(Long toLocationId);
+
     @EntityGraph(attributePaths = {
             "book",
             "fromLocation",

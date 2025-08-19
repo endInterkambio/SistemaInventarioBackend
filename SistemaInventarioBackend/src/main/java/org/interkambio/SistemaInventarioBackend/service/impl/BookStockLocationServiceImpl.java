@@ -1,7 +1,9 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookStockLocationSearchCriteria;
+import org.interkambio.SistemaInventarioBackend.exception.LocationDeleteException;
 import org.interkambio.SistemaInventarioBackend.mapper.BookStockLocationMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.BookCondition;
@@ -9,6 +11,7 @@ import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.LocationType;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
+import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookStockLocationService;
 import org.interkambio.SistemaInventarioBackend.specification.BookStockLocationSpecification;
 import org.springframework.data.domain.Page;
@@ -30,14 +33,17 @@ public class BookStockLocationServiceImpl
     private final BookStockLocationRepository repository;
     private final BookStockLocationMapper mapper;
     private final BookRepository bookRepository;
+    private final InventoryTransactionRepository transactionRepository;
 
     public BookStockLocationServiceImpl(BookStockLocationRepository repository,
                                         BookRepository bookRepository,
-                                        BookStockLocationMapper mapper) {
+                                        BookStockLocationMapper mapper,
+                                        InventoryTransactionRepository transactionRepository) {
         super(repository, mapper);
         this.repository = repository;
         this.mapper = mapper;
         this.bookRepository = bookRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -136,6 +142,25 @@ public class BookStockLocationServiceImpl
 
             return mapper.toDTO(reloaded);
         });
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        return repository.findById(id).map(entity -> {
+            boolean hasTransactions = transactionRepository.existsByFromLocationId(id) ||
+                    transactionRepository.existsByToLocationId(id);
+
+            if (hasTransactions) {
+                throw new LocationDeleteException(
+                        "No se puede eliminar la ubicación porque está asociada a transacciones de inventario."
+                );
+            }
+
+            repository.delete(entity);
+            return true;
+        }).orElseThrow(() -> new EntityNotFoundException(
+                "La ubicación con ID " + id + " no existe o ya fue eliminada."
+        ));
     }
 
 

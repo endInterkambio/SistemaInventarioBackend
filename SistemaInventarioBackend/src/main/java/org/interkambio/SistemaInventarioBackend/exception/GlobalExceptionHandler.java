@@ -83,4 +83,16 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
+
+    @ExceptionHandler(LocationDeleteException.class)
+    public ResponseEntity<Object> handleLocationDeletion(
+            LocationDeleteException ex,
+            WebRequest request
+    ) {
+        return new ResponseEntity<>(
+                buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request),
+                HttpStatus.CONFLICT
+        );
+    }
+
 }
