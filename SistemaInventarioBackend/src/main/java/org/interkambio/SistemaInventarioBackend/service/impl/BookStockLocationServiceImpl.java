@@ -55,19 +55,38 @@ public class BookStockLocationServiceImpl
     @Override
     @Transactional
     public BookStockLocationDTO create(BookStockLocationDTO dto) {
-        // 1️⃣ Convertir DTO a entidad (solo ID de warehouse)
         BookStockLocation entity = mapper.toEntity(dto);
+
+        // Cargar libro
+        Book book = bookRepository.findBySku(dto.getBookSku())
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
+        entity.setBook(book);
+
+        // 1️⃣ Validación SHOWROOM
+        if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
+            boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
+                    entity.getBook().getSku(),
+                    entity.getWarehouse().getId(),
+                    entity.getLocationType()
+            );
+
+            if (exists) {
+                throw new RuntimeException(
+                        "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                );
+            }
+        }
 
         // 2️⃣ Guardar la entidad
         BookStockLocation saved = repository.save(entity);
 
-        // 3️⃣ Recargar la entidad completa con join fetch de warehouse y book
+        // 3️⃣ Recargar entidad completa
         BookStockLocation reloaded = repository.findById(saved.getId())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
 
-        // 4️⃣ Mapear a DTO con name de warehouse correctamente cargado
         return mapper.toDTO(reloaded);
     }
+
 
     @Override
     public BookStockLocationDTO save(BookStockLocationDTO dto) {
@@ -75,17 +94,31 @@ public class BookStockLocationServiceImpl
 
         Book book = bookRepository.findBySku(dto.getBookSku())
                 .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
-
         entity.setBook(book);
+
+        // VALIDACIÓN SHOWROOM
+        if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
+            boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
+                    entity.getBook().getSku(),
+                    entity.getWarehouse().getId(),
+                    entity.getLocationType()
+            );
+
+            if (exists) {
+                throw new RuntimeException(
+                        "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                );
+            }
+        }
 
         BookStockLocation saved = repository.save(entity);
 
-        // Recargar con warehouse y book usando el repository
         BookStockLocation reloaded = repository.findById(saved.getId())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
 
         return mapper.toDTO(reloaded);
     }
+
 
     @Override
     public List<BookStockLocationDTO> saveAll(List<BookStockLocationDTO> dtoList) {
@@ -94,12 +127,29 @@ public class BookStockLocationServiceImpl
             Book book = bookRepository.findBySku(dto.getBookSku())
                     .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
             entity.setBook(book);
+
+            // VALIDACIÓN SHOWROOM para cada entity
+            if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
+                boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
+                        entity.getBook().getSku(),
+                        entity.getWarehouse().getId(),
+                        entity.getLocationType()
+                );
+
+                if (exists) {
+                    throw new RuntimeException(
+                            "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                    );
+                }
+            }
+
             return entity;
         }).collect(Collectors.toList());
 
         List<BookStockLocation> savedEntities = repository.saveAll(entities);
         return savedEntities.stream().map(mapper::toDTO).collect(Collectors.toList());
     }
+
 
     @Override
     public java.util.Optional<BookStockLocationDTO> update(Long id, BookStockLocationDTO dto) {

@@ -1,6 +1,8 @@
 package org.interkambio.SistemaInventarioBackend.repository;
 
+import org.interkambio.SistemaInventarioBackend.model.BookCondition;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
+import org.interkambio.SistemaInventarioBackend.model.LocationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,5 +39,20 @@ public interface BookStockLocationRepository extends
      */
     @EntityGraph(attributePaths = { "warehouse", "book" })
     Optional<BookStockLocation> findById(Long id);
+
+    boolean existsByBookSkuAndBookConditionAndWarehouseIdAndLocationType(
+            String bookSku,
+            BookCondition bookCondition,
+            Long warehouseId,
+            LocationType locationType
+    );
+
+    boolean existsByBookSkuAndWarehouseIdAndLocationType(
+            String bookSku,
+            Long warehouseId,
+            LocationType locationType
+    );
+
+
 
 }
