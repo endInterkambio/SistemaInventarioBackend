@@ -55,7 +55,12 @@ public class BookStockLocationServiceImpl
         entity.setBook(book);
 
         BookStockLocation saved = repository.save(entity);
-        return mapper.toDTO(saved);
+
+        // Recargar con warehouse y book usando el repository
+        BookStockLocation reloaded = repository.findById(saved.getId())
+                .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
+
+        return mapper.toDTO(reloaded);
     }
 
     @Override
@@ -84,7 +89,9 @@ public class BookStockLocationServiceImpl
             updated.setId(id);
 
             BookStockLocation saved = repository.save(updated);
-            return mapper.toDTO(saved);
+            BookStockLocation reloaded = repository.findById(saved.getId())
+                    .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
+            return mapper.toDTO(reloaded);
         });
     }
 
@@ -120,8 +127,14 @@ public class BookStockLocationServiceImpl
                 }
             });
 
-            repository.save(entity);
-            return mapper.toDTO(entity);
+            // Guardar cambios
+            BookStockLocation saved = repository.save(entity);
+
+            // Refetch con relaciones
+            BookStockLocation reloaded = repository.findById(saved.getId())
+                    .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
+
+            return mapper.toDTO(reloaded);
         });
     }
 
