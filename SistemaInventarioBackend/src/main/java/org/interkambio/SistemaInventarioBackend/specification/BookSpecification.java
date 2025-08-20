@@ -26,6 +26,7 @@ public class BookSpecification {
                 searchPredicates.add(builder.like(builder.lower(root.get("title")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("author")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("publisher")), "%" + search + "%"));
+                searchPredicates.add(builder.like(builder.lower(root.get("category")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("isbn")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("sku")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("filter")), "%" + search + "%"));
