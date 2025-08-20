@@ -1,22 +1,22 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.User;
-import org.interkambio.SistemaInventarioBackend.model.Warehouse;
-import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
-import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class BookMapper implements GenericMapper<Book, BookDTO> {
-    private final UserRepository userRepository;
-    private final WarehouseRepository warehouseRepository;
 
-    public BookMapper(UserRepository userRepository, WarehouseRepository warehouseRepository) {
-        this.userRepository = userRepository;
-        this.warehouseRepository = warehouseRepository;
+    private final BookStockLocationMapper stockLocationMapper;
+
+    public BookMapper(BookStockLocationMapper stockLocationMapper) {
+        this.stockLocationMapper = stockLocationMapper;
     }
 
     @Override
@@ -28,8 +28,6 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setIsbn(dto.getIsbn());
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
-        book.setStock(dto.getStock());
-        book.setBookCondition(dto.getBookCondition());
         book.setDescription(dto.getDescription());
         book.setCategory(dto.getCategory());
         book.setSubjects(dto.getSubjects());
@@ -44,17 +42,6 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setTag(dto.getTag());
         book.setFilter(dto.getFilter());
         book.setProductSaleType(dto.getProductSaleType());
-        book.setBookcase(dto.getBookcase());
-        book.setBookcaseFloor(dto.getBookcaseFloor());
-
-        if (dto.getWarehouse() != null && dto.getWarehouse().getId() != null) {
-            Warehouse warehouse = new Warehouse();
-            warehouse.setId(dto.getWarehouse().getId());
-            book.setWarehouse(warehouse);
-        } else {
-            book.setWarehouse(null);
-        }
-
         book.setCreatedAt(dto.getCreatedAt());
         book.setUpdatedAt(dto.getUpdatedAt());
 
@@ -82,8 +69,6 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         dto.setIsbn(entity.getIsbn());
         dto.setAuthor(entity.getAuthor());
         dto.setPublisher(entity.getPublisher());
-        dto.setStock(entity.getStock());
-        dto.setBookCondition(entity.getBookCondition());
         dto.setDescription(entity.getDescription());
         dto.setCategory(entity.getCategory());
         dto.setSubjects(entity.getSubjects());
@@ -98,18 +83,8 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         dto.setTag(entity.getTag());
         dto.setFilter(entity.getFilter());
         dto.setProductSaleType(entity.getProductSaleType());
-        dto.setBookcase(entity.getBookcase());
-        dto.setBookcaseFloor(entity.getBookcaseFloor());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
-
-        // warehouse
-        if (entity.getWarehouse() != null) {
-            dto.setWarehouse(new SimpleIdNameDTO(
-                    entity.getWarehouse().getId(),
-                    entity.getWarehouse().getName()
-            ));
-        }
 
         if (entity.getCreatedBy() != null) {
             dto.setCreatedBy(new SimpleIdNameDTO(
@@ -125,6 +100,33 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
             ));
         }
 
+        // 📌 Reutilizar mapper de locations
+        if (entity.getStockLocations() != null) {
+            dto.setLocations(
+                    entity.getStockLocations().stream()
+                            .map(stockLocationMapper::toDTO)
+                            .toList()
+            );
+
+            dto.setTotalStock(
+                    entity.getStockLocations().stream()
+                            .mapToInt(BookStockLocation::getStock)
+                            .sum()
+            );
+
+            // 📌 Calcular totalStock
+            dto.setTotalStock(
+                    entity.getStockLocations().stream()
+                            .mapToInt(BookStockLocation::getStock)
+                            .sum()
+            );
+        } else {
+            dto.setLocations(List.of());
+            dto.setTotalStock(0);
+        }
+
         return dto;
     }
+
 }
+

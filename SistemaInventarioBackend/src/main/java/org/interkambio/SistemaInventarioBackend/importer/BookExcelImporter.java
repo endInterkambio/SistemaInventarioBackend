@@ -46,8 +46,8 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setIsbn(getCellString(row, columnIndex.get("ISBN")));
                     book.setAuthor(getCellString(row, columnIndex.get("Author")));
                     book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
-                    book.setStock(getCellInt(row, columnIndex.get("Stock")));
-                    book.setBookCondition(getCellString(row, columnIndex.get("Condition")));
+                    //book.setStock(getCellInt(row, columnIndex.get("Stock")));
+                    //book.setBookCondition(getCellString(row, columnIndex.get("Condition")));
                     book.setDescription(getCellString(row, columnIndex.get("Description")));
                     book.setCategory(getCellString(row, columnIndex.get("Category")));
                     book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
@@ -55,11 +55,11 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setLanguage(getCellString(row, columnIndex.get("Language")));
                     book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
                     book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
-                    book.setWarehouse(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("WarehouseId")), null));
+                    //book.setWarehouse(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("WarehouseId")), null));
                     book.setTag(getCellString(row, columnIndex.get("Tag")));
                     book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
-                    book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
-                    book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
+                    //book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
+                    //book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
                     book.setCoverPrice(getCellBigDecimal(row, columnIndex.get("CoverPrice")));
                     book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
                     book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));

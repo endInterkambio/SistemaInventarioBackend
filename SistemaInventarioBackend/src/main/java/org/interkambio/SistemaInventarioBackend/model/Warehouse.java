@@ -22,7 +22,8 @@ public class Warehouse {
 
     private String description;
 
-    @OneToMany(mappedBy = "warehouse")
-    private List<Book> books;
+    // Relación hacia las ubicaciones de stock
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<BookStockLocation> stockLocations;
 }
 

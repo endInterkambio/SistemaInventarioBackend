@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +44,12 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     protected void setId(Book entity, Long id) {
         entity.setId(id);
     }
+
+    @Override
+    public Optional<Book> findBySku(String sku) {
+        return bookRepository.findBySku(sku);
+    }
+
 
     @Override
     public Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable) {

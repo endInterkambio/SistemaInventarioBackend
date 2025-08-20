@@ -13,5 +13,8 @@ public class WarehouseDTO {
     private String name;
     private String location;
     private String description;
+
+    // 🔹 campo referencial
+    private Long totalBooks;
 }
 

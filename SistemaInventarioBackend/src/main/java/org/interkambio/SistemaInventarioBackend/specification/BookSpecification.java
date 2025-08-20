@@ -1,7 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.specification;
 
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.Predicate;
@@ -23,6 +26,7 @@ public class BookSpecification {
                 searchPredicates.add(builder.like(builder.lower(root.get("title")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("author")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("publisher")), "%" + search + "%"));
+                searchPredicates.add(builder.like(builder.lower(root.get("category")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("isbn")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("sku")), "%" + search + "%"));
                 searchPredicates.add(builder.like(builder.lower(root.get("filter")), "%" + search + "%"));
@@ -65,18 +69,39 @@ public class BookSpecification {
                 predicates.add(builder.lessThanOrEqualTo(root.get("sellingPrice"), criteria.getMaxPrice()));
 
             // 📦 Stock
-            if (criteria.getMinStock() != null)
-                predicates.add(builder.greaterThanOrEqualTo(root.get("stockOnHand"), criteria.getMinStock()));
-            if (criteria.getMaxStock() != null)
-                predicates.add(builder.lessThanOrEqualTo(root.get("stockOnHand"), criteria.getMaxStock()));
+            if (criteria.getMinStock() != null || criteria.getMaxStock() != null) {
+                // Subquery para obtener el totalStock por libro
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<BookStockLocation> stockRoot = subquery.from(BookStockLocation.class);
+                subquery.select(builder.sum(stockRoot.get("stock")));
+                subquery.where(builder.equal(stockRoot.get("book").get("id"), root.get("id")));
+
+                if (criteria.getMinStock() != null) {
+                    predicates.add(
+                            builder.greaterThanOrEqualTo(
+                                    subquery.getSelection().as(Long.class),
+                                    criteria.getMinStock().longValue()
+                            )
+                    );
+                }
+
+                if (criteria.getMaxStock() != null) {
+                    predicates.add(
+                            builder.lessThanOrEqualTo(
+                                    subquery.getSelection().as(Long.class),
+                                    criteria.getMaxStock().longValue()
+                            )
+                    );
+                }
+            }
 
             // 📚 Estante
-            if (criteria.getShelf() != null)
+            /*if (criteria.getShelf() != null)
                 predicates.add(builder.equal(root.get("bookcase"), criteria.getShelf()));
 
             // 🧱 Piso
             if (criteria.getFloor() != null)
-                predicates.add(builder.equal(root.get("bookcaseFloor"), criteria.getFloor()));
+                predicates.add(builder.equal(root.get("bookcaseFloor"), criteria.getFloor()));*/
 
             return builder.and(predicates.toArray(new Predicate[0]));
         };

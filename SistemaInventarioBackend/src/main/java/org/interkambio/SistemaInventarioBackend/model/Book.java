@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -43,11 +44,6 @@ public class Book {
     // ========================
     // 3. Detalles descriptivos
     // ========================
-    @Column(name = "stock")
-    private Integer stock;
-
-    @Column(name = "book_condition")
-    private String bookCondition;
 
     @Column(name = "description")
     private String description;
@@ -101,21 +97,9 @@ public class Book {
     private String productSaleType;
 
     // ========================
-    // 7. Ubicación física
-    // ========================
-    @Column(name = "bookcase")
-    private Integer bookcase;
-
-    @Column(name = "bookcase_floor")
-    private Integer bookcaseFloor;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id")
-    private Warehouse warehouse;
-
-    // ========================
     // 8. Auditoría
     // ========================
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -129,4 +113,8 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
+
+    // Relación con ubicaciones de stock
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<BookStockLocation> stockLocations;
 }
