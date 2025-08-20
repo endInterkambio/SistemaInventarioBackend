@@ -21,6 +21,14 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // Buscar por SKU
+    @GetMapping("/sku/{sku}")
+    public ResponseEntity<BookDTO> getBySku(@PathVariable String sku) {
+        return bookService.findBySku(sku)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // Obtener todos los libros
     @GetMapping
     public Page<BookDTO> getBooks(

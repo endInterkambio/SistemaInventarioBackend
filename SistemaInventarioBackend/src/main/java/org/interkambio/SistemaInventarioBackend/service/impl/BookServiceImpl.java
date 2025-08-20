@@ -46,10 +46,10 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
-    public Optional<Book> findBySku(String sku) {
-        return bookRepository.findBySku(sku);
+    public Optional<BookDTO> findBySku(String sku) {
+        return bookRepository.findBySku(sku)
+                .map(bookMapper::toDTO);
     }
-
 
     @Override
     public Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable) {

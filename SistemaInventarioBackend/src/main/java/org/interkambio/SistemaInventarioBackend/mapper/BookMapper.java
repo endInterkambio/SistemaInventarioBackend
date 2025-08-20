@@ -108,12 +108,6 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                             .toList()
             );
 
-            dto.setTotalStock(
-                    entity.getStockLocations().stream()
-                            .mapToInt(BookStockLocation::getStock)
-                            .sum()
-            );
-
             // 📌 Calcular totalStock
             dto.setTotalStock(
                     entity.getStockLocations().stream()
