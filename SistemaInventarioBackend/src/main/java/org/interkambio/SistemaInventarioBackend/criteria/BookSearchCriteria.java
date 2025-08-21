@@ -3,6 +3,8 @@ package org.interkambio.SistemaInventarioBackend.criteria;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class BookSearchCriteria {
@@ -13,7 +15,7 @@ public class BookSearchCriteria {
     private String isbn;
     private String sku;
     private String publisher;
-    private String category;
+    private List<String> categories;
     private String subjects;
     private String format;
     private String tag;

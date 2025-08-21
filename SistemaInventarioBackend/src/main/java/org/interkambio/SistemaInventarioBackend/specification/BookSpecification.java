@@ -51,8 +51,23 @@ public class BookSpecification {
                 predicates.add(builder.like(builder.lower(root.get("sku")), "%" + criteria.getSku().toLowerCase() + "%"));
             if (criteria.getPublisher() != null)
                 predicates.add(builder.like(builder.lower(root.get("publisher")), "%" + criteria.getPublisher().toLowerCase() + "%"));
-            if (criteria.getCategory() != null)
-                predicates.add(builder.like(builder.lower(root.get("category")), "%" + criteria.getCategory().toLowerCase() + "%"));
+            if (criteria.getCategories() != null && !criteria.getCategories().isEmpty()) {
+                List<Predicate> categoryPredicates = new ArrayList<>();
+
+                for (String category : criteria.getCategories()) {
+                    categoryPredicates.add(
+                            builder.like(
+                                    builder.lower(root.get("category")), // campo real en la entidad
+                                    "%" + category.toLowerCase() + "%"
+                            )
+                    );
+                }
+
+                // OR → si coincide con cualquiera de las categorías del filtro
+                predicates.add(builder.or(categoryPredicates.toArray(new Predicate[0])));
+            }
+
+
             if (criteria.getSubjects() != null)
                 predicates.add(builder.like(builder.lower(root.get("subjects")), "%" + criteria.getSubjects().toLowerCase() + "%"));
             if (criteria.getFormat() != null)

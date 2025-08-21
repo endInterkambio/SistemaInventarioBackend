@@ -8,6 +8,8 @@ import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.User;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -29,7 +31,13 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
         book.setDescription(dto.getDescription());
-        book.setCategory(dto.getCategory());
+        // DTO -> Entity
+        book.setCategory(
+                dto.getCategories() != null && !dto.getCategories().isEmpty()
+                        ? String.join(",", dto.getCategories()) // persistimos como coma-separado
+                        : null
+        );
+
         book.setSubjects(dto.getSubjects());
         book.setFormat(dto.getFormat());
         book.setLanguage(dto.getLanguage());
@@ -70,7 +78,11 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         dto.setAuthor(entity.getAuthor());
         dto.setPublisher(entity.getPublisher());
         dto.setDescription(entity.getDescription());
-        dto.setCategory(entity.getCategory());
+        dto.setCategories(
+                entity.getCategory() != null
+                        ? Arrays.asList(entity.getCategory().split("[,;/]")) // <- acepta coma, punto y coma o slash
+                        : new ArrayList<>()
+        );
         dto.setSubjects(entity.getSubjects());
         dto.setFormat(entity.getFormat());
         dto.setLanguage(entity.getLanguage());

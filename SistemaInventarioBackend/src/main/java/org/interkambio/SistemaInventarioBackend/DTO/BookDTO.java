@@ -19,7 +19,7 @@ public class BookDTO {
     private String author;
     private String publisher;
     private String description;
-    private String category;
+    private List<String> categories;
     private String subjects;
     private String format;
     private String language;
