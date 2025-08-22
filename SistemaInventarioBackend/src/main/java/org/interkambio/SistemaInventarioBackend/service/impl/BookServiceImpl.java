@@ -10,15 +10,21 @@ import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -97,7 +103,55 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         return books.map(bookMapper::toDTO);
     }
 
+    @Override
+    public Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates) {
+        return bookRepository.findById(id).map(existing -> {
+            BeanWrapper wrapper = new BeanWrapperImpl(existing);
 
+            updates.forEach((key, value) -> {
+                switch (key) {
+                    case "categories":
+                        if (value instanceof List<?> listValue) {
+                            wrapper.setPropertyValue("category",
+                                    listValue.stream()
+                                            .map(Object::toString)
+                                            .collect(Collectors.joining(",")));
+                        } else if (value instanceof String strValue) {
+                            wrapper.setPropertyValue("category", strValue);
+                        }
+                        break;
+
+                    case "formats":
+                        if (value instanceof List<?> listValue) {
+                            wrapper.setPropertyValue("format",
+                                    listValue.stream()
+                                            .map(Object::toString)
+                                            .collect(Collectors.joining(",")));
+                        } else if (value instanceof String strValue) {
+                            wrapper.setPropertyValue("format", strValue);
+                        }
+                        break;
+
+                    default:
+                        // Para el resto de campos, BeanWrapper usará el setter correspondiente
+                        wrapper.setPropertyValue(key, value);
+                }
+            });
+
+            // Actualizamos la fecha de modificación
+            existing.setUpdatedAt(LocalDateTime.now());
+
+            // Guardamos la entidad
+            Book saved = bookRepository.save(existing);
+
+            // Debug
+            System.out.println("categories=" + saved.getCategory());
+            System.out.println("formats=" + saved.getFormat());
+
+            // Retornamos el DTO mapeado
+            return bookMapper.toDTO(saved);
+        });
+    }
 
     // Método para importar archivo
     @Override
