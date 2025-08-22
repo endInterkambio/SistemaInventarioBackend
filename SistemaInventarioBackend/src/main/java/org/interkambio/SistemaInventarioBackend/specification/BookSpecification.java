@@ -70,8 +70,22 @@ public class BookSpecification {
 
             if (criteria.getSubjects() != null)
                 predicates.add(builder.like(builder.lower(root.get("subjects")), "%" + criteria.getSubjects().toLowerCase() + "%"));
-            if (criteria.getFormat() != null)
-                predicates.add(builder.like(builder.lower(root.get("format")), "%" + criteria.getFormat().toLowerCase() + "%"));
+            if (criteria.getFormats() != null && !criteria.getFormats().isEmpty()) {
+                List<Predicate> formatPredicates = new ArrayList<>();
+
+                for (String format : criteria.getFormats()) {
+                    formatPredicates.add(
+                            builder.like(
+                                    builder.lower(root.get("format")), // campo real en la entidad
+                                    "%" + format.toLowerCase() + "%"
+                            )
+                    );
+                }
+
+                // OR → si coincide con cualquiera de los formatos del filtro
+                predicates.add(builder.or(formatPredicates.toArray(new Predicate[0])));
+            }
+
             if (criteria.getTag() != null)
                 predicates.add(builder.like(builder.lower(root.get("tag")), "%" + criteria.getTag().toLowerCase() + "%"));
             if (criteria.getFilter() != null)

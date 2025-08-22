@@ -31,7 +31,6 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setAuthor(dto.getAuthor());
         book.setPublisher(dto.getPublisher());
         book.setDescription(dto.getDescription());
-        // DTO -> Entity
         book.setCategory(
                 dto.getCategories() != null && !dto.getCategories().isEmpty()
                         ? String.join(",", dto.getCategories()) // persistimos como coma-separado
@@ -39,7 +38,11 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         );
 
         book.setSubjects(dto.getSubjects());
-        book.setFormat(dto.getFormat());
+        book.setFormat(
+                dto.getFormats() != null && !dto.getFormats().isEmpty()
+                        ? String.join(",", dto.getFormats()) // persistimos como coma-separado
+                        : null
+        );
         book.setLanguage(dto.getLanguage());
         book.setImageUrl(dto.getImageUrl());
         book.setWebsiteUrl(dto.getWebsiteUrl());
@@ -84,7 +87,11 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
                         : new ArrayList<>()
         );
         dto.setSubjects(entity.getSubjects());
-        dto.setFormat(entity.getFormat());
+        dto.setFormats(
+                entity.getFormat() != null
+                        ? Arrays.asList(entity.getFormat().split("[,;/]")) // <- acepta coma, punto y coma o slash
+                        : new ArrayList<>()
+        );
         dto.setLanguage(entity.getLanguage());
         dto.setImageUrl(entity.getImageUrl());
         dto.setWebsiteUrl(entity.getWebsiteUrl());

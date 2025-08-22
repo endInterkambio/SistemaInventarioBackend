@@ -17,7 +17,7 @@ public class BookSearchCriteria {
     private String publisher;
     private List<String> categories;
     private String subjects;
-    private String format;
+    List<String> formats;
     private String tag;
     private String filter;
 

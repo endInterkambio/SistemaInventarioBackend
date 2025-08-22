@@ -51,7 +51,7 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setDescription(getCellString(row, columnIndex.get("Description")));
                     //book.setCategory(getCellString(row, columnIndex.get("Category")));
                     book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
-                    book.setFormat(getCellString(row, columnIndex.get("Format")));
+                    //book.setFormat(getCellString(row, columnIndex.get("Format")));
                     book.setLanguage(getCellString(row, columnIndex.get("Language")));
                     book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
                     book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));

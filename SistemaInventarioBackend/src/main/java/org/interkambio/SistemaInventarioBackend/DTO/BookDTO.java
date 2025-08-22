@@ -21,7 +21,7 @@ public class BookDTO {
     private String description;
     private List<String> categories;
     private String subjects;
-    private String format;
+    private List<String> formats;
     private String language;
     private String imageUrl;
     private String websiteUrl;

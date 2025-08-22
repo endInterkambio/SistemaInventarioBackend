@@ -41,7 +41,7 @@ public class BookCsvImporter implements BookFileImporter {
                     book.setDescription(parseString(row.get("Description")));
                     //book.setCategories(parseString(row.get("Category")));
                     book.setSubjects(parseString(row.get("Subjects")));
-                    book.setFormat(parseString(row.get("Format")));
+                    //book.setFormat(parseString(row.get("Format")));
                     book.setLanguage(parseString(row.get("Language")));
                     book.setImageUrl(parseString(row.get("ImageUrl")));
                     book.setWebsiteUrl(parseString(row.get("WebsiteUrl")));
