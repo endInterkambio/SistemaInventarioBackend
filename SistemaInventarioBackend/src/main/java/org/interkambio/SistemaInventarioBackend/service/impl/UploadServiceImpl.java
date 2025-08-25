@@ -41,7 +41,7 @@ public class UploadServiceImpl {
             file.transferTo(destination);
 
             // Retornar la URL accesible públicamente
-            return "/uploads/" + sku + extension;
+            return "/" + sku + extension;
 
         } catch (Exception e) {
             throw new RuntimeException("Error al subir imagen: " + e.getMessage(), e);

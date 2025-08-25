@@ -15,7 +15,7 @@ public class Config {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173", "sistema.agentedepaz.com") // frontend
+                        .allowedOrigins("http://localhost:5173", "sistema.agentedepaz.com", "https://el.gusanitolector.pe") // frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
