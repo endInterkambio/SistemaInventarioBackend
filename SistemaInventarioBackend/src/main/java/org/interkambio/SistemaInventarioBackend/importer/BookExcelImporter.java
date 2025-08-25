@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
 
@@ -25,15 +29,23 @@ public class BookExcelImporter implements BookFileImporter {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
 
-            if (!rowIterator.hasNext()) {
-                return books; // Excel vacío
-            }
+            if (!rowIterator.hasNext()) return books; // Excel vacío
 
-            // Crear mapa dinámico de nombre de columna -> índice
+            // -----------------------------
+            // Crear mapa dinámico columna -> índice
+            // -----------------------------
             Row headerRow = rowIterator.next();
             Map<String, Integer> columnIndex = new HashMap<>();
             for (Cell cell : headerRow) {
                 columnIndex.put(cell.getStringCellValue().trim(), cell.getColumnIndex());
+            }
+
+            // Validar columnas obligatorias
+            List<String> requiredColumns = Arrays.asList("SKU", "Stock", "WarehouseId");
+            for (String col : requiredColumns) {
+                if (!columnIndex.containsKey(col)) {
+                    throw new IllegalArgumentException("No se encontró la columna obligatoria: " + col);
+                }
             }
 
             while (rowIterator.hasNext()) {
@@ -41,44 +53,90 @@ public class BookExcelImporter implements BookFileImporter {
                 try {
                     BookDTO book = new BookDTO();
 
-                    book.setTitle(getCellString(row, columnIndex.get("Title")));
+                    // -----------------------------
+                    // Campos generales
+                    // -----------------------------
                     book.setSku(getCellString(row, columnIndex.get("SKU")));
+                    book.setTitle(getCellString(row, columnIndex.get("Title")));
                     book.setIsbn(getCellString(row, columnIndex.get("ISBN")));
                     book.setAuthor(getCellString(row, columnIndex.get("Author")));
                     book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
-                    //book.setStock(getCellInt(row, columnIndex.get("Stock")));
-                    //book.setBookCondition(getCellString(row, columnIndex.get("Condition")));
                     book.setDescription(getCellString(row, columnIndex.get("Description")));
-                    //book.setCategory(getCellString(row, columnIndex.get("Category")));
-                    book.setSubjects(getCellString(row, columnIndex.get("Subjects")));
-                    //book.setFormat(getCellString(row, columnIndex.get("Format")));
+                    book.setCategories(getCellList(row, columnIndex.get("Category")));
+                    // Subjects como string
+                    Integer idxSubjects = columnIndex.get("Subjects");
+                    if (idxSubjects != null) {
+                        String subjects = getCellString(row, idxSubjects);
+                        book.setSubjects(subjects != null ? subjects.trim() : null);
+                    }
+                    book.setFormats(getCellList(row, columnIndex.get("Format")));
                     book.setLanguage(getCellString(row, columnIndex.get("Language")));
                     book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
                     book.setWebsiteUrl(getCellString(row, columnIndex.get("WebsiteUrl")));
-                    //book.setWarehouse(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("WarehouseId")), null));
                     book.setTag(getCellString(row, columnIndex.get("Tag")));
                     book.setProductSaleType(getCellString(row, columnIndex.get("ProductSaleType")));
-                    //book.setBookcase(getCellInt(row, columnIndex.get("Bookcase")));
-                    //book.setBookcaseFloor(getCellInt(row, columnIndex.get("BookcaseFloor")));
                     book.setCoverPrice(getCellBigDecimal(row, columnIndex.get("CoverPrice")));
                     book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
                     book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));
                     book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
                     book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
                     book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
-                    book.setCreatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("CreatedBy")), null));
-                    book.setUpdatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("UpdatedBy")), null));
+                    book.setCreatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("CreatedById")), null));
+                    book.setUpdatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("UpdatedById")), null));
                     book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
+                    // -----------------------------
+                    // Crear DTO de ubicación
+                    // -----------------------------
+                    BookStockLocationDTO location = new BookStockLocationDTO();
+                    location.setBookSku(book.getSku());
+
+                    // Warehouse
+                    Long warehouseId = getCellLong(row, columnIndex.get("WarehouseId"));
+                    if (warehouseId != null) location.setWarehouse(new SimpleIdNameDTO(warehouseId, null));
+
+                    // Bookcase
+                    Integer bookcase = getCellInt(row, columnIndex.get("Bookcase"));
+                    if (bookcase != null) location.setBookcase(bookcase);
+
+                    // Floor
+                    Integer floor = getCellInt(row, columnIndex.get("BookcaseFloor"));
+                    if (floor != null) location.setBookcaseFloor(floor);
+
+                    // Stock (obligatorio)
+                    Integer stock = getCellInt(row, columnIndex.get("Stock"));
+                    if (stock == null) {
+                        throw new IllegalArgumentException("Stock obligatorio no encontrado");
+                    }
+                    location.setStock(stock);
+
+                    // BookCondition y LocationType como string
+                    location.setBookCondition(getCellString(row, columnIndex.get("BookCondition")));
+                    location.setLocationType(getCellString(row, columnIndex.get("LocationType")));
+
+                    book.setLocations(Collections.singletonList(location));
+                    book.setTotalStock(location.getStock());
+
                     books.add(book);
+
                 } catch (Exception e) {
                     String sku = getCellString(row, columnIndex.get("SKU"));
-                    throw new IllegalArgumentException("Error en fila con SKU: " + sku + " → " + e.getMessage());
+                    throw new IllegalArgumentException("Error en fila con SKU: " + sku + " → " + e.getMessage(), e);
                 }
-
             }
         }
 
         return books;
+    }
+
+    // -----------------------------
+    // Helper: convertir lista separada por coma o punto y coma
+    // -----------------------------
+    private List<String> getCellList(Row row, Integer index) {
+        if (index == null) return Collections.emptyList();
+        String value = getCellString(row, index);
+        if (value == null || value.isEmpty()) return Collections.emptyList();
+        String[] parts = value.split("[,;]");
+        return Arrays.stream(parts).map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
 }
