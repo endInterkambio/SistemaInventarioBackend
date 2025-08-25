@@ -15,7 +15,7 @@ public class BookStockLocationDTO {
     private SimpleIdNameDTO warehouse; // en lugar de warehouseId
     private Integer bookcase;
     private Integer bookcaseFloor;
-    private int stock;
+    private Integer stock;
     private Integer lastStock; // último stock antes de la última modificación
     private String bookCondition;
     private String locationType;

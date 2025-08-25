@@ -3,25 +3,29 @@ package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.transaction.Transactional;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
+import org.interkambio.SistemaInventarioBackend.exporter.BookExcelExporter;
 import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
+import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +38,19 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final UnifiedBookImporter bookImporter;
+    private final BookStockLocationRepository stockLocationRepository;
 
     public BookServiceImpl(
             BookRepository bookRepository,
             BookMapper bookMapper,
-            UnifiedBookImporter bookImporter
+            UnifiedBookImporter bookImporter,
+            BookStockLocationRepository stockLocationRepository
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
         this.bookImporter = bookImporter;
+        this.stockLocationRepository = stockLocationRepository;
     }
 
     @Override
@@ -164,5 +171,29 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         } catch (Exception ex) {
             throw new RuntimeException("Error general al procesar el archivo. Verifica que los datos sean válidos y el formato correcto.", ex);
         }
+    }
+
+    @Override
+    public List<BookStockLocationDTO> getAllStockLocationsDTO() {
+        List<BookStockLocation> locations = stockLocationRepository.findAll();
+
+        return locations.stream().map(loc -> {
+            BookStockLocationDTO dto = new BookStockLocationDTO();
+            dto.setBookSku(loc.getBook().getSku());
+            dto.setWarehouse(new SimpleIdNameDTO(loc.getWarehouse().getId(), loc.getWarehouse().getName()));
+            dto.setBookcase(loc.getBookcase());
+            dto.setBookcaseFloor(loc.getBookcaseFloor());
+            dto.setStock(loc.getStock());
+            dto.setBookCondition(loc.getBookCondition().name());
+            dto.setLocationType(loc.getLocationType().name());
+            return dto;
+        }).toList();
+    }
+
+    @Override
+    public void exportBooksWithStock(java.io.OutputStream os) throws Exception {
+        List<BookDTO> books = this.findAllBooks(Pageable.unpaged()).getContent();
+        List<BookStockLocationDTO> stockLocations = this.getAllStockLocationsDTO();
+        BookExcelExporter.exportUnifiedExcel(books, stockLocations, os);
     }
 }

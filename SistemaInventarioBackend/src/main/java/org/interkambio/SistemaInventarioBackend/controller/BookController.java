@@ -1,13 +1,16 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -90,5 +93,21 @@ public class BookController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportBooks() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bookService.exportBooksWithStock(out);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Books.xlsx");
+        headers.add(HttpHeaders.CONTENT_TYPE,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(out.toByteArray());
     }
 }
