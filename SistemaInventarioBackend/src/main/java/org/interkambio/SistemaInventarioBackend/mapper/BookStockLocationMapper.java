@@ -3,20 +3,22 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
-import org.interkambio.SistemaInventarioBackend.repository.BookStockAdjustmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class BookStockLocationMapper implements GenericMapper<BookStockLocation, BookStockLocationDTO> {
 
-    private final BookStockAdjustmentRepository adjustmentRepository;
+    private final InventoryTransactionRepository transactionRepository;
 
-    @Autowired
-    public BookStockLocationMapper(BookStockAdjustmentRepository adjustmentRepository) {
-        this.adjustmentRepository = adjustmentRepository;
+    public BookStockLocationMapper(InventoryTransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -76,20 +78,46 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
         dto.setLocationType(entity.getLocationType() != null ? entity.getLocationType().name() : null);
         dto.setLastUpdatedAt(entity.getLastUpdatedAt());
 
-        dto.setLastStock(getLastStockValue(entity));
+        dto.setLastStock(calculateLastStock(entity));
 
         return dto;
     }
 
-    private Integer getLastStockValue(BookStockLocation entity) {
-        if (entity.getId() == null) {
-            return null; // si es nuevo no tiene histórico
-        }
+    /**
+     * Calcula el stock histórico antes del último ajuste.
+     * No lanza error si no hay transacciones.
+     */
+    private Integer calculateLastStock(BookStockLocation location) {
+        if (location.getId() == null) return null;
 
-        return adjustmentRepository
-                .findTopByLocationIdOrderByPerformedAtDesc(entity.getId())
-                .map(adj -> entity.getStock() - adj.getAdjustmentQuantity())
-                .orElse(null);
+        Page<InventoryTransaction> page = transactionRepository.findRelevantTransactions(
+                location.getId(),
+                List.of(
+                        TransactionType.ADJUSTMENT,
+                        TransactionType.TRANSFER,
+                        TransactionType.PURCHASE,
+                        TransactionType.SALE,
+                        TransactionType.RETURN_IN,
+                        TransactionType.RETURN_OUT
+                ),
+                PageRequest.of(0, 1) // Tomamos solo la primera fila
+        );
+
+        if (page.isEmpty()) return null;
+
+        InventoryTransaction lastTx = page.getContent().get(0);
+
+        LocalDateTime before = lastTx.getTransactionDate().minusNanos(1);
+
+        Integer totalIn = transactionRepository.sumQuantityByToLocationBefore(location.getId(), before);
+        Integer totalOut = transactionRepository.sumQuantityByFromLocationBefore(location.getId(), before);
+
+        totalIn = totalIn != null ? totalIn : 0;
+        totalOut = totalOut != null ? totalOut : 0;
+
+        return totalIn - totalOut;
     }
+
+
 
 }

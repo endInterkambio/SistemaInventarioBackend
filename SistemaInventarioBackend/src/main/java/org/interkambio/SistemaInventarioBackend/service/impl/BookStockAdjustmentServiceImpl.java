@@ -2,10 +2,10 @@ package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockAdjustmentDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.BookStockAdjustmentMapper;
-import org.interkambio.SistemaInventarioBackend.model.BookStockAdjustment;
-import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
+import org.interkambio.SistemaInventarioBackend.model.*;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockAdjustmentRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
+import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookStockAdjustmentService;
 import org.interkambio.SistemaInventarioBackend.criteria.BookStockAdjustmentSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.specification.BookStockAdjustmentSpecification;
@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,13 +24,18 @@ public class BookStockAdjustmentServiceImpl implements BookStockAdjustmentServic
     private final BookStockAdjustmentRepository repository;
     private final BookStockAdjustmentMapper mapper;
     private final BookStockLocationRepository locationRepository;
+    private final InventoryTransactionRepository transactionRepository;
 
     public BookStockAdjustmentServiceImpl(BookStockAdjustmentRepository repository,
                                           BookStockAdjustmentMapper mapper,
-                                          BookStockLocationRepository locationRepository) {
+                                          BookStockLocationRepository locationRepository,
+                                          InventoryTransactionRepository transactionRepository
+
+    ) {
         this.repository = repository;
         this.mapper = mapper;
         this.locationRepository = locationRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -46,28 +52,62 @@ public class BookStockAdjustmentServiceImpl implements BookStockAdjustmentServic
                 .map(mapper::toDTO);
     }
 
-    public BookStockAdjustmentDTO save(BookStockAdjustmentDTO dto) {
-        // 1️⃣ Buscar ubicación
-        BookStockLocation location = locationRepository.findById(dto.getLocationId())
-                .orElseThrow(() -> new RuntimeException("Ubicación no encontrada: " + dto.getLocationId()));
+    public InventoryTransaction saveStockAdjustment(
+            String bookSku,
+            Long locationId,
+            int adjustmentQuantity,
+            String reason,
+            User user) {
 
-        // 2️⃣ Actualizar stock
-        int newStock = location.getStock() + dto.getAdjustmentQuantity();
+        BookStockLocation location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Ubicación no encontrada: " + locationId));
+
+        int newStock = location.getStock() + adjustmentQuantity;
         if (newStock < 0) {
-            throw new RuntimeException("El stock no puede ser negativo. Stock actual: "
-                    + location.getStock());
+            throw new RuntimeException("El stock no puede ser negativo. Stock actual: " + location.getStock());
         }
+
         location.setStock(newStock);
         locationRepository.save(location);
 
-        // 3️⃣ Crear y guardar ajuste
-        BookStockAdjustment entity = mapper.toEntity(dto);
+        InventoryTransaction tx = new InventoryTransaction();
+        tx.setBook(location.getBook());
+        tx.setToLocation(location);
+        tx.setTransactionType(TransactionType.ADJUSTMENT);
+        tx.setQuantity(adjustmentQuantity);
+        tx.setReason(reason);
+        tx.setUser(user);
+        tx.setTransactionDate(LocalDateTime.now());
 
-        BookStockAdjustment savedAdjustment = repository.save(entity);
-
-        // 4️⃣ Retornar DTO
-        return mapper.toDTO(savedAdjustment);
+        return transactionRepository.save(tx);
     }
+
+    @Override
+    public BookStockAdjustmentDTO save(BookStockAdjustmentDTO dto) {
+        // Obtener user
+        User user = dto.getPerformedBy() != null ? new User(dto.getPerformedBy().getId()) : null;
+
+        InventoryTransaction tx = saveStockAdjustment(
+                dto.getBookSku(),
+                dto.getLocationId(),
+                dto.getAdjustmentQuantity(),
+                dto.getReason(),
+                user
+        );
+
+        // Retornar un DTO “dummy” de BookStockAdjustment para compatibilidad
+        BookStockAdjustmentDTO resultDto = new BookStockAdjustmentDTO();
+        resultDto.setId(tx.getId());
+        resultDto.setBookSku(tx.getBook().getSku());
+        resultDto.setLocationId(tx.getToLocation().getId());
+        resultDto.setAdjustmentQuantity(tx.getQuantity());
+        resultDto.setReason(tx.getReason());
+        resultDto.setPerformedBy(dto.getPerformedBy());
+        resultDto.setPerformedAt(tx.getTransactionDate());
+
+        return resultDto;
+    }
+
 
     @Override
     public List<BookStockAdjustmentDTO> saveAll(List<BookStockAdjustmentDTO> list) {
