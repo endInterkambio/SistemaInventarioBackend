@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.importer.util;
 
 import org.apache.poi.ss.usermodel.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,11 +68,42 @@ public class BookFieldParser {
     public static String getCellString(Row row, int col) {
         try {
             Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            return (cell != null) ? cell.toString().trim() : null;
+            if (cell == null) return null;
+
+            switch (cell.getCellType()) {
+                case STRING:
+                    return parseString(cell.getStringCellValue());
+
+                case NUMERIC:
+                    // Manejar ISBN u otros números grandes sin notación científica
+                    return BigDecimal.valueOf(cell.getNumericCellValue())
+                            .toPlainString()
+                            .trim();
+
+                case BOOLEAN:
+                    return String.valueOf(cell.getBooleanCellValue());
+
+                case FORMULA:
+                    try {
+                        return cell.getStringCellValue().trim();
+                    } catch (IllegalStateException e) {
+                        return BigDecimal.valueOf(cell.getNumericCellValue())
+                                .toPlainString()
+                                .trim();
+                    }
+
+                case BLANK:
+                default:
+                    return null;
+            }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error al leer valor String en columna " + col + ": " + e.getMessage());
+            throw new IllegalArgumentException(
+                    "Error al leer valor String en columna " + col + ": " + e.getMessage(),
+                    e
+            );
         }
     }
+
 
     public static Integer getCellInt(Row row, int col) {
         try {

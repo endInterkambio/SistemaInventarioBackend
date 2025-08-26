@@ -2,6 +2,7 @@ package org.interkambio.SistemaInventarioBackend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.ImportResult;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,13 +22,15 @@ public class BookUploadController {
     private final BookService bookService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
-        try {
-            List<BookDTO> result = bookService.importBooksFromFile(file);
-            return ResponseEntity.ok().body(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws Exception {
+        ImportResult<BookDTO> result = bookService.importBooksFromFile(file);
+
+        if (result.isSuccess()) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.badRequest().body(result);
         }
     }
+
 }
 

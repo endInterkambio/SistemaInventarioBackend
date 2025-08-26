@@ -33,14 +33,13 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setDescription(dto.getDescription());
         book.setCategory(
                 dto.getCategories() != null && !dto.getCategories().isEmpty()
-                        ? String.join(",", dto.getCategories()) // persistimos como coma-separado
+                        ? String.join(",", dto.getCategories())
                         : null
         );
-
         book.setSubjects(dto.getSubjects());
         book.setFormat(
                 dto.getFormats() != null && !dto.getFormats().isEmpty()
-                        ? String.join(",", dto.getFormats()) // persistimos como coma-separado
+                        ? String.join(",", dto.getFormats())
                         : null
         );
         book.setLanguage(dto.getLanguage());
@@ -68,8 +67,19 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
             book.setUpdatedBy(updatedBy);
         }
 
+        // 📌 NUEVO: mapear locations desde DTO
+        if (dto.getLocations() != null && !dto.getLocations().isEmpty()) {
+            List<BookStockLocation> stockLocations = dto.getLocations().stream()
+                    .map(stockLocationMapper::toEntity)
+                    .peek(loc -> loc.setBook(book)) // aseguramos la relación bidireccional
+                    .toList();
+
+            book.setStockLocations(stockLocations);
+        }
+
         return book;
     }
+
 
     @Override
     public BookDTO toDTO(Book entity) {

@@ -2,6 +2,7 @@ package org.interkambio.SistemaInventarioBackend.service;
 
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.ImportResult;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public interface BookService extends GenericService<BookDTO, Long> {
     Optional<BookDTO> findBySku(String sku);
     Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates);
     Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable);
-    List<BookDTO> importBooksFromFile(MultipartFile file) throws Exception;
+    ImportResult<BookDTO> importBooksFromFile(MultipartFile file) throws Exception;
     List<BookStockLocationDTO> getAllStockLocationsDTO();
     void exportBooksWithStock(OutputStream os) throws Exception;
 }

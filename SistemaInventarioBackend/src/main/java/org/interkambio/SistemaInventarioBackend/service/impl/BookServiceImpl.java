@@ -4,20 +4,25 @@ package org.interkambio.SistemaInventarioBackend.service.impl;
 import jakarta.transaction.Transactional;
 import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.ImportResult;
 import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exporter.BookExcelExporter;
 import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
 import org.interkambio.SistemaInventarioBackend.model.Book;
+import org.interkambio.SistemaInventarioBackend.model.BookCondition;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
+import org.interkambio.SistemaInventarioBackend.model.LocationType;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
+import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,9 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,18 +42,21 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     private final BookMapper bookMapper;
     private final UnifiedBookImporter bookImporter;
     private final BookStockLocationRepository stockLocationRepository;
+    private final WarehouseRepository warehouseRepository;
 
     public BookServiceImpl(
             BookRepository bookRepository,
             BookMapper bookMapper,
             UnifiedBookImporter bookImporter,
-            BookStockLocationRepository stockLocationRepository
+            BookStockLocationRepository stockLocationRepository,
+            WarehouseRepository warehouseRepository
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
         this.bookImporter = bookImporter;
         this.stockLocationRepository = stockLocationRepository;
+        this.warehouseRepository = warehouseRepository;
     }
 
     @Override
@@ -96,12 +102,53 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     @Override
     @Transactional
     public List<BookDTO> saveAll(List<BookDTO> books) {
+        List<BookDTO> savedBooks = new ArrayList<>();
+
         for (BookDTO dto : books) {
-            if (dto.getSku() != null && bookRepository.existsBySku(dto.getSku())) {
-                throw new IllegalArgumentException("Ya existe un libro con el SKU: " + dto.getSku());
+            try {
+                if (dto.getSku() != null && bookRepository.existsBySku(dto.getSku())) {
+                    throw new IllegalArgumentException("Ya existe un libro con el SKU: " + dto.getSku());
+                }
+
+                // Guardar libro
+                Book book = bookMapper.toEntity(dto);
+                book = bookRepository.save(book);
+
+                // Guardar ubicaciones solo si existen
+                if (dto.getLocations() != null && !dto.getLocations().isEmpty()) {
+                    for (BookStockLocationDTO locDTO : dto.getLocations()) {
+                        if (locDTO.getWarehouse() == null) {
+                            continue; // evita nullpointer si en Excel no había warehouse
+                        }
+
+                        BookStockLocation loc = new BookStockLocation();
+                        loc.setBook(book);
+                        loc.setWarehouse(
+                                warehouseRepository.findById(locDTO.getWarehouse().getId())
+                                        .orElseThrow(() -> new IllegalArgumentException(
+                                                "Almacén no encontrado con ID: " + locDTO.getWarehouse().getId()
+                                        ))
+                        );
+                        loc.setBookcase(locDTO.getBookcase());
+                        loc.setBookcaseFloor(locDTO.getBookcaseFloor());
+                        loc.setStock(locDTO.getStock() != null ? locDTO.getStock() : 0);
+                        if (locDTO.getBookCondition() != null) {
+                            loc.setBookCondition(BookCondition.valueOf(locDTO.getBookCondition()));
+                        }
+                        if (locDTO.getLocationType() != null) {
+                            loc.setLocationType(LocationType.valueOf(locDTO.getLocationType()));
+                        }
+                        stockLocationRepository.save(loc);
+                    }
+                }
+
+                savedBooks.add(bookMapper.toDTO(book));
+            } catch (Exception e) {
+                System.err.println("Error al guardar libro con SKU " + dto.getSku() + ": " + e.getMessage());
             }
         }
-        return super.saveAll(books);
+
+        return savedBooks;
     }
 
     @Override
@@ -160,18 +207,46 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         });
     }
 
-    // Método para importar archivo
     @Override
-    public List<BookDTO> importBooksFromFile(MultipartFile file) throws Exception {
+    public ImportResult<BookDTO> importBooksFromFile(MultipartFile file) {
+        ImportResult<BookDTO> result = new ImportResult<>();
         try {
             List<BookDTO> books = bookImporter.parse(file);
-            return saveAll(books);
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Error al importar libros: " + ex.getMessage(), ex);
+
+            if (books == null || books.isEmpty()) {
+                result.setSuccess(false);
+                result.setMessage("El archivo no contiene libros válidos.");
+                return result;
+            }
+
+            // Validar SKUs
+            for (BookDTO dto : books) {
+                if (dto.getSku() == null || dto.getSku().isBlank()) {
+                    result.setSuccess(false);
+                    result.setMessage("El libro no tiene un SKU definido.");
+                    return result;
+                }
+                if (bookRepository.existsBySku(dto.getSku())) {
+                    result.setSuccess(false);
+                    result.setMessage("Ya existe un libro con el SKU: " + dto.getSku());
+                    return result;
+                }
+            }
+
+            // Guardar en lote
+            List<BookDTO> savedBooks = saveAll(books);
+            result.setSuccess(true);
+            result.setMessage("Libros importados correctamente.");
+            result.setData(savedBooks);
+            return result;
+
         } catch (Exception ex) {
-            throw new RuntimeException("Error general al procesar el archivo. Verifica que los datos sean válidos y el formato correcto.", ex);
+            result.setSuccess(false);
+            result.setMessage("Error al importar: " + ex.getMessage());
+            return result;
         }
     }
+
 
     @Override
     public List<BookStockLocationDTO> getAllStockLocationsDTO() {

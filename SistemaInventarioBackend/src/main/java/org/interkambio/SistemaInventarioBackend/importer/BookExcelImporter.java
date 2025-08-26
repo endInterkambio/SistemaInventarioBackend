@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
 
@@ -40,12 +37,9 @@ public class BookExcelImporter implements BookFileImporter {
                 columnIndex.put(cell.getStringCellValue().trim(), cell.getColumnIndex());
             }
 
-            // Validar columnas obligatorias
-            List<String> requiredColumns = Arrays.asList("SKU", "Stock", "WarehouseId");
-            for (String col : requiredColumns) {
-                if (!columnIndex.containsKey(col)) {
-                    throw new IllegalArgumentException("No se encontró la columna obligatoria: " + col);
-                }
+            // SKU siempre requerido
+            if (!columnIndex.containsKey("SKU")) {
+                throw new IllegalArgumentException("No se encontró la columna obligatoria: SKU");
             }
 
             while (rowIterator.hasNext()) {
@@ -54,7 +48,7 @@ public class BookExcelImporter implements BookFileImporter {
                     BookDTO book = new BookDTO();
 
                     // -----------------------------
-                    // Campos generales
+                    // Campos generales del libro
                     // -----------------------------
                     book.setSku(getCellString(row, columnIndex.get("SKU")));
                     book.setTitle(getCellString(row, columnIndex.get("Title")));
@@ -63,12 +57,14 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setPublisher(getCellString(row, columnIndex.get("Publisher")));
                     book.setDescription(getCellString(row, columnIndex.get("Description")));
                     book.setCategories(getCellList(row, columnIndex.get("Category")));
+
                     // Subjects como string
                     Integer idxSubjects = columnIndex.get("Subjects");
                     if (idxSubjects != null) {
                         String subjects = getCellString(row, idxSubjects);
                         book.setSubjects(subjects != null ? subjects.trim() : null);
                     }
+
                     book.setFormats(getCellList(row, columnIndex.get("Format")));
                     book.setLanguage(getCellString(row, columnIndex.get("Language")));
                     book.setImageUrl(getCellString(row, columnIndex.get("ImageUrl")));
@@ -85,37 +81,46 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setUpdatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("UpdatedById")), null));
                     book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
-                    // -----------------------------
-                    // Crear DTO de ubicación
-                    // -----------------------------
-                    BookStockLocationDTO location = new BookStockLocationDTO();
-                    location.setBookSku(book.getSku());
+// -----------------------------
+// Crear DTO de ubicación (si la fila tiene datos reales)
+// -----------------------------
+                    boolean hasLocation =
+                            (columnIndex.containsKey("WarehouseId") && getCellLong(row, columnIndex.get("WarehouseId")) != null) ||
+                                    (columnIndex.containsKey("Stock") && getCellInt(row, columnIndex.get("Stock")) != null);
 
-                    // Warehouse
-                    Long warehouseId = getCellLong(row, columnIndex.get("WarehouseId"));
-                    if (warehouseId != null) location.setWarehouse(new SimpleIdNameDTO(warehouseId, null));
+                    if (hasLocation) {
+                        BookStockLocationDTO location = new BookStockLocationDTO();
+                        location.setBookSku(book.getSku());
 
-                    // Bookcase
-                    Integer bookcase = getCellInt(row, columnIndex.get("Bookcase"));
-                    if (bookcase != null) location.setBookcase(bookcase);
+                        // Warehouse
+                        Long warehouseId = getCellLong(row, columnIndex.get("WarehouseId"));
+                        if (warehouseId != null) {
+                            location.setWarehouse(new SimpleIdNameDTO(warehouseId, null));
+                        }
 
-                    // Floor
-                    Integer floor = getCellInt(row, columnIndex.get("BookcaseFloor"));
-                    if (floor != null) location.setBookcaseFloor(floor);
+                        // Bookcase
+                        Integer bookcase = getCellInt(row, columnIndex.get("Bookcase"));
+                        if (bookcase != null) location.setBookcase(bookcase);
 
-                    // Stock (obligatorio)
-                    Integer stock = getCellInt(row, columnIndex.get("Stock"));
-                    if (stock == null) {
-                        throw new IllegalArgumentException("Stock obligatorio no encontrado");
+                        // Floor
+                        Integer floor = getCellInt(row, columnIndex.get("BookcaseFloor"));
+                        if (floor != null) location.setBookcaseFloor(floor);
+
+                        // Stock (si existe)
+                        Integer stock = getCellInt(row, columnIndex.get("Stock"));
+                        if (stock != null) {
+                            location.setStock(stock);
+                        }
+
+                        // BookCondition y LocationType
+                        location.setBookCondition(getCellString(row, columnIndex.get("BookCondition")));
+                        location.setLocationType(getCellString(row, columnIndex.get("LocationType")));
+
+                        book.setLocations(Collections.singletonList(location));
+                    } else {
+                        // Caso sin ubicación → catálogo bibliográfico
+                        book.setLocations(Collections.emptyList());
                     }
-                    location.setStock(stock);
-
-                    // BookCondition y LocationType como string
-                    location.setBookCondition(getCellString(row, columnIndex.get("BookCondition")));
-                    location.setLocationType(getCellString(row, columnIndex.get("LocationType")));
-
-                    book.setLocations(Collections.singletonList(location));
-                    book.setTotalStock(location.getStock());
 
                     books.add(book);
 
