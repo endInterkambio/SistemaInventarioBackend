@@ -1,7 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
-import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.springframework.stereotype.Component;
 
@@ -34,17 +33,6 @@ public class WarehouseMapper implements GenericMapper<Warehouse, WarehouseDTO> {
         dto.setName(entity.getName());
         dto.setLocation(entity.getLocation());
         dto.setDescription(entity.getDescription());
-
-        // Calcular totalBooks sumando stock de cada BookStockLocation
-        /*if (entity.getStockLocations() != null) {
-            int total = entity.getStockLocations()
-                    .stream()
-                    .mapToInt(BookStockLocation::getStock)
-                    .sum();
-            dto.setTotalBooks(total);
-        } else {
-            dto.setTotalBooks(0);
-        }*/
 
         return dto;
     }
