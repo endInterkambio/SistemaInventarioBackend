@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(name = "payment_received")
 public class PaymentReceived {
 
@@ -18,8 +19,9 @@ public class PaymentReceived {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id")
-    private Long orderId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id")
+    private SaleOrder saleOrder;
 
     @Column(name = "payment_date")
     private LocalDateTime paymentDate;

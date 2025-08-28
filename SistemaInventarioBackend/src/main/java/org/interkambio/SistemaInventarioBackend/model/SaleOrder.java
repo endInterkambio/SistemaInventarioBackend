@@ -2,8 +2,10 @@ package org.interkambio.SistemaInventarioBackend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "sale_orders")
@@ -14,7 +16,7 @@ public class SaleOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // PK técnico
+    private Long id;
 
     @Column(name = "order_number", unique = true, nullable = false, length = 20)
     private String orderNumber; // SO-00001
@@ -28,8 +30,9 @@ public class SaleOrder {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "created_by")
-    private Long createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     @Column(name = "sale_channel", nullable = false, length = 50)
     private String saleChannel;
@@ -41,4 +44,11 @@ public class SaleOrder {
 
     @Column(name = "additional_fee")
     private BigDecimal additionalFee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleOrderItem> items;
 }

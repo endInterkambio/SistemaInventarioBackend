@@ -1,13 +1,11 @@
 package org.interkambio.SistemaInventarioBackend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,8 +16,10 @@ public class ShipmentItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "shipment_id")
-    private Long shipmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipment shipment;
+
 
     @Column(name = "book_sku")
     private Book book_sku;

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,8 +22,9 @@ public class SaleOrderItem {
     @Column(name = "order_id")
     private Long orderId;
 
-    @Column(name = "book_sku")
-    private Book BookSku;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_sku", referencedColumnName = "sku", nullable = false)
+    private Book book;
 
     @Column(name = "quantity")
     private Integer quantity;
