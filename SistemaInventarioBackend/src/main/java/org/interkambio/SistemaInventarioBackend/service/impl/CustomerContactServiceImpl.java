@@ -1,9 +1,14 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
+
 import org.interkambio.SistemaInventarioBackend.DTO.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.CustomerContactMapper;
+import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerContact;
+import org.interkambio.SistemaInventarioBackend.model.CustomerType;
 import org.interkambio.SistemaInventarioBackend.repository.CustomerContactRepository;
+import org.interkambio.SistemaInventarioBackend.repository.CustomerRepository;
 import org.interkambio.SistemaInventarioBackend.service.CustomerContactService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,23 +23,61 @@ import java.util.stream.Collectors;
 public class CustomerContactServiceImpl implements CustomerContactService {
 
     private final CustomerContactRepository repository;
+    private final CustomerRepository customerRepository;
     private final CustomerContactMapper mapper;
 
-    public CustomerContactServiceImpl(CustomerContactRepository repository, CustomerContactMapper mapper) {
+    public CustomerContactServiceImpl(CustomerContactRepository repository, CustomerRepository customerRepository, CustomerContactMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
+        this.customerRepository = customerRepository;
     }
 
     @Override
     public CustomerContactDTO save(CustomerContactDTO dto) {
         CustomerContact entity = mapper.toEntity(dto);
-        return mapper.toDTO(repository.save(entity));
+
+        // Normalizar email
+        if (entity.getEmail() != null) {
+            entity.setEmail(entity.getEmail().trim().toLowerCase());
+        }
+
+        if (dto.getCustomerId() != null) {
+            Customer customer = customerRepository.findById(dto.getCustomerId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+            if (!CustomerType.COMPANY.equals(customer.getCustomerType())) {
+                throw new RuntimeException("Solo se puede asignar contacto a clientes tipo COMPANY");
+            }
+
+            entity.setCustomer(customer);
+        }
+
+        try {
+            return mapper.toDTO(repository.save(entity));
+        } catch (DataIntegrityViolationException ex) {
+            throw new RuntimeException("El email ya está registrado para otro contacto");
+        }
     }
 
     @Override
     public List<CustomerContactDTO> saveAll(List<CustomerContactDTO> dtos) {
-        List<CustomerContact> entities = dtos.stream().map(mapper::toEntity).collect(Collectors.toList());
-        return repository.saveAll(entities).stream().map(mapper::toDTO).collect(Collectors.toList());
+        List<CustomerContact> entities = dtos.stream().map(dto -> {
+            CustomerContact entity = mapper.toEntity(dto);
+            if (dto.getCustomerId() != null) {
+                Customer customer = customerRepository.findById(dto.getCustomerId())
+                        .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+                if (!CustomerType.COMPANY.equals(customer.getCustomerType())) {
+                    throw new RuntimeException("Solo se puede asignar contacto a clientes tipo COMPANY");
+                }
+
+                entity.setCustomer(customer);
+            }
+            return entity;
+        }).collect(Collectors.toList());
+
+        return repository.saveAll(entities).stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -52,10 +95,33 @@ public class CustomerContactServiceImpl implements CustomerContactService {
         return repository.findById(id).map(existing -> {
             CustomerContact updated = mapper.toEntity(dto);
             updated.setId(existing.getId());
-            updated.setCustomer(existing.getCustomer());
-            return mapper.toDTO(repository.save(updated));
+
+            if (dto.getCustomerId() != null) {
+                Customer customer = customerRepository.findById(dto.getCustomerId())
+                        .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+                if (!CustomerType.COMPANY.equals(customer.getCustomerType())) {
+                    throw new RuntimeException("Solo se puede asignar contacto a clientes tipo COMPANY");
+                }
+
+                updated.setCustomer(customer);
+            } else {
+                updated.setCustomer(existing.getCustomer());
+            }
+
+            // Normalizar email
+            if (updated.getEmail() != null) {
+                updated.setEmail(updated.getEmail().trim().toLowerCase());
+            }
+
+            try {
+                return mapper.toDTO(repository.save(updated));
+            } catch (DataIntegrityViolationException ex) {
+                throw new RuntimeException("El email ya está registrado para otro contacto");
+            }
         });
     }
+
 
     @Override
     public boolean delete(Long id) {
@@ -71,23 +137,43 @@ public class CustomerContactServiceImpl implements CustomerContactService {
                 if (value == null) return;
 
                 try {
-                    Field field = CustomerContact.class.getDeclaredField(key);
-                    field.setAccessible(true);
+                    if ("customerId".equals(key)) {
+                        Long customerId = Long.valueOf(value.toString());
+                        Customer customer = customerRepository.findById(customerId)
+                                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-                    if (field.getType() == String.class) {
-                        field.set(entity, value.toString());
+                        if (!CustomerType.COMPANY.equals(customer.getCustomerType())) {
+                            throw new RuntimeException("Solo se puede asignar contacto a clientes tipo COMPANY");
+                        }
+
+                        entity.setCustomer(customer);
+
+                    } else if ("email".equals(key)) {
+                        // Normalizar email
+                        entity.setEmail(value.toString().trim().toLowerCase());
+
                     } else {
-                        field.set(entity, value);
+                        Field field = CustomerContact.class.getDeclaredField(key);
+                        field.setAccessible(true);
+                        if (field.getType() == String.class) {
+                            field.set(entity, value.toString());
+                        } else {
+                            field.set(entity, value);
+                        }
                     }
-
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     // Ignorar campos inválidos
                 }
             });
 
-            CustomerContact saved = repository.save(entity);
-            return mapper.toDTO(saved);
+            try {
+                CustomerContact saved = repository.save(entity);
+                return mapper.toDTO(saved);
+            } catch (DataIntegrityViolationException ex) {
+                throw new RuntimeException("El email ya está registrado para otro contacto");
+            }
         });
     }
+
 }
 
