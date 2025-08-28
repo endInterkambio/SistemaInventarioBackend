@@ -12,19 +12,20 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "sale_order_items")
-
 public class SaleOrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id")
-    private Long orderId;
+    // Relación inversa con SaleOrder
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private SaleOrder order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_sku", referencedColumnName = "sku", nullable = false)
-    private Book book;
+    @JoinColumn(name = "book_stock_location_id", nullable = false)
+    private BookStockLocation bookStockLocation;
 
     @Column(name = "quantity")
     private Integer quantity;

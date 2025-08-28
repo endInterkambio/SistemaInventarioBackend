@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "shipment_items")
 
 public class ShipmentItem {
 
@@ -20,9 +21,9 @@ public class ShipmentItem {
     @JoinColumn(name = "shipment_id", nullable = false)
     private Shipment shipment;
 
-
-    @Column(name = "book_sku")
-    private Book book_sku;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_stock_location_id", nullable = false)
+    private BookStockLocation bookStockLocation;
 
     @Column(name = "quantity")
     private Integer quantity;

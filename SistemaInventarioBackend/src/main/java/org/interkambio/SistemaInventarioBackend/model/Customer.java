@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class Customer {
 
     @Id
@@ -32,9 +33,6 @@ public class Customer {
 
     @Column(name = "name") // nombre persona o razón social empresa
     private String name;
-
-    @Column(name = "last_name") // solo para personas
-    private String lastName;
 
     @Column(name = "company_name") // solo para empresas
     private String companyName;

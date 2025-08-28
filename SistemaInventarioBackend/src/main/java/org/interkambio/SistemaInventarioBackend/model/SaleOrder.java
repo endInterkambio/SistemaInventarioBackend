@@ -19,13 +19,10 @@ public class SaleOrder {
     private Long id;
 
     @Column(name = "order_number", unique = true, nullable = false, length = 20)
-    private String orderNumber; // SO-00001
+    private String orderNumber; // Ejemplo: SO-00001
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
-
-    @Column(name = "customer_id")
-    private Long customerId;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -45,10 +42,12 @@ public class SaleOrder {
     @Column(name = "additional_fee")
     private BigDecimal additionalFee;
 
+    // Relación con Customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    // Relación con items (mappedBy = "order")
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleOrderItem> items;
 }
