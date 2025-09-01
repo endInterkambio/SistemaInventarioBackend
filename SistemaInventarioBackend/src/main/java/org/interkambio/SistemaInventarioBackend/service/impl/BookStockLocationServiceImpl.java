@@ -13,6 +13,7 @@ import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionR
 import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
 import org.interkambio.SistemaInventarioBackend.service.BookStockLocationService;
 import org.interkambio.SistemaInventarioBackend.specification.BookStockLocationSpecification;
+import org.interkambio.SistemaInventarioBackend.util.StockLocationValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,23 +68,9 @@ public class BookStockLocationServiceImpl
     }
 
     private void validateShowroomDuplicate(BookStockLocation entity) {
-        Long warehouseId = entity.getWarehouse().getId();
-
-        // Solo Warehouse 1 permite SHOWROOM
-        if (warehouseId == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
-            boolean exists = repository.existsByBookIdAndWarehouseIdAndLocationType(
-                    entity.getBook().getId(),
-                    warehouseId,
-                    LocationType.SHOWROOM
-            );
-
-            if (exists) {
-                throw new RuntimeException(
-                        "Ya existe un ejemplar de este libro en SHOWROOM. No se puede duplicar, aunque tenga distinta condición."
-                );
-            }
-        }
+        StockLocationValidator.validateShowroomDuplicate(entity, repository);
     }
+
 
     private void applyValidations(BookStockLocation entity) {
         validateLocationType(entity);

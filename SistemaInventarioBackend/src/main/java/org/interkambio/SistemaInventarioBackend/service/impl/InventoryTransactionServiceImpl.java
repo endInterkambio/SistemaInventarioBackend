@@ -12,6 +12,7 @@ import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionR
 import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
 import org.interkambio.SistemaInventarioBackend.service.InventoryTransactionService;
 import org.interkambio.SistemaInventarioBackend.specification.InventoryTransactionSpecification;
+import org.interkambio.SistemaInventarioBackend.util.StockLocationValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,16 +65,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
             // Validar SHOWROOM: único ejemplar por ISBN
             if (toLocation.getLocationType() == LocationType.SHOWROOM && toLocation.getWarehouse().getId() == 1) {
-                boolean existsShowroom = bookStockLocationRepository.existsByBookIdAndWarehouseIdAndLocationType(
-                        book.getId(),
-                        toLocation.getWarehouse().getId(),
-                        LocationType.SHOWROOM
-                );
-                if (existsShowroom) {
-                    throw new IllegalArgumentException(
-                            "Ya existe un ejemplar de este libro en SHOWROOM. No se puede duplicar"
-                    );
-                }
+                StockLocationValidator.validateShowroomDuplicate(toLocation, bookStockLocationRepository);
             }
 
             // Validar condición en TRANSFER

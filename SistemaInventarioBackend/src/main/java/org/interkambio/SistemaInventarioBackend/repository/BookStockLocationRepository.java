@@ -40,10 +40,11 @@ public interface BookStockLocationRepository extends
     @EntityGraph(attributePaths = { "warehouse", "book" })
     Optional<BookStockLocation> findById(Long id);
 
-    boolean existsByBookIdAndWarehouseIdAndLocationType(
+    boolean existsByBookIdAndWarehouseIdAndLocationTypeAndIdNot(
             Long bookId,
             Long warehouseId,
-            LocationType locationType
+            LocationType locationType,
+            Long toLocation
     );
 
     @Deprecated
