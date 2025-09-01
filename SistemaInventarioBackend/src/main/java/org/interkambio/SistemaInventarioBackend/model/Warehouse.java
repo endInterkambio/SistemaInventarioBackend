@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -24,6 +25,6 @@ public class Warehouse {
 
     // Relación hacia las ubicaciones de stock
     @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<BookStockLocation> stockLocations;
+    private List<BookStockLocation> stockLocations = new ArrayList<>();
 }
 

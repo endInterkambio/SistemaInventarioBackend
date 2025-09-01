@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.InventoryTransactionSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.InventoryTransactionMapper;
-import org.interkambio.SistemaInventarioBackend.model.Book;
-import org.interkambio.SistemaInventarioBackend.model.InventoryTransaction;
-import org.interkambio.SistemaInventarioBackend.model.TransactionType;
+import org.interkambio.SistemaInventarioBackend.model.*;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
 import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
@@ -60,6 +58,44 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             }
         }
 
+        if (dto.getToLocationId() != null) {
+            var toLocation = bookStockLocationRepository.findById(dto.getToLocationId())
+                    .orElseThrow(() -> new EntityNotFoundException("Ubicación destino no encontrada"));
+
+            // Validar SHOWROOM: único ejemplar por ISBN
+            if (toLocation.getLocationType() == LocationType.SHOWROOM && toLocation.getWarehouse().getId() == 1) {
+                boolean existsShowroom = bookStockLocationRepository.existsByBookIdAndWarehouseIdAndLocationType(
+                        book.getId(),
+                        toLocation.getWarehouse().getId(),
+                        LocationType.SHOWROOM
+                );
+                if (existsShowroom) {
+                    throw new IllegalArgumentException(
+                            "Ya existe un ejemplar de este libro en SHOWROOM. No se puede duplicar"
+                    );
+                }
+            }
+
+            // Validar condición en TRANSFER
+            if (dto.getFromLocationId() != null) {
+                var fromLocation = bookStockLocationRepository.findById(dto.getFromLocationId())
+                        .orElseThrow(() -> new EntityNotFoundException("Ubicación origen no encontrada"));
+
+                BookCondition fromCondition = fromLocation.getBookCondition();
+                BookCondition toCondition = toLocation.getBookCondition();
+
+            // Permitir si la condición origen es U o X
+                if (fromCondition != toCondition && fromCondition != BookCondition.U && fromCondition != BookCondition.X) {
+                    throw new IllegalArgumentException(
+                            "La condición del libro no coincide entre origen y destino"
+                    );
+                }
+
+            // Opcional: normalizar condición al destino si quieres
+            // fromLocation.setBookCondition(toCondition);
+            }
+        }
+
         // Validaciones para ubicaciones según tipo
         switch (transactionType) {
             case PURCHASE:
@@ -82,7 +118,8 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 break;
         }
 
-        // Actualizar stock: lógica simplificada, luego puedes mejorar
+
+        // Actualizar stock: lógica simplificada
         switch (transactionType) {
             case PURCHASE:
                 // Incrementar stock en ubicación destino
