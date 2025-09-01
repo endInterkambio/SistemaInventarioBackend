@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(
         name = "book_stock_locations",
         uniqueConstraints = @UniqueConstraint(columnNames = {
-                "book_sku", "warehouse_id", "bookcase", "bookcase_floor", "book_condition", "location_type"
+                "book_id", "warehouse_id", "bookcase", "bookcase_floor", "book_condition", "location_type"
         })
 )
 @NoArgsConstructor
@@ -21,12 +21,16 @@ public class BookStockLocation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación con Book usando SKU como referencia
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_SKU", referencedColumnName = "sku", nullable = false)
+    // Relación con Book usando book_id como FK
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Mantener bookSku por compatibilidad (no FK, simple columna)
+    @Column(name = "book_SKU", length = 36)
+    private String bookSku;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 

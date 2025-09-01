@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookStockLocationDTO {
     private Long id;
-    private String bookSku;
+    private Long bookId; // relación real
+    private String bookSku; // compatibilidad / migración
     private SimpleIdNameDTO warehouse; // en lugar de warehouseId
     private Integer bookcase;
     private Integer bookcaseFloor;

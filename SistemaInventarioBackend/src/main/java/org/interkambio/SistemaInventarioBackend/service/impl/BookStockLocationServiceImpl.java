@@ -57,30 +57,29 @@ public class BookStockLocationServiceImpl
     public BookStockLocationDTO create(BookStockLocationDTO dto) {
         BookStockLocation entity = mapper.toEntity(dto);
 
-        // Cargar libro
-        Book book = bookRepository.findBySku(dto.getBookSku())
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
+        // Cargar libro por ID
+        Book book = bookRepository.findById(dto.getBookId())
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado con ID: " + dto.getBookId()));
         entity.setBook(book);
 
-        // 1️⃣ Validación SHOWROOM
+        // Validación: evitar duplicados en SHOWROOM
         if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
-            boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
-                    entity.getBook().getSku(),
+            boolean exists = repository.existsByBookIdAndBookConditionAndWarehouseIdAndLocationType(
+                    entity.getBook().getId(),
+                    entity.getBookCondition(),
                     entity.getWarehouse().getId(),
                     entity.getLocationType()
             );
 
             if (exists) {
                 throw new RuntimeException(
-                        "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                        "Ya existe este libro en SHOWROOM con la misma condición. No se permite duplicar."
                 );
             }
         }
 
-        // 2️⃣ Guardar la entidad
         BookStockLocation saved = repository.save(entity);
 
-        // 3️⃣ Recargar entidad completa
         BookStockLocation reloaded = repository.findById(saved.getId())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
 
@@ -88,25 +87,27 @@ public class BookStockLocationServiceImpl
     }
 
 
+
     @Override
     public BookStockLocationDTO save(BookStockLocationDTO dto) {
         BookStockLocation entity = mapper.toEntity(dto);
 
-        Book book = bookRepository.findBySku(dto.getBookSku())
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
+        Book book = bookRepository.findById(dto.getBookId())
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado con ID: " + dto.getBookId()));
         entity.setBook(book);
 
-        // VALIDACIÓN SHOWROOM
+        // Validación SHOWROOM
         if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
-            boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
-                    entity.getBook().getSku(),
+            boolean exists = repository.existsByBookIdAndBookConditionAndWarehouseIdAndLocationType(
+                    entity.getBook().getId(),
+                    entity.getBookCondition(),
                     entity.getWarehouse().getId(),
                     entity.getLocationType()
             );
 
             if (exists) {
                 throw new RuntimeException(
-                        "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                        "Ya existe este libro en SHOWROOM con la misma condición. No se permite duplicar."
                 );
             }
         }
@@ -124,21 +125,21 @@ public class BookStockLocationServiceImpl
     public List<BookStockLocationDTO> saveAll(List<BookStockLocationDTO> dtoList) {
         List<BookStockLocation> entities = dtoList.stream().map(dto -> {
             BookStockLocation entity = mapper.toEntity(dto);
-            Book book = bookRepository.findBySku(dto.getBookSku())
-                    .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
+            Book book = bookRepository.findById(dto.getBookId())
+                    .orElseThrow(() -> new RuntimeException("Libro no encontrado con ID: " + dto.getBookId()));
             entity.setBook(book);
 
-            // VALIDACIÓN SHOWROOM para cada entity
             if (entity.getWarehouse().getId() == 1 && entity.getLocationType() == LocationType.SHOWROOM) {
-                boolean exists = repository.existsByBookSkuAndWarehouseIdAndLocationType(
-                        entity.getBook().getSku(),
+                boolean exists = repository.existsByBookIdAndBookConditionAndWarehouseIdAndLocationType(
+                        entity.getBook().getId(),
+                        entity.getBookCondition(),
                         entity.getWarehouse().getId(),
                         entity.getLocationType()
                 );
 
                 if (exists) {
                     throw new RuntimeException(
-                            "Ya existe este libro en SHOWROOM. No se permite duplicar con distinta condición."
+                            "Ya existe este libro en SHOWROOM con la misma condición. No se permite duplicar."
                     );
                 }
             }
@@ -152,12 +153,12 @@ public class BookStockLocationServiceImpl
 
 
     @Override
-    public java.util.Optional<BookStockLocationDTO> update(Long id, BookStockLocationDTO dto) {
+    public Optional<BookStockLocationDTO> update(Long id, BookStockLocationDTO dto) {
         return repository.findById(id).map(existing -> {
             BookStockLocation updated = mapper.toEntity(dto);
 
-            Book book = bookRepository.findBySku(dto.getBookSku())
-                    .orElseThrow(() -> new RuntimeException("Libro no encontrado con SKU: " + dto.getBookSku()));
+            Book book = bookRepository.findById(dto.getBookId())
+                    .orElseThrow(() -> new RuntimeException("Libro no encontrado con ID: " + dto.getBookId()));
 
             updated.setBook(book);
             updated.setId(id);
@@ -185,7 +186,6 @@ public class BookStockLocationServiceImpl
                     } else if ("bookCondition".equals(key)) {
                         field.set(entity, BookCondition.valueOf(value.toString()));
                     } else {
-                        // Conversión simple por tipo
                         if (field.getType() == Integer.class || field.getType() == int.class) {
                             field.set(entity, Integer.valueOf(value.toString()));
                         } else if (field.getType() == String.class) {
@@ -197,14 +197,12 @@ public class BookStockLocationServiceImpl
                         }
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
-                    // Ignorar si el campo no existe o no es accesible
+                    // Ignorar campos inexistentes o inaccesibles
                 }
             });
 
-            // Guardar cambios
             BookStockLocation saved = repository.save(entity);
 
-            // Refetch con relaciones
             BookStockLocation reloaded = repository.findById(saved.getId())
                     .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
 
@@ -230,7 +228,6 @@ public class BookStockLocationServiceImpl
                 "La ubicación con ID " + id + " no existe o ya fue eliminada."
         ));
     }
-
 
     @Override
     public Page<BookStockLocationDTO> searchLocations(BookStockLocationSearchCriteria criteria, Pageable pageable) {

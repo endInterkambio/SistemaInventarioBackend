@@ -115,7 +115,7 @@ public class Book {
     @JoinColumn(name = "updated_by")
     private User updatedBy;
 
-    // Relación con ubicaciones de stock
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Relación con ubicaciones de stock (sin cascada para no borrar stock accidentalmente)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private List<BookStockLocation> stockLocations = new ArrayList<>();
 }

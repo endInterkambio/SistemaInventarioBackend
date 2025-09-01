@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class BookStockLocationMapper implements GenericMapper<BookStockLocation, BookStockLocationDTO> {
@@ -26,10 +25,16 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
         BookStockLocation entity = new BookStockLocation();
         entity.setId(dto.getId());
 
-        if (dto.getBookSku() != null) {
+        // Relación real por bookId
+        if (dto.getBookId() != null) {
             Book book = new Book();
-            book.setSku(dto.getBookSku());
+            book.setId(dto.getBookId());
             entity.setBook(book);
+        }
+
+        // Mantener compatibilidad con bookSku
+        if (dto.getBookSku() != null) {
+            entity.setBookSku(dto.getBookSku());
         }
 
         if (dto.getWarehouse() != null && dto.getWarehouse().getId() != null) {
@@ -62,7 +67,8 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
         BookStockLocationDTO dto = new BookStockLocationDTO();
 
         dto.setId(entity.getId());
-        dto.setBookSku(entity.getBook() != null ? entity.getBook().getSku() : null);
+        dto.setBookId(entity.getBook() != null ? entity.getBook().getId() : null);
+        dto.setBookSku(entity.getBookSku()); // mantenemos compatibilidad
 
         if (entity.getWarehouse() != null) {
             dto.setWarehouse(new SimpleIdNameDTO(
