@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,7 +28,9 @@ public class GlobalExceptionHandler {
         return body;
     }
 
-    /** Maneja errores de validación de @Valid */
+    /**
+     * Maneja errores de validación de @Valid
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationErrors(
             MethodArgumentNotValidException ex,
@@ -47,7 +50,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    /** Maneja cuando una entidad no existe en la BD */
+    /**
+     * Maneja cuando una entidad no existe en la BD
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFound(
             EntityNotFoundException ex,
@@ -59,7 +64,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    /** Maneja errores de argumentos inválidos (como stock negativo) */
+    /**
+     * Maneja errores de argumentos inválidos (como stock negativo)
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(
             IllegalArgumentException ex,
@@ -71,7 +78,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    /** Maneja cualquier otro error no controlado */
+    /**
+     * Maneja cualquier otro error no controlado
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(
             Exception ex,
@@ -90,6 +99,19 @@ public class GlobalExceptionHandler {
     ) {
         return new ResponseEntity<>(
                 buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            WebRequest request
+    ) {
+        String message = "Ya existe una ubicación para este libro con los mismos datos (estante, piso, condición, etc.)";
+
+        return new ResponseEntity<>(
+                buildResponse(HttpStatus.CONFLICT, message, request),
                 HttpStatus.CONFLICT
         );
     }
