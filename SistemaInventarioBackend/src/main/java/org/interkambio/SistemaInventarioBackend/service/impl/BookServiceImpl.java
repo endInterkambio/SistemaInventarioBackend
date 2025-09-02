@@ -10,13 +10,12 @@ import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exporter.BookExcelExporter;
 import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.BookMapper;
-import org.interkambio.SistemaInventarioBackend.model.Book;
-import org.interkambio.SistemaInventarioBackend.model.BookCondition;
-import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
-import org.interkambio.SistemaInventarioBackend.model.LocationType;
+import org.interkambio.SistemaInventarioBackend.model.*;
 import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
+import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
 import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;
+import org.interkambio.SistemaInventarioBackend.security.CustomUserPrincipal;
 import org.interkambio.SistemaInventarioBackend.service.BookService;
 import org.interkambio.SistemaInventarioBackend.specification.BookSpecification;
 import org.springframework.beans.BeanWrapper;
@@ -25,9 +24,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,13 +42,15 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     private final UnifiedBookImporter bookImporter;
     private final BookStockLocationRepository stockLocationRepository;
     private final WarehouseRepository warehouseRepository;
+    private final UserRepository userRepository;
 
     public BookServiceImpl(
             BookRepository bookRepository,
             BookMapper bookMapper,
             UnifiedBookImporter bookImporter,
             BookStockLocationRepository stockLocationRepository,
-            WarehouseRepository warehouseRepository
+            WarehouseRepository warehouseRepository,
+            UserRepository userRepository
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
@@ -55,6 +58,7 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         this.bookImporter = bookImporter;
         this.stockLocationRepository = stockLocationRepository;
         this.warehouseRepository = warehouseRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -156,54 +160,71 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
+    @Transactional
     public Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates) {
         return bookRepository.findById(id).map(existing -> {
             BeanWrapper wrapper = new BeanWrapperImpl(existing);
 
+            // Actualización de campos
             updates.forEach((key, value) -> {
-                switch (key) {
-                    case "categories":
-                        if (value instanceof List<?> listValue) {
-                            wrapper.setPropertyValue("category",
-                                    listValue.stream()
-                                            .map(Object::toString)
-                                            .collect(Collectors.joining(",")));
-                        } else if (value instanceof String strValue) {
-                            wrapper.setPropertyValue("category", strValue);
-                        }
-                        break;
+                try {
+                    switch (key) {
+                        case "categories":
+                            if (value instanceof List<?> listValue) {
+                                wrapper.setPropertyValue("category",
+                                        listValue.stream()
+                                                .map(Object::toString)
+                                                .collect(Collectors.joining(",")));
+                            } else if (value instanceof String strValue) {
+                                wrapper.setPropertyValue("category", strValue);
+                            }
+                            break;
 
-                    case "formats":
-                        if (value instanceof List<?> listValue) {
-                            wrapper.setPropertyValue("format",
-                                    listValue.stream()
-                                            .map(Object::toString)
-                                            .collect(Collectors.joining(",")));
-                        } else if (value instanceof String strValue) {
-                            wrapper.setPropertyValue("format", strValue);
-                        }
-                        break;
+                        case "formats":
+                            if (value instanceof List<?> listValue) {
+                                wrapper.setPropertyValue("format",
+                                        listValue.stream()
+                                                .map(Object::toString)
+                                                .collect(Collectors.joining(",")));
+                            } else if (value instanceof String strValue) {
+                                wrapper.setPropertyValue("format", strValue);
+                            }
+                            break;
 
-                    default:
-                        // Para el resto de campos, BeanWrapper usará el setter correspondiente
-                        wrapper.setPropertyValue(key, value);
+                        default:
+                            // Para el resto de campos, BeanWrapper usará el setter correspondiente
+                            wrapper.setPropertyValue(key, value);
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "No se pudo actualizar la propiedad '" + key + "': " + e.getMessage()
+                    );
                 }
             });
 
             // Actualizamos la fecha de modificación
             existing.setUpdatedAt(LocalDateTime.now());
 
+            // Asignamos el usuario logueado como responsable de la actualización
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof CustomUserPrincipal customUser) {
+                    User userEntity = userRepository.findById(customUser.getId())
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Usuario logueado no encontrado: " + customUser.getId()));
+                    existing.setUpdatedBy(userEntity);
+                }
+            }
+
             // Guardamos la entidad
             Book saved = bookRepository.save(existing);
-
-            // Debug
-            System.out.println("categories=" + saved.getCategory());
-            System.out.println("formats=" + saved.getFormat());
 
             // Retornamos el DTO mapeado
             return bookMapper.toDTO(saved);
         });
     }
+
 
     @Override
     public ImportResult<BookDTO> importBooksFromFile(MultipartFile file) {
