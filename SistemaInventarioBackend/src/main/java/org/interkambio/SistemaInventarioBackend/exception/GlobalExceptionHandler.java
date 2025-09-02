@@ -108,12 +108,22 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex,
             WebRequest request
     ) {
-        String message = "Ya existe una ubicación para este libro con los mismos datos (estante, piso, condición, etc.)";
+        String message;
+
+        if (ex.getMessage() != null && ex.getMessage().contains("book_stock_locations_unique")) {
+            // Violación de restricción única en ubicaciones
+            message = "Ya existe una ubicación para este libro con los mismos datos (estante, piso, condición, etc.).";
+        } else if (ex.getMessage() != null && ex.getMessage().contains("fk_book_stock_locations_book_id")) {
+            // Violación de clave foránea al intentar eliminar libro con ubicaciones
+            message = "No se puede eliminar este libro porque tiene ubicaciones asociadas. Elimina primero las ubicaciones.";
+        } else {
+            // Cualquier otra violación de integridad de datos
+            message = "Error de integridad de datos: " + ex.getMostSpecificCause().getMessage();
+        }
 
         return new ResponseEntity<>(
                 buildResponse(HttpStatus.CONFLICT, message, request),
                 HttpStatus.CONFLICT
         );
     }
-
 }

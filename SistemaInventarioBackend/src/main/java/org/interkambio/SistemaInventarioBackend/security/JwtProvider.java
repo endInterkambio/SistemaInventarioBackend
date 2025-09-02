@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import org.interkambio.SistemaInventarioBackend.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -17,10 +18,11 @@ public class JwtProvider {
     private final Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
 
     // Generar un token JWT con ID y username
-    public String generateToken(Long userId, String username) {
+    public String generateToken(User user) {
         return JWT.create()
-                .withSubject(username)
-                .withClaim("userId", userId)
+                .withSubject(user.getUsername())
+                .withClaim("userId", user.getId())
+                .withClaim("role", user.getRole().getName()) // <-- rol como string
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(algorithm);
@@ -48,5 +50,10 @@ public class JwtProvider {
     public String getUsernameFromToken(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getSubject();
+    }
+
+    public String getRoleFromToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        return decodedJWT.getClaim("role").asString();
     }
 }
