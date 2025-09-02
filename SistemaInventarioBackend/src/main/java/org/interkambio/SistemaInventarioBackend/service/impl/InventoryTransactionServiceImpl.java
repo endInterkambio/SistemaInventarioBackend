@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.InventoryTransactionSearchCriteria;
@@ -10,12 +11,17 @@ import org.interkambio.SistemaInventarioBackend.repository.BookRepository;
 import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
 import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
 import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
+import org.interkambio.SistemaInventarioBackend.security.CustomUserPrincipal;
 import org.interkambio.SistemaInventarioBackend.service.InventoryTransactionService;
 import org.interkambio.SistemaInventarioBackend.specification.InventoryTransactionSpecification;
 import org.interkambio.SistemaInventarioBackend.util.StockLocationValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +40,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .map(mapper::toDTO);
     }
 
+    @Transactional
     @Override
     public InventoryTransactionDTO createTransaction(InventoryTransactionDTO dto) {
 
@@ -155,6 +162,22 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         // Aquí asignar el libro gestionado para evitar error transient
         entity.setBook(book);
         entity.setTransactionType(transactionType);
+
+        // Obtener usuario logueado desde Spring Security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserPrincipal customUser) {
+                User userEntity = userRepository.findById(customUser.getId())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Usuario logueado no encontrado: " + customUser.getId()
+                        ));
+                entity.setUser(userEntity); // asigna el usuario que realizó la operación
+            }
+        }
+
+        entity.setTransactionDate(LocalDateTime.now());
+
         InventoryTransaction saved = repository.save(entity);
 
         return mapper.toDTO(saved);
