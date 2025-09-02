@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
+import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
 import org.interkambio.SistemaInventarioBackend.model.User;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,9 @@ public class UserMapper implements GenericMapper<User, UserDTO> {
                 entity.getId(),
                 entity.getUsername(),
                 entity.getPassword(),
-                entity.getRole() != null ? entity.getRole().getId() : null
+                entity.getRole() != null
+                        ? new RoleDTO(entity.getRole().getId(), entity.getRole().getName())
+                        : null
         );
     }
 
@@ -24,9 +27,10 @@ public class UserMapper implements GenericMapper<User, UserDTO> {
         user.setUsername(dto.getUsername());
         user.setPassword(dto.getPassword());
 
-        if (dto.getRoleId() != null) {
+        if (dto.getRole() != null) {
             var role = new org.interkambio.SistemaInventarioBackend.model.Role();
-            role.setId(dto.getRoleId());
+            role.setId(dto.getRole().getId());
+            role.setName(dto.getRole().getName());
             user.setRole(role);
         }
 

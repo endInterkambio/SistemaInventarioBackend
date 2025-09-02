@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.login.LoginRequestDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.login.LoginResponseDTO;
@@ -40,7 +41,9 @@ public class AuthServiceImpl implements AuthService {
                         user.getId(),
                         user.getUsername(),
                         null,
-                        user.getRole().getId()
+                        user.getRole() != null
+                                ? new RoleDTO(user.getRole().getId(), user.getRole().getName())
+                                : null
                 )
         );
     }

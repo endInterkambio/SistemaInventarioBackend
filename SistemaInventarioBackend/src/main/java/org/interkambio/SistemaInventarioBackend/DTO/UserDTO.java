@@ -17,5 +17,5 @@ public class UserDTO {
     @JsonIgnoreProperties("password")
     private String password;
 
-    private Long roleId;
+    private RoleDTO role;
 }
