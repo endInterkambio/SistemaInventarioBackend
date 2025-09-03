@@ -9,8 +9,10 @@ import org.interkambio.SistemaInventarioBackend.model.User;
 import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
 import org.interkambio.SistemaInventarioBackend.security.JwtProvider;
 import org.interkambio.SistemaInventarioBackend.service.AuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,17 +28,19 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsernameCaseSensitive(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Validar contraseña con BCrypt
+        // 2. Validar contraseña
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Credenciales inválidas");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
 
-        // 3. Generar token con JWT
-        String token = jwtProvider.generateToken(user);
+        // 3. Generar tokens
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
 
         // 4. Retornar respuesta
         return new LoginResponseDTO(
-                token,
+                accessToken,
+                refreshToken,
                 new UserDTO(
                         user.getId(),
                         user.getUsername(),
@@ -47,5 +51,6 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
     }
+
 }
 

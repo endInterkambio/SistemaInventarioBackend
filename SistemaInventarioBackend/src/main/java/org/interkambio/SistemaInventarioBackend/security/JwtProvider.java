@@ -2,9 +2,9 @@ package org.interkambio.SistemaInventarioBackend.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import org.interkambio.SistemaInventarioBackend.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -12,24 +12,64 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    private final String SECRET_KEY = "mi_clave_secreta_super_segura"; // cámbiala por algo fuerte
-    private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+    private final Algorithm algorithm;
+    private final long accessExpiration;
+    private final long refreshExpiration;
 
-    private final Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+    public JwtProvider(
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.access.expiration}") long accessExpiration,
+            @Value("${jwt.refresh.expiration}") long refreshExpiration
+    ) {
+        this.algorithm = Algorithm.HMAC256(secretKey);
+        this.accessExpiration = accessExpiration;
+        this.refreshExpiration = refreshExpiration;
+    }
 
-    // Generar un token JWT con ID y username
-    public String generateToken(User user) {
+    // Generar Access Token con entidad User
+    public String generateAccessToken(User user) {
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withClaim("userId", user.getId())
-                .withClaim("role", user.getRole().getName()) // <-- rol como string
+                .withClaim("role", user.getRole().getName())
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .withExpiresAt(new Date(System.currentTimeMillis() + accessExpiration))
                 .sign(algorithm);
     }
 
+    // Generar Refresh Token con entidad User
+    public String generateRefreshToken(User user) {
+        return JWT.create()
+                .withSubject(user.getUsername())
+                .withClaim("userId", user.getId())
+                .withClaim("role", user.getRole().getName())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + refreshExpiration))
+                .sign(algorithm);
+    }
 
-    // Validar token y retornar true/false
+    // Overloads para cuando no tengas entidad completa
+    public String generateAccessToken(Long userId, String username, String roleName) {
+        return JWT.create()
+                .withSubject(username)
+                .withClaim("userId", userId)
+                .withClaim("role", roleName)
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + accessExpiration))
+                .sign(algorithm);
+    }
+
+    public String generateRefreshToken(Long userId, String username, String roleName) {
+        return JWT.create()
+                .withSubject(username)
+                .withClaim("userId", userId)
+                .withClaim("role", roleName)
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + refreshExpiration))
+                .sign(algorithm);
+    }
+
+    // Validar cualquier token
     public boolean validateToken(String token) {
         try {
             JWTVerifier verifier = JWT.require(algorithm).build();
@@ -40,20 +80,16 @@ public class JwtProvider {
         }
     }
 
-    // Extraer userId desde el token
+    // Extraer claims
     public Long getUserIdFromToken(String token) {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        return decodedJWT.getClaim("userId").asLong();
+        return JWT.decode(token).getClaim("userId").asLong();
     }
 
-    // Extraer username desde el token
     public String getUsernameFromToken(String token) {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        return decodedJWT.getSubject();
+        return JWT.decode(token).getSubject();
     }
 
     public String getRoleFromToken(String token) {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        return decodedJWT.getClaim("role").asString();
+        return JWT.decode(token).getClaim("role").asString();
     }
 }

@@ -9,6 +9,7 @@ import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponseDTO {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private UserDTO user;
 }
