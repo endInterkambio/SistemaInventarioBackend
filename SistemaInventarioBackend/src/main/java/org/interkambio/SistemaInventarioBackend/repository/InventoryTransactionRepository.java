@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,14 +61,14 @@ public interface InventoryTransactionRepository extends
             "AND tx.transactionDate < :beforeDate " +
             "AND tx.transactionType IN ('ADJUSTMENT','PURCHASE','RETURN_IN','TRANSFER')")
     Integer sumQuantityByToLocationBefore(@Param("locationId") Long locationId,
-                                          @Param("beforeDate") LocalDateTime beforeDate);
+                                          @Param("beforeDate") OffsetDateTime beforeDate);
 
     @Query("SELECT SUM(tx.quantity) FROM InventoryTransaction tx " +
             "WHERE tx.fromLocation.id = :locationId " +
             "AND tx.transactionDate < :beforeDate " +
             "AND tx.transactionType IN ('SALE','RETURN_OUT','TRANSFER','ADJUSTMENT')")
     Integer sumQuantityByFromLocationBefore(@Param("locationId") Long locationId,
-                                            @Param("beforeDate") LocalDateTime beforeDate);
+                                            @Param("beforeDate") OffsetDateTime beforeDate);
 
     @Query("SELECT tx FROM InventoryTransaction tx " +
             "WHERE (tx.toLocation.id = :locationId OR tx.fromLocation.id = :locationId) " +
@@ -79,8 +79,6 @@ public interface InventoryTransactionRepository extends
             @Param("types") List<TransactionType> types,
             Pageable pageable
     );
-
-
 
 
 }

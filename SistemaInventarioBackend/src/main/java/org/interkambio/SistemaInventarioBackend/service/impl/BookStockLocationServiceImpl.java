@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -170,8 +171,10 @@ public class BookStockLocationServiceImpl
                         field.set(entity, Integer.valueOf(value.toString()));
                     } else if (field.getType() == String.class) {
                         field.set(entity, value.toString());
-                    } else if (field.getType() == LocalDateTime.class) {
+                    } else if (field.getType() == LocalDateTime.class && !"lastUpdatedAt".equals(key)) {
                         field.set(entity, LocalDateTime.parse(value.toString()));
+                    } else if (field.getType() == OffsetDateTime.class && !"lastUpdatedAt".equals(key)) {
+                        field.set(entity, OffsetDateTime.parse(value.toString()));
                     } else {
                         field.set(entity, value);
                     }

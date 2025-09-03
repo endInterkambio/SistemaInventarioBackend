@@ -56,8 +56,8 @@ public class BookCsvImporter implements BookFileImporter {
                     book.setFairPrice(parseBigDecimal(row.get("FairPrice")));
                     book.setCreatedBy(new SimpleIdNameDTO(parseLong(row.get("CreatedBy")), null));
                     book.setUpdatedBy(new SimpleIdNameDTO(parseLong(row.get("UpdatedBy")), null));
-                    book.setCreatedAt(parseDateTime(row.get("CreatedAt")));
-                    book.setUpdatedAt(parseDateTime(row.get("UpdatedAt")));
+                    book.setCreatedAt(parseOffsetDateTime(row.get("CreatedAt")));
+                    book.setUpdatedAt(parseOffsetDateTime(row.get("UpdatedAt")));
                     book.setFilter(parseString(row.get("Filter")));
 
                     books.add(book);

@@ -202,9 +202,6 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
                 }
             });
 
-            // Actualizamos la fecha de modificación
-            existing.setUpdatedAt(LocalDateTime.now());
-
             // Asignamos el usuario logueado como responsable de la actualización
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {

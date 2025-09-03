@@ -75,15 +75,15 @@ public class BookExcelImporter implements BookFileImporter {
                     book.setPurchasePrice(getCellBigDecimal(row, columnIndex.get("PurchasePrice")));
                     book.setSellingPrice(getCellBigDecimal(row, columnIndex.get("SellingPrice")));
                     book.setFairPrice(getCellBigDecimal(row, columnIndex.get("FairPrice")));
-                    book.setCreatedAt(getCellDateTime(row, columnIndex.get("CreatedAt")));
-                    book.setUpdatedAt(getCellDateTime(row, columnIndex.get("UpdatedAt")));
+                    book.setCreatedAt(getCellOffsetDateTime(row, columnIndex.get("CreatedAt")));
+                    book.setUpdatedAt(getCellOffsetDateTime(row, columnIndex.get("UpdatedAt")));
                     book.setCreatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("CreatedById")), null));
                     book.setUpdatedBy(new SimpleIdNameDTO(getCellLong(row, columnIndex.get("UpdatedById")), null));
                     book.setFilter(getCellString(row, columnIndex.get("Filter")));
 
-// -----------------------------
-// Crear DTO de ubicación (si la fila tiene datos reales)
-// -----------------------------
+                    // -----------------------------
+                    // Crear DTO de ubicación (si la fila tiene datos reales)
+                    // -----------------------------
                     boolean hasLocation =
                             (columnIndex.containsKey("WarehouseId") && getCellLong(row, columnIndex.get("WarehouseId")) != null) ||
                                     (columnIndex.containsKey("Stock") && getCellInt(row, columnIndex.get("Stock")) != null);

@@ -176,8 +176,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             }
         }
 
-        entity.setTransactionDate(LocalDateTime.now());
-
         InventoryTransaction saved = repository.save(entity);
 
         return mapper.toDTO(saved);

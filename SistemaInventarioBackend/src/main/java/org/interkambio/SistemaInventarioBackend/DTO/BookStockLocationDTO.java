@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -20,7 +20,7 @@ public class BookStockLocationDTO {
     private Integer lastStock; // último stock antes de la última modificación
     private String bookCondition;
     private String locationType;
-    private LocalDateTime lastUpdatedAt;
+    private OffsetDateTime lastUpdatedAt;
 }
 
 

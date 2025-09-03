@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @Entity
@@ -17,7 +17,7 @@ public class InventoryTransaction {
     private Long id;
 
     @Column(name = "transaction_date", nullable = false)
-    private LocalDateTime transactionDate;
+    private OffsetDateTime transactionDate;
 
     // Relación con Book usando SKU
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +49,7 @@ public class InventoryTransaction {
     private User user;
 
     @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }
 
 

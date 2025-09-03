@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -36,8 +36,8 @@ public class BookDTO {
     private Integer totalStock; // suma de stock en todas las ubicaciones
     private List<BookStockLocationDTO> locations;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private SimpleIdNameDTO createdBy;
     private SimpleIdNameDTO updatedBy;
 }

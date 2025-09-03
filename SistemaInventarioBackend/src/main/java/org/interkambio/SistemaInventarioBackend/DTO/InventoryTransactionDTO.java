@@ -2,12 +2,12 @@ package org.interkambio.SistemaInventarioBackend.DTO;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 public class InventoryTransactionDTO {
     private Long id;
-    private LocalDateTime transactionDate;
+    private OffsetDateTime transactionDate;
     private String bookSku;
     private Long fromLocationId;
     private Long toLocationId;
@@ -15,5 +15,5 @@ public class InventoryTransactionDTO {
     private Integer quantity;
     private String reason;
     private Long userId;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

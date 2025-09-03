@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Data
@@ -52,7 +52,7 @@ public class BookStockLocation {
     private LocationType locationType = LocationType.MAIN_STORAGE;
 
     @Column(name = "last_updated_at", insertable = false, updatable = false)
-    private LocalDateTime lastUpdatedAt;
+    private OffsetDateTime lastUpdatedAt;
 
     @Transient
     public String getDisplayName() {

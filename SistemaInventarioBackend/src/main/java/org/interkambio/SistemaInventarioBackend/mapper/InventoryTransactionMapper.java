@@ -5,6 +5,8 @@ import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Component
 public class InventoryTransactionMapper {
@@ -51,7 +53,8 @@ public class InventoryTransactionMapper {
         entity.setId(dto.getId());
 
         if (dto.getTransactionDate() == null) {
-            entity.setTransactionDate(LocalDateTime.now());
+            // Generar con UTC por consistencia
+            entity.setTransactionDate(OffsetDateTime.now(ZoneOffset.UTC));
         } else {
             entity.setTransactionDate(dto.getTransactionDate());
         }

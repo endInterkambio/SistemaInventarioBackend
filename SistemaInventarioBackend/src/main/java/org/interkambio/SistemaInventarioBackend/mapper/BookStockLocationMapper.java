@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
@@ -55,10 +56,6 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
             entity.setLocationType(LocationType.valueOf(dto.getLocationType()));
         }
 
-        if (dto.getLastUpdatedAt() != null) {
-            entity.setLastUpdatedAt(LocalDateTime.now());
-        }
-
         return entity;
     }
 
@@ -68,7 +65,7 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
 
         dto.setId(entity.getId());
         dto.setBookId(entity.getBook() != null ? entity.getBook().getId() : null);
-        dto.setBookSku(entity.getBookSku()); // mantenemos compatibilidad
+        dto.setBookSku(entity.getBookSku());
 
         if (entity.getWarehouse() != null) {
             dto.setWarehouse(new SimpleIdNameDTO(
@@ -113,7 +110,7 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
 
         InventoryTransaction lastTx = page.getContent().get(0);
 
-        LocalDateTime before = lastTx.getTransactionDate().minusNanos(1);
+        OffsetDateTime before = lastTx.getTransactionDate().minusNanos(1);
 
         Integer totalIn = transactionRepository.sumQuantityByToLocationBefore(location.getId(), before);
         Integer totalOut = transactionRepository.sumQuantityByFromLocationBefore(location.getId(), before);
@@ -123,7 +120,6 @@ public class BookStockLocationMapper implements GenericMapper<BookStockLocation,
 
         return totalIn - totalOut;
     }
-
 
 
 }
