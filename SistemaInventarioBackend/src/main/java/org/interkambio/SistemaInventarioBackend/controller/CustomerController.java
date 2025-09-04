@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.CustomerService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +40,7 @@ public class CustomerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Listing without pagination
+    // TODO: Listing without pagination
     /*@GetMapping
     public ResponseEntity<List<CustomerDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
@@ -74,4 +75,23 @@ public class CustomerController {
         if (service.delete(id)) return ResponseEntity.noContent().build();
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/search")
+    public Page<CustomerDTO> searchCustomers(
+            @RequestParam(required = false) String name,
+            // @RequestParam(required = false) String email,
+            // @RequestParam(required = false) String phoneNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        CustomerSearchCriteria criteria = new CustomerSearchCriteria();
+        criteria.setName(name);
+        /* TODO
+        criteria.setEmail(email);
+        criteria.setPhoneNumber(phoneNumber);
+        */
+
+        return service.searchCustomers(criteria, page, size);
+    }
+
 }

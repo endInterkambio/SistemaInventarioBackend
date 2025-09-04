@@ -1,13 +1,16 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.CustomerMapper;
 import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerType;
 import org.interkambio.SistemaInventarioBackend.model.DocumentType;
 import org.interkambio.SistemaInventarioBackend.repository.CustomerRepository;
 import org.interkambio.SistemaInventarioBackend.service.CustomerService;
+import org.interkambio.SistemaInventarioBackend.specification.CustomerSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,6 +114,21 @@ public class CustomerServiceImpl implements CustomerService {
             Customer saved = repository.save(entity);
             return mapper.toDTO(saved);
         });
+    }
+
+    @Override
+    public Page<CustomerDTO> searchCustomers(CustomerSearchCriteria criteria, int page, int size) {
+        // Crear PageRequest
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        // Usar Specification para filtrar clientes
+        Page<Customer> customerPage = repository.findAll(
+                CustomerSpecification.withFilters(criteria),
+                pageRequest
+        );
+
+        // Mapear entidades a DTO
+        return customerPage.map(mapper::toDTO);
     }
 
 }
