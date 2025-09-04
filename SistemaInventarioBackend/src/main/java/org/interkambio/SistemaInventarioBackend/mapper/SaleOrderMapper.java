@@ -1,9 +1,12 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.SaleOrderDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderCustomerDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerType;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
+import org.interkambio.SistemaInventarioBackend.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -29,18 +32,25 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         order.setAmountShipment(dto.getAmountShipment());
         order.setAdditionalFee(dto.getAdditionalFee());
 
+        // Mapeo del usuario que creó la orden
         if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
-            var user = new org.interkambio.SistemaInventarioBackend.model.User();
+            var user = new User();
             user.setId(dto.getCreatedBy().getId());
             order.setCreatedBy(user);
         }
 
+        // Mapeo del customer usando SaleOrderCustomerDTO
         if (dto.getCustomer() != null && dto.getCustomer().getId() != null) {
-            var customer = new org.interkambio.SistemaInventarioBackend.model.Customer();
+            var customer = new Customer();
             customer.setId(dto.getCustomer().getId());
+            // Mapear customerType de String a enum
+            if (dto.getCustomer().getCustomerType() != null) {
+                customer.setCustomerType(CustomerType.valueOf(dto.getCustomer().getCustomerType()));
+            }
             order.setCustomer(customer);
         }
 
+        // Mapeo de items
         if (dto.getItems() != null && !dto.getItems().isEmpty()) {
             order.setItems(dto.getItems().stream()
                     .map(itemDto -> {
@@ -66,6 +76,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         dto.setAmountShipment(entity.getAmountShipment());
         dto.setAdditionalFee(entity.getAdditionalFee());
 
+        // Mapeo del usuario que creó la orden
         if (entity.getCreatedBy() != null) {
             dto.setCreatedBy(new SimpleIdNameDTO(
                     entity.getCreatedBy().getId(),
@@ -73,6 +84,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
             ));
         }
 
+        // Mapeo del customer usando SaleOrderCustomerDTO
         if (entity.getCustomer() != null) {
             String customerName;
             if (entity.getCustomer().getCustomerType() == CustomerType.PERSON) {
@@ -81,13 +93,15 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
                 customerName = entity.getCustomer().getCompanyName();
             }
 
-            dto.setCustomer(new SimpleIdNameDTO(
+            dto.setCustomer(new SaleOrderCustomerDTO(
                     entity.getCustomer().getId(),
-                    customerName
+                    customerName,
+                    entity.getCustomer().getCustomerType().name(),
+                    entity.getCustomer().getCompanyName() // opcional
             ));
         }
 
-
+        // Mapeo de items
         if (entity.getItems() != null && !entity.getItems().isEmpty()) {
             dto.setItems(entity.getItems().stream()
                     .map(itemMapper::toDTO)

@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.WarehouseDTO;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.springframework.stereotype.Component;
 

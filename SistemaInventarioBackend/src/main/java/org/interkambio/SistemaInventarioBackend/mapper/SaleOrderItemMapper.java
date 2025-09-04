@@ -1,7 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.SaleOrderItemDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderItemDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrderItem;
 import org.springframework.stereotype.Component;

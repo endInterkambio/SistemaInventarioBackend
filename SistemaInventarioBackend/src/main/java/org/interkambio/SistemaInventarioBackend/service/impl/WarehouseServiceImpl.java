@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.WarehouseDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.WarehouseMapper;
 import org.interkambio.SistemaInventarioBackend.model.Warehouse;
 import org.interkambio.SistemaInventarioBackend.repository.WarehouseRepository;

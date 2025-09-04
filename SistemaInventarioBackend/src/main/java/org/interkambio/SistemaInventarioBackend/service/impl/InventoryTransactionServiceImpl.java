@@ -3,7 +3,7 @@ package org.interkambio.SistemaInventarioBackend.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.InventoryTransactionSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.InventoryTransactionMapper;
 import org.interkambio.SistemaInventarioBackend.model.*;
@@ -20,8 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor

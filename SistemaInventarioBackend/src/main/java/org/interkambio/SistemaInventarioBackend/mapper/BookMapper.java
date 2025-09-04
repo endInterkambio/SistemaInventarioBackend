@@ -1,7 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.User;

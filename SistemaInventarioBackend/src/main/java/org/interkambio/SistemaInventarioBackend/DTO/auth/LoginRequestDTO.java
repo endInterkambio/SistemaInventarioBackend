@@ -1,4 +1,4 @@
-package org.interkambio.SistemaInventarioBackend.DTO.login;
+package org.interkambio.SistemaInventarioBackend.DTO.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.RoleMapper;
 import org.interkambio.SistemaInventarioBackend.model.Role;
 import org.interkambio.SistemaInventarioBackend.repository.RoleRepository;

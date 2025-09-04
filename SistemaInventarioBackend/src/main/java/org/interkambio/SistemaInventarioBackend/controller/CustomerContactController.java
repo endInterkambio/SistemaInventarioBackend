@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
-import org.interkambio.SistemaInventarioBackend.DTO.CustomerContactDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.service.CustomerContactService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -2,7 +2,7 @@ package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookStockLocationSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exception.LocationDeleteException;
 import org.interkambio.SistemaInventarioBackend.mapper.BookStockLocationMapper;

@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
-import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.service.RoleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

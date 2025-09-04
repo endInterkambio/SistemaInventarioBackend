@@ -1,10 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.login.LoginRequestDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.login.LoginResponseDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.RoleDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.UserDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.auth.LoginRequestDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.auth.LoginResponseDTO;
 import org.interkambio.SistemaInventarioBackend.model.User;
 import org.interkambio.SistemaInventarioBackend.repository.UserRepository;
 import org.interkambio.SistemaInventarioBackend.security.JwtProvider;

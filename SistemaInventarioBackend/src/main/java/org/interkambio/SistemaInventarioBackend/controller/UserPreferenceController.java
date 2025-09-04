@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
-import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.UserPreferenceDTO;
 import org.interkambio.SistemaInventarioBackend.service.UserPreferenceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

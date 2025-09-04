@@ -1,7 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
-import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.WarehouseDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.WarehouseDTO;
 import org.interkambio.SistemaInventarioBackend.service.WarehouseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

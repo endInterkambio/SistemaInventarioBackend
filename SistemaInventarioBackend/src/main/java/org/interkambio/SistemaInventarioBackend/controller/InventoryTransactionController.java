@@ -1,7 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.InventoryTransactionSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.InventoryTransactionService;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package org.interkambio.SistemaInventarioBackend.DTO;
+package org.interkambio.SistemaInventarioBackend.DTO.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

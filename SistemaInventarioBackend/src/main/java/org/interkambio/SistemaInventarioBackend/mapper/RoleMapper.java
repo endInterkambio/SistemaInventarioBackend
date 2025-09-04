@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.RoleDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.RoleDTO;
 import org.interkambio.SistemaInventarioBackend.model.Role;
 import org.springframework.stereotype.Component;
 

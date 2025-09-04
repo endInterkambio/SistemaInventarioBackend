@@ -1,9 +1,9 @@
-package org.interkambio.SistemaInventarioBackend.DTO.login;
+package org.interkambio.SistemaInventarioBackend.DTO.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.UserDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.UserDTO;
 
 @Data
 @AllArgsConstructor

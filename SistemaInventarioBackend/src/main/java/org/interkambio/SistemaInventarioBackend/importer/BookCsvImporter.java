@@ -2,8 +2,8 @@ package org.interkambio.SistemaInventarioBackend.importer;
 
 import com.opencsv.CSVReaderHeaderAware;
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

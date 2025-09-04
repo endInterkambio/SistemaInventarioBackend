@@ -1,7 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.SaleOrderDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.SaleOrderSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.SaleOrderService;
 import org.springframework.data.domain.Page;

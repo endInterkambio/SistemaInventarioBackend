@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.UserPreferenceDTO;
 import org.interkambio.SistemaInventarioBackend.model.User;
 import org.interkambio.SistemaInventarioBackend.model.UserPreference;
 import org.springframework.beans.factory.annotation.Autowired;

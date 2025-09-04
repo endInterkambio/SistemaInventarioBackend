@@ -3,9 +3,9 @@ package org.interkambio.SistemaInventarioBackend.importer;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

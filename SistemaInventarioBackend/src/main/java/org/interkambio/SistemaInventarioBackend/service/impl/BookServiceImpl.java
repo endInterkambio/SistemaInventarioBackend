@@ -2,10 +2,10 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
 import jakarta.transaction.Transactional;
-import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.ImportResult;
-import org.interkambio.SistemaInventarioBackend.DTO.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.common.ImportResult;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exporter.BookExcelExporter;
 import org.interkambio.SistemaInventarioBackend.importer.UnifiedBookImporter;
@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 

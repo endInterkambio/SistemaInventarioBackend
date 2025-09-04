@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import org.interkambio.SistemaInventarioBackend.DTO.CustomerContactDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.CustomerContactMapper;
 import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerContact;

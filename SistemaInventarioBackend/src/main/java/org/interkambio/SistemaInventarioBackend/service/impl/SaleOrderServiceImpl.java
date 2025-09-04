@@ -1,7 +1,8 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.SaleOrderDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.SaleOrderSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.SaleOrderMapper;
 import org.interkambio.SistemaInventarioBackend.model.*;
@@ -59,12 +60,9 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
                     updates.forEach((key, value) -> {
                         switch (key) {
                             case "saleChannel" -> order.setSaleChannel((String) value);
-                            case "amount" ->
-                                    order.setAmount((value instanceof Number n) ? BigDecimal.valueOf(n.doubleValue()) : null);
-                            case "amountShipment" ->
-                                    order.setAmountShipment((value instanceof Number n) ? BigDecimal.valueOf(n.doubleValue()) : null);
-                            case "additionalFee" ->
-                                    order.setAdditionalFee((value instanceof Number n) ? BigDecimal.valueOf(n.doubleValue()) : null);
+                            case "amount" -> order.setAmount(parseBigDecimal(value));
+                            case "amountShipment" -> order.setAmountShipment(parseBigDecimal(value));
+                            case "additionalFee" -> order.setAdditionalFee(parseBigDecimal(value));
                         }
                     });
                     return mapper.toDTO(repository.save(order));
@@ -84,21 +82,25 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
     @Override
     @Transactional
     public SaleOrderDTO save(SaleOrderDTO orderDTO) {
+        // Convertimos DTO a entidad
         SaleOrder order = mapper.toEntity(orderDTO);
 
+        // Fecha de creación en UTC si no viene definida
         if (order.getCreatedAt() == null) {
-            order.setCreatedAt(OffsetDateTime.now(ZoneOffset.systemDefault()));
+            order.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         }
 
+        // Cargar el customer desde DB
         if (order.getCustomer() != null && order.getCustomer().getId() != null) {
-            order.setCustomer(
-                    customerRepository.findById(order.getCustomer().getId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Customer con id " + order.getCustomer().getId() + " no encontrado"
-                            ))
-            );
+            Customer customer = customerRepository.findById(order.getCustomer().getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Customer con id " + order.getCustomer().getId() + " no encontrado"
+                    ));
+            // Asignamos la entidad completa
+            order.setCustomer(customer);
         }
 
+        // Validación y carga de BookStockLocation en items
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             List<Long> locationIds = order.getItems().stream()
                     .map(item -> item.getBookStockLocation().getId())
@@ -112,21 +114,21 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
                 Long locId = item.getBookStockLocation().getId();
                 BookStockLocation location = locationMap.get(locId);
                 if (location == null) {
-                    throw new RuntimeException("BookStockLocation con id " + locId + " no encontrado");
+                    throw new EntityNotFoundException("BookStockLocation con id " + locId + " no encontrado");
                 }
-
                 if (location.getBook() == null) {
-                    throw new RuntimeException("BookStockLocation con id " + locId + " no tiene Book asignado");
+                    throw new IllegalStateException("BookStockLocation con id " + locId + " no tiene Book asignado");
                 }
-
                 item.setBookStockLocation(location);
                 item.setOrder(order);
             }
         }
 
+        // Guardar la orden y retornar DTO
         SaleOrder saved = repository.save(order);
         return mapper.toDTO(saved);
     }
+
 
     @Override
     @Transactional
@@ -138,6 +140,13 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
         } else {
             return false;
         }
+    }
+
+    private BigDecimal parseBigDecimal(Object value) {
+        if (value == null) return null;
+        if (value instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
+        if (value instanceof String s) return new BigDecimal(s);
+        throw new IllegalArgumentException("No se puede convertir a BigDecimal: " + value);
     }
 
     // ===================== MÉTODOS GENÉRICOS NO IMPLEMENTADOS =====================

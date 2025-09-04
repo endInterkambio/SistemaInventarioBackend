@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
-import org.interkambio.SistemaInventarioBackend.DTO.UserPreferenceDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.user.UserPreferenceDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.UserPreferenceMapper;
 import org.interkambio.SistemaInventarioBackend.model.UserPreference;
 import org.interkambio.SistemaInventarioBackend.repository.UserPreferenceRepository;

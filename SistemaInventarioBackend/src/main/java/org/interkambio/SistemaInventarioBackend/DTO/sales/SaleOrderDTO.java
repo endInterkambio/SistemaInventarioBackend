@@ -1,8 +1,9 @@
-package org.interkambio.SistemaInventarioBackend.DTO;
+package org.interkambio.SistemaInventarioBackend.DTO.sales;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -23,6 +24,6 @@ public class SaleOrderDTO {
     private BigDecimal amount;
     private BigDecimal amountShipment;
     private BigDecimal additionalFee;
-    private SimpleIdNameDTO customer;
+    private SaleOrderCustomerDTO customer;
     private List<SaleOrderItemDTO> items;
 }

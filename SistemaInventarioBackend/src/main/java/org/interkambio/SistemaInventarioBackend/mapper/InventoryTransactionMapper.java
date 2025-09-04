@@ -1,10 +1,9 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.InventoryTransactionDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.InventoryTransactionDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 

@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.importer;
 
-import org.interkambio.SistemaInventarioBackend.DTO.BookDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

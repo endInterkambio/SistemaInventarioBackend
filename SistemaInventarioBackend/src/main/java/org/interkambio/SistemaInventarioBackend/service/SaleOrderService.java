@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.service;
 
-import org.interkambio.SistemaInventarioBackend.DTO.SaleOrderDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.SaleOrderSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

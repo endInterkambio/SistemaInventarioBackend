@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
-import org.interkambio.SistemaInventarioBackend.DTO.CustomerContactDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.model.CustomerContact;
 import org.springframework.stereotype.Component;
 

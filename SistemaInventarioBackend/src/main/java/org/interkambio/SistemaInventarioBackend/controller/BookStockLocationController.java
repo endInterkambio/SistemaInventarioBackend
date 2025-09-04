@@ -1,6 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
-import org.interkambio.SistemaInventarioBackend.DTO.BookStockLocationDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.BookStockLocationSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.BookStockLocationService;
 import org.springframework.data.domain.Page;
