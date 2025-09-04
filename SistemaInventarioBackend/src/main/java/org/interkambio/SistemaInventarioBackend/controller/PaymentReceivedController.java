@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/payment-received")
 @RequiredArgsConstructor
 public class PaymentReceivedController {
 
@@ -39,10 +39,17 @@ public class PaymentReceivedController {
         return ResponseEntity.ok(service.findBySaleOrderId(orderId));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<PaymentReceivedDTO>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
+
+    @GetMapping
+    public ResponseEntity<Page<PaymentReceivedDTO>> getPaged(Pageable pageable) {
+        Page<PaymentReceivedDTO> page = service.findAll(null, pageable);
+        return ResponseEntity.ok(page);
+    }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<PaymentReceivedDTO> partialUpdate(

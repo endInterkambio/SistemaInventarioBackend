@@ -12,5 +12,4 @@ public interface PaymentReceivedService extends GenericService<PaymentReceivedDT
     List<PaymentReceivedDTO> findBySaleOrderId(Long orderId);
 
     Page<PaymentReceivedDTO> findAll(Specification<PaymentReceived> spec, Pageable pageable);
-
 }
