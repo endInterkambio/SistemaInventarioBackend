@@ -3,12 +3,10 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderCustomerDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
-import org.interkambio.SistemaInventarioBackend.model.Customer;
-import org.interkambio.SistemaInventarioBackend.model.CustomerType;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
-import org.interkambio.SistemaInventarioBackend.model.User;
+import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,6 +30,12 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         order.setAmountShipment(dto.getAmountShipment());
         order.setAdditionalFee(dto.getAdditionalFee());
         order.setStatus(dto.getStatus());
+        if (dto.getPaymentStatus() != null) {
+            order.setPaymentStatus(dto.getPaymentStatus());
+        } else {
+            order.setPaymentStatus(PaymentStatus.UNPAID);
+        }
+
 
         // Mapeo del usuario que creó la orden
         if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
@@ -77,6 +81,10 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         dto.setAmountShipment(entity.getAmountShipment());
         dto.setAdditionalFee(entity.getAdditionalFee());
         dto.setStatus(entity.getStatus());
+        dto.setPaymentStatus(entity.getPaymentStatus());
+
+        // 🔹 totalPaid (si hay pagos asociados)
+        dto.setTotalPaid(calculateTotalPaid(entity));
 
         // Mapeo del usuario que creó la orden
         if (entity.getCreatedBy() != null) {
@@ -112,4 +120,12 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
 
         return dto;
     }
+
+    private BigDecimal calculateTotalPaid(SaleOrder entity) {
+        if (entity.getPayments() == null) return BigDecimal.ZERO;
+        return entity.getPayments().stream()
+                .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 }

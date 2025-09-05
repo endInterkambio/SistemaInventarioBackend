@@ -6,6 +6,7 @@ import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.ShipmentSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.ShipmentMapper;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
+import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
 import org.interkambio.SistemaInventarioBackend.model.Shipment;
 import org.interkambio.SistemaInventarioBackend.model.ShipmentMethod;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
@@ -103,14 +104,21 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
         // Convertir DTO a entity (sin items)
         Shipment shipment = mapper.toEntity(shipmentDTO);
 
-        // Asociar SaleOrder existente
+        SaleOrder order = null;
         if (shipmentDTO.getOrderId() != null) {
-            SaleOrder order = saleOrderRepository.findById(shipmentDTO.getOrderId())
+            order = saleOrderRepository.findById(shipmentDTO.getOrderId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "SaleOrder con id " + shipmentDTO.getOrderId() + " no encontrado"
                     ));
             shipment.setOrder(order);
+
+            // Cambiar estado de la orden automáticamente
+            if (order.getStatus() == null || order.getStatus() == SaleOrderStatus.PENDING) {
+                order.setStatus(SaleOrderStatus.IN_PROGRESS);
+                saleOrderRepository.save(order);
+            }
         }
+
 
         // Asociar ShipmentMethod existente
         if (shipmentDTO.getShipmentMethod() != null && shipmentDTO.getShipmentMethod().getId() != null) {

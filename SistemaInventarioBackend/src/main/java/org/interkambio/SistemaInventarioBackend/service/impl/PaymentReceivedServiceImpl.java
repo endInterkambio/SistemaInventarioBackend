@@ -1,10 +1,16 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.PaymentReceivedDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.PaymentReceivedMapper;
 import org.interkambio.SistemaInventarioBackend.model.PaymentReceived;
+import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
+import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
+import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
 import org.interkambio.SistemaInventarioBackend.repository.PaymentReceivedRepository;
+import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
 import org.interkambio.SistemaInventarioBackend.service.PaymentReceivedService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +29,41 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
 
     private final PaymentReceivedRepository repository;
     private final PaymentReceivedMapper mapper;
+    private final SaleOrderRepository saleOrderRepository;
 
     @Override
+    @Transactional
     public PaymentReceivedDTO save(PaymentReceivedDTO dto) {
         PaymentReceived entity = mapper.toEntity(dto);
-        return mapper.toDTO(repository.save(entity));
+
+        // Validar que el SaleOrder exista
+        SaleOrder order = saleOrderRepository.findById(dto.getSaleOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("SaleOrder con id " + dto.getSaleOrderId() + " no encontrado"));
+
+        entity.setSaleOrder(order);
+
+        // Calcular total pagado actual
+        BigDecimal totalPagadoActual = repository.findBySaleOrderId(order.getId()).stream()
+                .map(PaymentReceived::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Calcular saldo pendiente considerando amount + shipment + fee
+        BigDecimal totalOrden = getOrderTotal(order);
+        BigDecimal saldoPendiente = totalOrden.subtract(totalPagadoActual);
+
+        if (dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El pago debe ser mayor a 0");
+        }
+        if (dto.getAmount().compareTo(saldoPendiente) > 0) {
+            throw new IllegalArgumentException("El pago excede el saldo pendiente de la orden");
+        }
+
+        PaymentReceived saved = repository.save(entity);
+
+        // Actualizar estado de la orden
+        UpdateOrderStatus(order);
+
+        return mapper.toDTO(saved);
     }
 
     @Override
@@ -51,21 +87,37 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
     }
 
     @Override
+    @Transactional
     public Optional<PaymentReceivedDTO> update(Long id, PaymentReceivedDTO dto) {
         return repository.findById(id).map(existing -> {
-            PaymentReceived updated = mapper.toEntity(dto);
-            updated.setId(existing.getId());
-            return mapper.toDTO(repository.save(updated));
+            SaleOrder order = existing.getSaleOrder();
+
+            existing.setPaymentDate(dto.getPaymentDate());
+            existing.setPaymentMethod(dto.getPaymentMethod());
+            existing.setAmount(dto.getAmount());
+            existing.setReferenceNumber(dto.getReferenceNumber());
+
+            PaymentReceived updated = repository.save(existing);
+
+            // Recalcular estado del pedido
+            UpdateOrderStatus(order);
+
+            return mapper.toDTO(updated);
         });
     }
 
     @Override
+    @Transactional
     public boolean delete(Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
+        return repository.findById(id).map(existing -> {
+            SaleOrder order = existing.getSaleOrder();
+            repository.delete(existing);
+
+            // Recalcular estado del pedido después de eliminar pago
+            UpdateOrderStatus(order);
+
             return true;
-        }
-        return false;
+        }).orElse(false);
     }
 
     @Override
@@ -94,5 +146,29 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
     public Page<PaymentReceivedDTO> findAll(Specification<PaymentReceived> spec, Pageable pageable) {
         return repository.findAll(spec, pageable)
                 .map(mapper::toDTO);
+    }
+
+    private void UpdateOrderStatus(SaleOrder order) {
+        BigDecimal totalPaid = repository.findBySaleOrderId(order.getId()).stream()
+                .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalOrden = getOrderTotal(order);
+
+        if (totalPaid.compareTo(BigDecimal.ZERO) == 0) {
+            order.setPaymentStatus(PaymentStatus.UNPAID);
+        } else if (totalPaid.compareTo(totalOrden) >= 0) {
+            order.setPaymentStatus(PaymentStatus.PAID);
+        } else {
+            order.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+        }
+
+        saleOrderRepository.save(order);
+    }
+
+    private BigDecimal getOrderTotal(SaleOrder order) {
+        return (order.getAmount() != null ? order.getAmount() : BigDecimal.ZERO)
+                .add(order.getAmountShipment() != null ? order.getAmountShipment() : BigDecimal.ZERO)
+                .add(order.getAdditionalFee() != null ? order.getAdditionalFee() : BigDecimal.ZERO);
     }
 }

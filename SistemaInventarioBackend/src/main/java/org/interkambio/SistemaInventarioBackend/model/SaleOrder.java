@@ -46,6 +46,10 @@ public class SaleOrder {
     @Column(name = "status", length = 20, nullable = false)
     private SaleOrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
     // Relación con Customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -54,4 +58,7 @@ public class SaleOrder {
     // Relación con items (mappedBy = "order")
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleOrderItem> items;
+
+    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PaymentReceived> payments;
 }
