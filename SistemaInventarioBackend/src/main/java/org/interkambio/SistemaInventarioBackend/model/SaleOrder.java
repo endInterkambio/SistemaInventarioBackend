@@ -61,4 +61,19 @@ public class SaleOrder {
 
     @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentReceived> payments;
+
+    // ✅ Método de dominio para calcular el total de la orden
+    public BigDecimal getTotalAmount() {
+        return (amount != null ? amount : BigDecimal.ZERO)
+                .add(amountShipment != null ? amountShipment : BigDecimal.ZERO)
+                .add(additionalFee != null ? additionalFee : BigDecimal.ZERO);
+    }
+
+    // ✅ Método de dominio para calcular el total pagado
+    public BigDecimal getTotalPaid() {
+        if (payments == null) return BigDecimal.ZERO;
+        return payments.stream()
+                .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

@@ -21,13 +21,14 @@ public interface SaleOrderRepository extends JpaRepository<SaleOrder, Long>, Jpa
     Page<Long> findAllIds(Pageable pageable);
 
     @Query("""
-           SELECT DISTINCT s FROM SaleOrder s
-           LEFT JOIN FETCH s.createdBy
-           LEFT JOIN FETCH s.customer
-           LEFT JOIN FETCH s.items i
-           LEFT JOIN FETCH i.bookStockLocation bsl
-           LEFT JOIN FETCH bsl.book
-           WHERE s.id IN :ids
-           """)
+            SELECT DISTINCT s FROM SaleOrder s
+            LEFT JOIN FETCH s.createdBy
+            LEFT JOIN FETCH s.customer c
+            LEFT JOIN FETCH s.items i
+            LEFT JOIN FETCH i.bookStockLocation bsl
+            LEFT JOIN FETCH bsl.book
+            WHERE s.id IN :ids
+            """)
     List<SaleOrder> findAllWithRelations(@Param("ids") List<Long> ids);
+
 }

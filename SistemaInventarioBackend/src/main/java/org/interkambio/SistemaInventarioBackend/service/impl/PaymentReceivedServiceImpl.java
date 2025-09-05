@@ -8,7 +8,6 @@ import org.interkambio.SistemaInventarioBackend.mapper.PaymentReceivedMapper;
 import org.interkambio.SistemaInventarioBackend.model.PaymentReceived;
 import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
 import org.interkambio.SistemaInventarioBackend.repository.PaymentReceivedRepository;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
 import org.interkambio.SistemaInventarioBackend.service.PaymentReceivedService;
@@ -36,20 +35,12 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
     public PaymentReceivedDTO save(PaymentReceivedDTO dto) {
         PaymentReceived entity = mapper.toEntity(dto);
 
-        // Validar que el SaleOrder exista
         SaleOrder order = saleOrderRepository.findById(dto.getSaleOrderId())
                 .orElseThrow(() -> new EntityNotFoundException("SaleOrder con id " + dto.getSaleOrderId() + " no encontrado"));
 
         entity.setSaleOrder(order);
 
-        // Calcular total pagado actual
-        BigDecimal totalPagadoActual = repository.findBySaleOrderId(order.getId()).stream()
-                .map(PaymentReceived::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Calcular saldo pendiente considerando amount + shipment + fee
-        BigDecimal totalOrden = getOrderTotal(order);
-        BigDecimal saldoPendiente = totalOrden.subtract(totalPagadoActual);
+        BigDecimal saldoPendiente = order.getTotalAmount().subtract(order.getTotalPaid());
 
         if (dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El pago debe ser mayor a 0");
@@ -59,9 +50,7 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         }
 
         PaymentReceived saved = repository.save(entity);
-
-        // Actualizar estado de la orden
-        UpdateOrderStatus(order);
+        updateOrderStatus(order);
 
         return mapper.toDTO(saved);
     }
@@ -98,9 +87,7 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
             existing.setReferenceNumber(dto.getReferenceNumber());
 
             PaymentReceived updated = repository.save(existing);
-
-            // Recalcular estado del pedido
-            UpdateOrderStatus(order);
+            updateOrderStatus(order);
 
             return mapper.toDTO(updated);
         });
@@ -112,10 +99,7 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         return repository.findById(id).map(existing -> {
             SaleOrder order = existing.getSaleOrder();
             repository.delete(existing);
-
-            // Recalcular estado del pedido después de eliminar pago
-            UpdateOrderStatus(order);
-
+            updateOrderStatus(order);
             return true;
         }).orElse(false);
     }
@@ -148,16 +132,17 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
                 .map(mapper::toDTO);
     }
 
-    private void UpdateOrderStatus(SaleOrder order) {
+    private void updateOrderStatus(SaleOrder order) {
+        // Calcular totalPaid desde la BD
         BigDecimal totalPaid = repository.findBySaleOrderId(order.getId()).stream()
                 .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal totalOrden = getOrderTotal(order);
+        BigDecimal totalAmount = order.getTotalAmount();
 
         if (totalPaid.compareTo(BigDecimal.ZERO) == 0) {
             order.setPaymentStatus(PaymentStatus.UNPAID);
-        } else if (totalPaid.compareTo(totalOrden) >= 0) {
+        } else if (totalPaid.compareTo(totalAmount) >= 0) {
             order.setPaymentStatus(PaymentStatus.PAID);
         } else {
             order.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
@@ -166,9 +151,4 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         saleOrderRepository.save(order);
     }
 
-    private BigDecimal getOrderTotal(SaleOrder order) {
-        return (order.getAmount() != null ? order.getAmount() : BigDecimal.ZERO)
-                .add(order.getAmountShipment() != null ? order.getAmountShipment() : BigDecimal.ZERO)
-                .add(order.getAdditionalFee() != null ? order.getAdditionalFee() : BigDecimal.ZERO);
-    }
 }

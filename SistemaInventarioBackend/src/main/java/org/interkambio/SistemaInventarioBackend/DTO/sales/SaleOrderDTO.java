@@ -27,6 +27,7 @@ public class SaleOrderDTO {
     private BigDecimal amountShipment;
     private BigDecimal additionalFee;
     private BigDecimal totalPaid; // suma de todos los PaymentReceived asociados
+    private BigDecimal totalAmount; // Subtotal + envío + fee
     private SaleOrderStatus status;
     private PaymentStatus paymentStatus;
     private SaleOrderCustomerDTO customer;

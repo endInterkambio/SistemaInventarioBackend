@@ -82,9 +82,8 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         dto.setAdditionalFee(entity.getAdditionalFee());
         dto.setStatus(entity.getStatus());
         dto.setPaymentStatus(entity.getPaymentStatus());
-
-        // 🔹 totalPaid (si hay pagos asociados)
-        dto.setTotalPaid(calculateTotalPaid(entity));
+        dto.setTotalPaid(entity.getTotalPaid());
+        dto.setTotalAmount(entity.getTotalAmount());
 
         // Mapeo del usuario que creó la orden
         if (entity.getCreatedBy() != null) {
@@ -95,21 +94,12 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         }
 
         // Mapeo del customer usando SaleOrderCustomerDTO
-        if (entity.getCustomer() != null) {
-            String customerName;
-            if (entity.getCustomer().getCustomerType() == CustomerType.PERSON) {
-                customerName = entity.getCustomer().getName();
-            } else {
-                customerName = entity.getCustomer().getCompanyName();
-            }
-
-            dto.setCustomer(new SaleOrderCustomerDTO(
-                    entity.getCustomer().getId(),
-                    customerName,
-                    entity.getCustomer().getCustomerType().name(),
-                    entity.getCustomer().getCompanyName() // opcional
-            ));
-        }
+        dto.setCustomer(new SaleOrderCustomerDTO(
+                entity.getCustomer().getId(),
+                entity.getCustomer().getCustomerType() == CustomerType.PERSON ? entity.getCustomer().getName() : null,
+                entity.getCustomer().getCustomerType() == CustomerType.COMPANY ? entity.getCustomer().getCompanyName() : null,
+                entity.getCustomer().getCustomerType() != null ? entity.getCustomer().getCustomerType().name() : null
+        ));
 
         // Mapeo de items
         if (entity.getItems() != null && !entity.getItems().isEmpty()) {
@@ -119,13 +109,6 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         }
 
         return dto;
-    }
-
-    private BigDecimal calculateTotalPaid(SaleOrder entity) {
-        if (entity.getPayments() == null) return BigDecimal.ZERO;
-        return entity.getPayments().stream()
-                .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }
