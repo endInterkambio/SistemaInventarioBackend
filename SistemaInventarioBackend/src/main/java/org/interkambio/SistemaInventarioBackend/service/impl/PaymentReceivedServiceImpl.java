@@ -8,6 +8,7 @@ import org.interkambio.SistemaInventarioBackend.mapper.PaymentReceivedMapper;
 import org.interkambio.SistemaInventarioBackend.model.PaymentReceived;
 import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
+import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
 import org.interkambio.SistemaInventarioBackend.repository.PaymentReceivedRepository;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
 import org.interkambio.SistemaInventarioBackend.service.PaymentReceivedService;
@@ -147,6 +148,19 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         } else {
             order.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
         }
+
+        // Actualizar SaleOrderStatus basado en pago y envío
+        if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            if (order.getAmountShipment() != null && order.getAmountShipment().compareTo(BigDecimal.ZERO) > 0) {
+                order.setStatus(SaleOrderStatus.SHIPPED);
+            } else {
+                order.setStatus(SaleOrderStatus.COMPLETED);
+            }
+        } else if (order.getStatus() == null || order.getStatus() == SaleOrderStatus.PENDING) {
+            order.setStatus(SaleOrderStatus.PENDING);
+        }
+
+        saleOrderRepository.save(order);
 
         saleOrderRepository.save(order);
     }
