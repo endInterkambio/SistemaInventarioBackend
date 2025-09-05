@@ -42,6 +42,10 @@ public class SaleOrder {
     @Column(name = "additional_fee")
     private BigDecimal additionalFee;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20, nullable = false)
+    private SaleOrderStatus status;
+
     // Relación con Customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)

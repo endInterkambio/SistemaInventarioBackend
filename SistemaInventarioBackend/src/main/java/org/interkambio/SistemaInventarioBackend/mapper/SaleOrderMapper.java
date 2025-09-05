@@ -31,6 +31,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         order.setAmount(dto.getAmount());
         order.setAmountShipment(dto.getAmountShipment());
         order.setAdditionalFee(dto.getAdditionalFee());
+        order.setStatus(dto.getStatus());
 
         // Mapeo del usuario que creó la orden
         if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
@@ -75,6 +76,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         dto.setAmount(entity.getAmount());
         dto.setAmountShipment(entity.getAmountShipment());
         dto.setAdditionalFee(entity.getAdditionalFee());
+        dto.setStatus(entity.getStatus());
 
         // Mapeo del usuario que creó la orden
         if (entity.getCreatedBy() != null) {

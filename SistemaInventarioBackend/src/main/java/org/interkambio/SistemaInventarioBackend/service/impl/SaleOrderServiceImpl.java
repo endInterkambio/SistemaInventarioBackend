@@ -85,6 +85,11 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
         // Convertimos DTO a entidad
         SaleOrder order = mapper.toEntity(orderDTO);
 
+        // Marcar orden como pendiente por defecto
+        if (order.getStatus() == null) {
+            order.setStatus(SaleOrderStatus.PENDING);
+        }
+
         // Fecha de creación en UTC si no viene definida
         if (order.getCreatedAt() == null) {
             order.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));

@@ -7,6 +7,7 @@ import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
 import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.Predicate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,11 @@ public class SaleOrderSpecification {
             if (criteria.getCustomerName() != null && !criteria.getCustomerName().isEmpty()) {
                 Join<SaleOrder, Customer> customerJoin = root.join("customer");
                 predicates.add(builder.like(builder.lower(customerJoin.get("name")), "%" + criteria.getCustomerName().toLowerCase() + "%"));
+            }
+
+            // 🔍 Filtrar por status de orden
+            if (criteria.getStatus() != null) {
+                predicates.add(builder.equal(root.get("status"), criteria.getStatus()));
             }
 
             return builder.and(predicates.toArray(new Predicate[0]));
