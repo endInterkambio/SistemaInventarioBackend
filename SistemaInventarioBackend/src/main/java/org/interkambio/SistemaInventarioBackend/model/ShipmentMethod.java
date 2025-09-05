@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "agency_shipments")
-
-public class AgencyShipment {
+@Table(name = "shipment_methods")
+public class ShipmentMethod {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +19,6 @@ public class AgencyShipment {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "description")
+    private String description; // OPTIONAL
 }

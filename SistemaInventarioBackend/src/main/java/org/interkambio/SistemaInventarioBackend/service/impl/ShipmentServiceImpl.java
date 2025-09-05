@@ -7,7 +7,9 @@ import org.interkambio.SistemaInventarioBackend.criteria.ShipmentSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.ShipmentMapper;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
 import org.interkambio.SistemaInventarioBackend.model.Shipment;
+import org.interkambio.SistemaInventarioBackend.model.ShipmentMethod;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
+import org.interkambio.SistemaInventarioBackend.repository.ShipmentMethodRepository;
 import org.interkambio.SistemaInventarioBackend.repository.ShipmentRepository;
 import org.interkambio.SistemaInventarioBackend.service.GenericService;
 import org.interkambio.SistemaInventarioBackend.service.ShipmentService;
@@ -32,6 +34,7 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
     private final ShipmentRepository repository;
     private final ShipmentMapper mapper;
     private final SaleOrderRepository saleOrderRepository;
+    private final ShipmentMethodRepository shipmentMethodRepository;
 
     @Override
     public Page<ShipmentDTO> findAllShipments(Pageable pageable) {
@@ -63,11 +66,26 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
                             case "address" -> shipment.setAddress((String) value);
                             case "shipmentDate" -> shipment.setShipmentDate(LocalDateTime.parse((String) value));
                             case "shippingFee" -> shipment.setShippingFee(parseBigDecimal(value));
+                            case "shipmentMethodId" -> {  // NUEVO
+                                Long methodId = parseLong(value);
+                                ShipmentMethod method = shipmentMethodRepository.findById(methodId)
+                                        .orElseThrow(() -> new EntityNotFoundException(
+                                                "ShipmentMethod con id " + methodId + " no encontrado"
+                                        ));
+                                shipment.setShipmentMethod(method);
+                            }
                         }
                     });
                     return mapper.toDTO(repository.save(shipment));
                 });
     }
+
+    private Long parseLong(Object value) {
+        if (value instanceof Number n) return n.longValue();
+        if (value instanceof String s) return Long.parseLong(s);
+        throw new IllegalArgumentException("No se puede convertir a Long: " + value);
+    }
+
 
     @Override
     public Page<ShipmentDTO> searchShipments(ShipmentSearchCriteria criteria, Pageable pageable) {
@@ -82,25 +100,34 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
     @Override
     @Transactional
     public ShipmentDTO save(ShipmentDTO shipmentDTO) {
+        // Convertir DTO a entity (sin items)
         Shipment shipment = mapper.toEntity(shipmentDTO);
 
-        // Relación con Order
-        if (shipment.getOrder() != null && shipment.getOrder().getId() != null) {
-            SaleOrder order = saleOrderRepository.findById(shipment.getOrder().getId())
+        // Asociar SaleOrder existente
+        if (shipmentDTO.getOrderId() != null) {
+            SaleOrder order = saleOrderRepository.findById(shipmentDTO.getOrderId())
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "SaleOrder con id " + shipment.getOrder().getId() + " no encontrado"
+                            "SaleOrder con id " + shipmentDTO.getOrderId() + " no encontrado"
                     ));
             shipment.setOrder(order);
         }
 
-        // Cascade: los items se asignan automáticamente al guardar Shipment
-        if (shipment.getItems() != null) {
-            shipment.getItems().forEach(item -> item.setShipment(shipment));
+        // Asociar ShipmentMethod existente
+        if (shipmentDTO.getShipmentMethod() != null && shipmentDTO.getShipmentMethod().getId() != null) {
+            ShipmentMethod method = shipmentMethodRepository.findById(shipmentDTO.getShipmentMethod().getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "ShipmentMethod con id " + shipmentDTO.getShipmentMethod().getId() + " no encontrado"
+                    ));
+            shipment.setShipmentMethod(method);
         }
 
+        // Guardar envío
         Shipment saved = repository.save(shipment);
+
+        // Mapear a DTO (los items se toman de la orden)
         return mapper.toDTO(saved);
     }
+
 
     @Override
     @Transactional
