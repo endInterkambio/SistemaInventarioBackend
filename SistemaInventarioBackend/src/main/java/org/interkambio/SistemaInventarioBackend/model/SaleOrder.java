@@ -62,6 +62,13 @@ public class SaleOrder {
     @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentReceived> payments;
 
+    @Column(name= "customer_notes")
+    private String customerNotes;
+
+    // relación 1:1 con Shipment (opcional)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Shipment shipment;
+
     // ✅ Método de dominio para calcular el total de la orden
     public BigDecimal getTotalAmount() {
         return (amount != null ? amount : BigDecimal.ZERO)

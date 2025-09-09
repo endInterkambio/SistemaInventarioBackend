@@ -2,6 +2,8 @@ package org.interkambio.SistemaInventarioBackend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentMethodDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentMethodDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.ShipmentMethodSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.criteria.ShipmentMethodSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.ShipmentMethodService;
 import org.springframework.data.domain.Page;
@@ -58,12 +60,16 @@ public class ShipmentMethodController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<Page<ShipmentMethodDTO>> search(
-            @RequestBody ShipmentMethodSearchCriteria criteria,
-            Pageable pageable
+    /*@PostMapping("/search")
+    public Page<ShipmentMethodDTO> searchShipmentMethods(
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(service.search(criteria, pageable));
-    }
+        ShipmentMethodSearchCriteria criteria = new ShipmentMethodSearchCriteria();
+        criteria.setName(name);
+
+        return service.search(criteria, page, size);
+    }*/
 
 }

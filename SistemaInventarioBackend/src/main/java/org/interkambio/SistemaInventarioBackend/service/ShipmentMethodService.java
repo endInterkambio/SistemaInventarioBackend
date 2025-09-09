@@ -6,6 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ShipmentMethodService extends GenericService<ShipmentMethodDTO, Long> {
-    Page<ShipmentMethodDTO> search(ShipmentMethodSearchCriteria criteria, Pageable pageable);
+    //Page<ShipmentMethodDTO> search(ShipmentMethodSearchCriteria criteria, int page, int size);
 
 }

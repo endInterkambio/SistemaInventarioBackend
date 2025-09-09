@@ -32,4 +32,8 @@ public class SaleOrderDTO {
     private PaymentStatus paymentStatus;
     private SaleOrderCustomerDTO customer;
     private List<SaleOrderItemDTO> items;
+    private String customerNotes;
+
+    // (null si es compra en tienda)
+    private ShipmentDTO shipment;
 }

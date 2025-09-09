@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderCustomerDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +14,11 @@ import java.util.stream.Collectors;
 public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
 
     private final SaleOrderItemMapper itemMapper;
+    private final ShipmentMapper shipmentMapper;
 
-    public SaleOrderMapper(SaleOrderItemMapper itemMapper) {
+    public SaleOrderMapper(SaleOrderItemMapper itemMapper, ShipmentMapper shipmentMapper) {
         this.itemMapper = itemMapper;
+        this.shipmentMapper = shipmentMapper;
     }
 
     @Override
@@ -35,7 +38,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         } else {
             order.setPaymentStatus(PaymentStatus.UNPAID);
         }
-
+        order.setCustomerNotes(dto.getCustomerNotes());
 
         // Mapeo del usuario que creó la orden
         if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
@@ -66,6 +69,24 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
                     .collect(Collectors.toList()));
         }
 
+        // Mapeo de shipment
+        if (dto.getShipment() != null && dto.getShipment().getId() != null) {
+            Shipment shipment = new Shipment();
+            shipment.setId(dto.getShipment().getId());
+            shipment.setShipmentDate(dto.getShipment().getShipmentDate());
+            shipment.setTrackingNumber(dto.getShipment().getTrackingNumber());
+            shipment.setAddress(dto.getShipment().getAddress());
+            shipment.setShippingFee(dto.getShipment().getShippingFee());
+
+            if (dto.getShipment().getShipmentMethod() != null) {
+                ShipmentMethod method = new ShipmentMethod();
+                method.setId(dto.getShipment().getShipmentMethod().getId());
+                shipment.setShipmentMethod(method);
+            }
+
+            order.setShipment(shipment);
+        }
+
         return order;
     }
 
@@ -84,6 +105,7 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
         dto.setPaymentStatus(entity.getPaymentStatus());
         dto.setTotalPaid(entity.getTotalPaid());
         dto.setTotalAmount(entity.getTotalAmount());
+        dto.setCustomerNotes(entity.getCustomerNotes());
 
         // Mapeo del usuario que creó la orden
         if (entity.getCreatedBy() != null) {
@@ -107,6 +129,28 @@ public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
                     .map(itemMapper::toDTO)
                     .collect(Collectors.toList()));
         }
+
+        // Mapeo del shipment (único por orden, opcional)
+        if (entity.getShipment() != null) {
+            Shipment shipment = entity.getShipment();
+            ShipmentDTO shipmentDTO = new ShipmentDTO();
+            shipmentDTO.setId(shipment.getId());
+            shipmentDTO.setShipmentDate(shipment.getShipmentDate());
+            shipmentDTO.setTrackingNumber(shipment.getTrackingNumber());
+            shipmentDTO.setAddress(shipment.getAddress());
+            shipmentDTO.setShippingFee(shipment.getShippingFee());
+
+            if (shipment.getShipmentMethod() != null) {
+                shipmentDTO.setShipmentMethod(new SimpleIdNameDTO(
+                        shipment.getShipmentMethod().getId(),
+                        shipment.getShipmentMethod().getName()
+                ));
+            }
+
+            // 👇 No mapeamos items, quedará null (para evitar redundancia)
+            dto.setShipment(shipmentDTO);
+        }
+
 
         return dto;
     }

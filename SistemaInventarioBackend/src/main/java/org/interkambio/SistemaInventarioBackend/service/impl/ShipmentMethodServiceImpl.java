@@ -84,10 +84,10 @@ public class ShipmentMethodServiceImpl implements ShipmentMethodService, Generic
         });
     }
 
-    @Override
+    /*@Override
     public Page<ShipmentMethodDTO> search(ShipmentMethodSearchCriteria criteria, Pageable pageable) {
         Specification<ShipmentMethod> spec = ShipmentMethodSpecification.withFilters(criteria);
         Page<ShipmentMethod> page = repository.findAll(spec, pageable);
         return new PageImpl<>(page.getContent().stream().map(mapper::toDTO).collect(Collectors.toList()), pageable, page.getTotalElements());
-    }
+    }*/
 }

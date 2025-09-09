@@ -1,8 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderItemDTO;
 import org.interkambio.SistemaInventarioBackend.model.Shipment;
+import org.interkambio.SistemaInventarioBackend.model.ShipmentMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -28,15 +30,10 @@ public class ShipmentMapper implements GenericMapper<Shipment, ShipmentDTO> {
         shipment.setShippingFee(dto.getShippingFee());
 
         // Asignar ShipmentMethod
-        if (dto.getShipmentMethod() != null) {
-            shipment.setShipmentMethod(methodMapper.toEntity(dto.getShipmentMethod()));
-        }
-
-        // Asignar SaleOrder si viene orderId
-        if (dto.getOrderId() != null) {
-            var order = new org.interkambio.SistemaInventarioBackend.model.SaleOrder();
-            order.setId(dto.getOrderId());
-            shipment.setOrder(order);
+        if (dto.getShipmentMethod() != null && dto.getShipmentMethod().getId() != null) {
+            ShipmentMethod shipmentMethod = new ShipmentMethod();
+            shipmentMethod.setId(dto.getShipmentMethod().getId());
+            shipment.setShipmentMethod(shipmentMethod);
         }
 
         return shipment;
@@ -53,7 +50,10 @@ public class ShipmentMapper implements GenericMapper<Shipment, ShipmentDTO> {
 
         // Mapear ShipmentMethod
         if (entity.getShipmentMethod() != null) {
-            dto.setShipmentMethod(methodMapper.toDTO(entity.getShipmentMethod()));
+            dto.setShipmentMethod(new SimpleIdNameDTO(
+                    entity.getShipmentMethod().getId(),
+                    entity.getShipmentMethod().getName()
+            ));
         }
 
         // Asignar orderId

@@ -19,8 +19,8 @@ public class Shipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     private SaleOrder order;
 
     @Column(name = "shipment_date")
