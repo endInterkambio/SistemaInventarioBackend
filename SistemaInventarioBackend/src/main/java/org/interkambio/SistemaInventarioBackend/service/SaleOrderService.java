@@ -9,7 +9,11 @@ import java.util.Optional;
 
 public interface SaleOrderService extends GenericService<SaleOrderDTO, Long> {
     Page<SaleOrderDTO> findAllOrders(Pageable pageable);
+
     Optional<SaleOrderDTO> findByOrderNumber(String orderNumber);
+
     Page<SaleOrderDTO> searchOrders(SaleOrderSearchCriteria criteria, Pageable pageable);
+
+    String getNextOrderNumber();
 }
 

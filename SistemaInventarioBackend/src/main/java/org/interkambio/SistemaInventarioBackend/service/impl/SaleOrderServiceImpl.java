@@ -12,6 +12,7 @@ import org.interkambio.SistemaInventarioBackend.service.GenericService;
 import org.interkambio.SistemaInventarioBackend.specification.SaleOrderSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,14 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
     }
 
     @Override
+    public String getNextOrderNumber() {
+        String lastOrder = repository.findLastOrderNumber(PageRequest.of(0, 1))
+                .stream().findFirst().orElse(null);
+        return generateOrderNumber(lastOrder);
+    }
+
+
+    @Override
     @Transactional
     public SaleOrderDTO save(SaleOrderDTO orderDTO) {
         // Convertimos DTO a entidad
@@ -93,6 +102,13 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
         // Fecha de creación en UTC si no viene definida
         if (order.getCreatedAt() == null) {
             order.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        }
+
+        // Generar número de orden
+        if (order.getOrderNumber() == null || order.getOrderNumber().isBlank()) {
+            String lastOrder = repository.findLastOrderNumber(PageRequest.of(0,1))
+                    .stream().findFirst().orElse(null);
+            order.setOrderNumber(generateOrderNumber(lastOrder));
         }
 
         // Cargar el customer desde DB
@@ -152,6 +168,16 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
         if (value instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
         if (value instanceof String s) return new BigDecimal(s);
         throw new IllegalArgumentException("No se puede convertir a BigDecimal: " + value);
+    }
+
+    private String generateOrderNumber(String lastOrderNumber) {
+        int next = 1;
+        if (lastOrderNumber != null && lastOrderNumber.startsWith("SO-")) {
+            try {
+                next = Integer.parseInt(lastOrderNumber.substring(3)) + 1;
+            } catch (NumberFormatException ignored) {}
+        }
+        return String.format("SO-%05d", next);
     }
 
     // ===================== MÉTODOS GENÉRICOS NO IMPLEMENTADOS =====================

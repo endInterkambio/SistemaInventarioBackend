@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.controller;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.SaleOrderSearchCriteria;
+import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
 import org.interkambio.SistemaInventarioBackend.service.SaleOrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +49,13 @@ public class SaleOrderController {
     public ResponseEntity<SaleOrderDTO> createOrder(@RequestBody SaleOrderDTO orderDTO) {
         SaleOrderDTO saved = service.save(orderDTO);
         return ResponseEntity.ok(saved);
+    }
+
+    // 🔹 Obtener el próximo número de orden
+    @GetMapping("/next-order-number")
+    public ResponseEntity<String> getNextOrderNumber() {
+        String next = service.getNextOrderNumber();
+        return ResponseEntity.ok(next);
     }
 
     // 🔹 Actualización parcial

@@ -31,4 +31,7 @@ public interface SaleOrderRepository extends JpaRepository<SaleOrder, Long>, Jpa
             """)
     List<SaleOrder> findAllWithRelations(@Param("ids") List<Long> ids);
 
+    @Query("SELECT s.orderNumber FROM SaleOrder s ORDER BY s.id DESC")
+    List<String> findLastOrderNumber(Pageable pageable);
+
 }
