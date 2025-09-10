@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderItemDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
@@ -19,7 +20,7 @@ public class SaleOrderItemMapper implements GenericMapper<SaleOrderItem, SaleOrd
 
         if (dto.getBookStockLocation() != null && dto.getBookStockLocation().getId() != null) {
             BookStockLocation bsl = new BookStockLocation();
-            bsl.setId(dto.getBookStockLocation().getId());
+            bsl.setId(dto.getBookStockLocation().getId()); // solo id, suficiente para la relación
             item.setBookStockLocation(bsl);
         }
 
@@ -35,10 +36,23 @@ public class SaleOrderItemMapper implements GenericMapper<SaleOrderItem, SaleOrd
         dto.setCustomPrice(entity.getCustomPrice());
 
         if (entity.getBookStockLocation() != null) {
-            dto.setBookStockLocation(new SimpleIdNameDTO(
-                    entity.getBookStockLocation().getId(),
-                    entity.getBookStockLocation().getBook().getTitle()
+            BookStockLocation bsl = entity.getBookStockLocation();
+
+            // Mapear solo los campos útiles
+            dto.setBookStockLocation(new BookStockLocationDTO(
+                    bsl.getId(),
+                    bsl.getBook().getId(),
+                    bsl.getBook().getSku(),
+                    new SimpleIdNameDTO(bsl.getWarehouse().getId(), bsl.getWarehouse().getName()),
+                    bsl.getBookcase(),
+                    bsl.getBookcaseFloor(),
+                    bsl.getBookCondition().name(),
+                    bsl.getLocationType().name()
             ));
+
+            if (bsl.getBook() != null) {
+                dto.setBookTitle(bsl.getBook().getTitle());
+            }
         }
 
         return dto;

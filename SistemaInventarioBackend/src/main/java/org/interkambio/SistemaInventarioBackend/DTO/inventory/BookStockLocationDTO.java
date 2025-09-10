@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.DTO.inventory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookStockLocationDTO {
     private Long id;
     private Long bookId; // relación real
@@ -22,6 +24,20 @@ public class BookStockLocationDTO {
     private String bookCondition;
     private String locationType;
     private OffsetDateTime lastUpdatedAt;
+
+    // Constructor para saleOrderItem
+    public BookStockLocationDTO(Long id, Long bookId, String bookSku,
+                                SimpleIdNameDTO warehouse, Integer bookcase, Integer bookcaseFloor,
+                                String bookCondition, String locationType) {
+        this.id = id;
+        this.bookId = bookId;
+        this.bookSku = bookSku;
+        this.warehouse = warehouse;
+        this.bookcase = bookcase;
+        this.bookcaseFloor = bookcaseFloor;
+        this.bookCondition = bookCondition;
+        this.locationType = locationType;
+    }
 }
 
 

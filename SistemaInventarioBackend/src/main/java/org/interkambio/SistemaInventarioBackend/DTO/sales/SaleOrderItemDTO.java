@@ -3,7 +3,7 @@ package org.interkambio.SistemaInventarioBackend.DTO.sales;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 
 import java.math.BigDecimal;
 
@@ -13,10 +13,8 @@ import java.math.BigDecimal;
 public class SaleOrderItemDTO {
 
     private Long id;
-
-    // Solo referencia mínima al libro/stock
-    private SimpleIdNameDTO bookStockLocation; // { id, name } o algún identificador del libro
-
+    private String bookTitle;
+    private BookStockLocationDTO bookStockLocation;
     private Integer quantity;
     private BigDecimal discount;
     private BigDecimal customPrice;
