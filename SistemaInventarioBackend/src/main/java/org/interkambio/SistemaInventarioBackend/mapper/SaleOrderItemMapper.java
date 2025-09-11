@@ -47,7 +47,8 @@ public class SaleOrderItemMapper implements GenericMapper<SaleOrderItem, SaleOrd
                     bsl.getBookcase(),
                     bsl.getBookcaseFloor(),
                     bsl.getBookCondition().name(),
-                    bsl.getLocationType().name()
+                    bsl.getLocationType().name(),
+                    bsl.getStock()
             ));
 
             if (bsl.getBook() != null) {

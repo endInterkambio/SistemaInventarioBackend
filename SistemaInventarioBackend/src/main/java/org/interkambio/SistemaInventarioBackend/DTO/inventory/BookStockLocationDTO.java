@@ -16,19 +16,19 @@ public class BookStockLocationDTO {
     private Long id;
     private Long bookId; // relación real
     private String bookSku; // compatibilidad / migración
+    private String bookCondition;
     private SimpleIdNameDTO warehouse; // en lugar de warehouseId
+    private String locationType;
     private Integer bookcase;
     private Integer bookcaseFloor;
     private Integer stock;
     private Integer lastStock; // último stock antes de la última modificación
-    private String bookCondition;
-    private String locationType;
     private OffsetDateTime lastUpdatedAt;
 
     // Constructor para saleOrderItem
     public BookStockLocationDTO(Long id, Long bookId, String bookSku,
                                 SimpleIdNameDTO warehouse, Integer bookcase, Integer bookcaseFloor,
-                                String bookCondition, String locationType) {
+                                String bookCondition, String locationType, Integer stock) {
         this.id = id;
         this.bookId = bookId;
         this.bookSku = bookSku;
@@ -37,6 +37,7 @@ public class BookStockLocationDTO {
         this.bookcaseFloor = bookcaseFloor;
         this.bookCondition = bookCondition;
         this.locationType = locationType;
+        this.stock = stock;
     }
 }
 
