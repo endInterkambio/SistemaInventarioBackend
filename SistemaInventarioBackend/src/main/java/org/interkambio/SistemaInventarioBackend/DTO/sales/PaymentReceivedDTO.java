@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 public class PaymentReceivedDTO {
     private Long id;
     private Long saleOrderId; // FK hacia el pedido
+    private String saleOrderNumber; // número legible de la orden
+    private SaleOrderCustomerDTO customer; // cliente asociado
     private LocalDateTime paymentDate;
     private String paymentMethod;
     private BigDecimal amount;
     private String referenceNumber;
 }
-
-

@@ -22,4 +22,14 @@ public class CustomerDTO {
     private String phoneNumber;
     private String address;
     private List<CustomerContactDTO> contacts;
+
+    /**
+     * Devuelve un nombre amigable según el tipo de cliente
+     */
+    public String getDisplayName() {
+        if ("COMPANY".equalsIgnoreCase(customerType) && companyName != null) {
+            return companyName;
+        }
+        return name;
+    }
 }

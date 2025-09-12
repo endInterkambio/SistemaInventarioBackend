@@ -78,9 +78,9 @@ public class PaymentReceivedController {
                 ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<Page<PaymentReceivedDTO>> search(
-            @RequestBody PaymentReceivedCriteria criteria,
+            @ModelAttribute PaymentReceivedCriteria criteria,
             Pageable pageable
     ) {
         Specification<PaymentReceived> spec = PaymentReceivedSpecification.withFilters(criteria);
