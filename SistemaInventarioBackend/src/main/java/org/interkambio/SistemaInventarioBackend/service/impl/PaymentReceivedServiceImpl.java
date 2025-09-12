@@ -5,10 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.PaymentReceivedDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.PaymentReceivedMapper;
-import org.interkambio.SistemaInventarioBackend.model.PaymentReceived;
-import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
+import org.interkambio.SistemaInventarioBackend.model.*;
+import org.interkambio.SistemaInventarioBackend.repository.BookStockLocationRepository;
+import org.interkambio.SistemaInventarioBackend.repository.InventoryTransactionRepository;
 import org.interkambio.SistemaInventarioBackend.repository.PaymentReceivedRepository;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
 import org.interkambio.SistemaInventarioBackend.service.PaymentReceivedService;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +30,8 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
     private final PaymentReceivedRepository repository;
     private final PaymentReceivedMapper mapper;
     private final SaleOrderRepository saleOrderRepository;
+    private final BookStockLocationRepository bookStockLocationRepository;
+    private final InventoryTransactionRepository inventoryTransactionRepository;
 
     @Override
     @Transactional
@@ -141,12 +143,20 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
 
         BigDecimal totalAmount = order.getTotalAmount();
 
+        PaymentStatus previousStatus = order.getPaymentStatus();
+
         if (totalPaid.compareTo(BigDecimal.ZERO) == 0) {
             order.setPaymentStatus(PaymentStatus.UNPAID);
         } else if (totalPaid.compareTo(totalAmount) >= 0) {
             order.setPaymentStatus(PaymentStatus.PAID);
         } else {
             order.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+        }
+
+        // Si pasa de UNPAID a otro estado => reservar stock
+        if (order.getPaymentStatus() != PaymentStatus.UNPAID &&
+                (previousStatus == null || previousStatus == PaymentStatus.UNPAID)) {
+            reserveStock(order);
         }
 
         // Actualizar SaleOrderStatus basado en pago y envío
@@ -161,8 +171,45 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         }
 
         saleOrderRepository.save(order);
-
-        saleOrderRepository.save(order);
     }
+
+    private void reserveStock(SaleOrder order) {
+        order.getItems().forEach(item -> {
+            BookStockLocation stockLocation = item.getBookStockLocation();
+
+            if (stockLocation == null) {
+                throw new IllegalStateException("El item no tiene ubicación de stock asociada");
+            }
+
+            int currentStock = stockLocation.getStock();
+            int requiredQty = item.getQuantity();
+
+            if (currentStock < requiredQty) {
+                throw new IllegalStateException("No hay stock suficiente para el libro "
+                        + stockLocation.getBook().getSku() +
+                        " en ubicación " + stockLocation.getId());
+            }
+
+            // Guardar último stock y actualizar
+            stockLocation.setStock(currentStock - requiredQty);
+            stockLocation.setLastUpdatedAt(OffsetDateTime.now());
+            bookStockLocationRepository.save(stockLocation);
+
+            // Registrar transacción de inventario
+            InventoryTransaction tx = new InventoryTransaction();
+            tx.setTransactionDate(OffsetDateTime.now());
+            tx.setBook(stockLocation.getBook());           // relación con Book
+            tx.setFromLocation(stockLocation);             // relación con ubicación origen
+            tx.setToLocation(null);                        // salida
+            tx.setTransactionType(TransactionType.SALE);
+            tx.setQuantity(requiredQty);
+            tx.setReason("Reserva por pago de orden #" + order.getOrderNumber());
+            tx.setUser(order.getCreatedBy());              // si createdBy es un User
+            // createdAt se setea automáticamente (columna insertable=false)
+
+            inventoryTransactionRepository.save(tx);
+        });
+    }
+
 
 }
