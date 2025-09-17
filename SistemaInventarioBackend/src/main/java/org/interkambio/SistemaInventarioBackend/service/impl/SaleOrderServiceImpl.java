@@ -10,10 +10,7 @@ import org.interkambio.SistemaInventarioBackend.repository.*;
 import org.interkambio.SistemaInventarioBackend.service.SaleOrderService;
 import org.interkambio.SistemaInventarioBackend.service.GenericService;
 import org.interkambio.SistemaInventarioBackend.specification.SaleOrderSpecification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,12 +70,36 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
     @Override
     public Page<SaleOrderDTO> searchOrders(SaleOrderSearchCriteria criteria, Pageable pageable) {
         Specification<SaleOrder> specification = SaleOrderSpecification.withFilters(criteria);
-        Page<Long> idsPage = repository.findAll(specification, pageable)
+
+        // 📌 Construir Pageable con ordenamiento dinámico
+        Pageable sortedPageable = pageable;
+        if (criteria.getSortBy() != null && !criteria.getSortBy().isEmpty()) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(criteria.getSortDirection())
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+
+            sortedPageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(direction, criteria.getSortBy())
+            );
+        }
+
+        // 📌 Primera query: solo IDs para respetar la paginación y ordenamiento
+        Page<Long> idsPage = repository.findAll(specification, sortedPageable)
                 .map(SaleOrder::getId);
+
+        // 📌 Segunda query: traer los registros con sus relaciones
         List<SaleOrder> orders = repository.findAllWithRelations(idsPage.getContent());
-        List<SaleOrderDTO> dtos = orders.stream().map(mapper::toDTO).collect(Collectors.toList());
-        return new PageImpl<>(dtos, pageable, idsPage.getTotalElements());
+
+        // 📌 Mapear a DTOs
+        List<SaleOrderDTO> dtos = orders.stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, sortedPageable, idsPage.getTotalElements());
     }
+
 
     @Override
     public String getNextOrderNumber() {

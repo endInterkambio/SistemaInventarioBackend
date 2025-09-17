@@ -14,4 +14,7 @@ public class SaleOrderSearchCriteria {
     private OffsetDateTime startDate;
     private OffsetDateTime endDate;
     private SaleOrderStatus status;
+
+    private String sortBy;
+    private String sortDirection;
 }
