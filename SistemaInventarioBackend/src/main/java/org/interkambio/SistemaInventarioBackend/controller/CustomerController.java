@@ -4,9 +4,7 @@ import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.CustomerService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,22 +38,6 @@ public class CustomerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // TODO: Listing without pagination
-    /*@GetMapping
-    public ResponseEntity<List<CustomerDTO>> findAll() {
-        return ResponseEntity.ok(service.findAll());
-    }*/
-
-    @GetMapping
-    public Page<CustomerDTO> getCustomers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy
-    ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return service.findAll(pageable);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDTO> update(@PathVariable Long id, @RequestBody CustomerDTO dto) {
         return service.update(id, dto)
@@ -76,22 +58,13 @@ public class CustomerController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/search")
-    public Page<CustomerDTO> searchCustomers(
-            @RequestParam(required = false) String name,
-            // @RequestParam(required = false) String email,
-            // @RequestParam(required = false) String phoneNumber,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    // Endpoint unificado para listado, búsqueda y filtros
+    @GetMapping
+    public ResponseEntity<Page<CustomerDTO>> getCustomers(
+            @ModelAttribute CustomerSearchCriteria criteria,
+            Pageable pageable
     ) {
-        CustomerSearchCriteria criteria = new CustomerSearchCriteria();
-        criteria.setName(name);
-        /* TODO
-        criteria.setEmail(email);
-        criteria.setPhoneNumber(phoneNumber);
-        */
-
-        return service.searchCustomers(criteria, page, size);
+        Page<CustomerDTO> page = service.searchCustomers(criteria, pageable);
+        return ResponseEntity.ok(page);
     }
-
 }

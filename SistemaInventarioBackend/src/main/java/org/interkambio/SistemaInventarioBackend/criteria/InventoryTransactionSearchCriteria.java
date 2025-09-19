@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 @Data
 public class InventoryTransactionSearchCriteria {
 
+    private String search;
+
     private String bookSku;        // Filtrar por SKU
     private Long fromLocationId;   // Ubicación de origen
     private Long toLocationId;     // Ubicación de destino

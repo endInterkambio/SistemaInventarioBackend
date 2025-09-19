@@ -1,10 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.specification;
 
+import jakarta.persistence.criteria.Predicate;
 import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +14,39 @@ public class CustomerSpecification {
         return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Buscar por nombre (PERSON) o companyName (COMPANY)
+            // 🔍 Búsqueda global
+            if (criteria.getSearch() != null && !criteria.getSearch().isBlank()) {
+                String search = "%" + criteria.getSearch().toLowerCase().trim() + "%";
+                List<Predicate> searchPredicates = new ArrayList<>();
+
+                // Campos para PERSON
+                searchPredicates.add(
+                        builder.and(
+                                builder.equal(root.get("customerType"), "PERSON"),
+                                builder.like(builder.lower(root.get("name")), search)
+                        )
+                );
+
+                // Campos para COMPANY
+                searchPredicates.add(
+                        builder.and(
+                                builder.equal(root.get("customerType"), "COMPANY"),
+                                builder.like(builder.lower(root.get("companyName")), search)
+                        )
+                );
+
+                // Otros campos comunes
+                if (root.get("email") != null) {
+                    searchPredicates.add(builder.like(builder.lower(root.get("email")), search));
+                }
+                if (root.get("phoneNumber") != null) {
+                    searchPredicates.add(builder.like(builder.lower(root.get("phoneNumber")), search));
+                }
+
+                predicates.add(builder.or(searchPredicates.toArray(new Predicate[0])));
+            }
+
+            // 🎯 Filtros individuales
             if (criteria.getName() != null && !criteria.getName().isBlank()) {
                 String pattern = "%" + criteria.getName().toLowerCase() + "%";
 
@@ -32,16 +64,17 @@ public class CustomerSpecification {
                 );
             }
 
-            /* TODO
-            // Buscar por email
             if (criteria.getEmail() != null && !criteria.getEmail().isBlank()) {
                 predicates.add(builder.like(builder.lower(root.get("email")), "%" + criteria.getEmail().toLowerCase() + "%"));
             }
 
-            // Buscar por teléfono
             if (criteria.getPhoneNumber() != null && !criteria.getPhoneNumber().isBlank()) {
                 predicates.add(builder.like(builder.lower(root.get("phoneNumber")), "%" + criteria.getPhoneNumber().toLowerCase() + "%"));
-            }*/
+            }
+
+            if (criteria.getCustomerType() != null && !criteria.getCustomerType().isBlank()) {
+                predicates.add(builder.equal(root.get("customerType"), criteria.getCustomerType()));
+            }
 
             return builder.and(predicates.toArray(new Predicate[0]));
         };

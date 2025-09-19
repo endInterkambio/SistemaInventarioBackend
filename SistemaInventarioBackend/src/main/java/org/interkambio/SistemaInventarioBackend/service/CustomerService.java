@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomerService extends GenericService<CustomerDTO, Long> {
     Page<CustomerDTO> findAll(Pageable pageable);
-    Page<CustomerDTO> searchCustomers(CustomerSearchCriteria criteria, int page, int size);
+    Page<CustomerDTO> searchCustomers(CustomerSearchCriteria criteria, Pageable pageable);
 }

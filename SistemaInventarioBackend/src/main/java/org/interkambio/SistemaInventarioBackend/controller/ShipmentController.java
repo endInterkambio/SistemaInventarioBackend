@@ -49,11 +49,17 @@ public class ShipmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ===================== ENDPOINTS PERSONALIZADOS =====================
+    // ===================== ENDPOINTS UNIFICADOS =====================
 
+    /**
+     * Endpoint unificado para listado, búsqueda y filtros
+     */
     @GetMapping
-    public ResponseEntity<Page<ShipmentDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(service.findAllShipments(pageable));
+    public ResponseEntity<Page<ShipmentDTO>> getShipments(
+            @ModelAttribute ShipmentSearchCriteria criteria,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(service.searchShipments(criteria, pageable));
     }
 
     @GetMapping("/tracking/{trackingNumber}")
@@ -63,15 +69,7 @@ public class ShipmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<Page<ShipmentDTO>> search(
-            @RequestBody ShipmentSearchCriteria criteria,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(service.searchShipments(criteria, pageable));
-    }
-
-    // ===================== MÉTODOS NO IMPLEMENTADOS EN EL SERVICE =====================
+    // ===================== MÉTODOS NO IMPLEMENTADOS =====================
 
     @PostMapping("/bulk")
     public ResponseEntity<List<ShipmentDTO>> saveAll(@RequestBody List<ShipmentDTO> dtos) {

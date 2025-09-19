@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 
 @Data
 public class SaleOrderSearchCriteria {
+    private String search;
 
     private String orderNumber;
     private String customerName;

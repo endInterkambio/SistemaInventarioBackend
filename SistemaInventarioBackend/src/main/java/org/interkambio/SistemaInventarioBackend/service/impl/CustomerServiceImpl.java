@@ -117,18 +117,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Page<CustomerDTO> searchCustomers(CustomerSearchCriteria criteria, int page, int size) {
-        // Crear PageRequest
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // Usar Specification para filtrar clientes
+    public Page<CustomerDTO> searchCustomers(CustomerSearchCriteria criteria, Pageable pageable) {
+        // Usar Specification con Pageable directamente
         Page<Customer> customerPage = repository.findAll(
                 CustomerSpecification.withFilters(criteria),
-                pageRequest
+                pageable
         );
 
         // Mapear entidades a DTO
         return customerPage.map(mapper::toDTO);
     }
-
 }

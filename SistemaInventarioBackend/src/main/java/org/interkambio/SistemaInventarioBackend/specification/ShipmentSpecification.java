@@ -14,6 +14,19 @@ public class ShipmentSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // 🔍 Búsqueda global
+            if (criteria.getSearch() != null && !criteria.getSearch().isBlank()) {
+                String search = "%" + criteria.getSearch().toLowerCase().trim() + "%";
+                List<Predicate> searchPredicates = new ArrayList<>();
+
+                searchPredicates.add(cb.like(cb.lower(root.get("trackingNumber")), search));
+                searchPredicates.add(cb.like(cb.lower(root.get("address")), search));
+
+                // Podrías incluir más campos en la búsqueda global si es necesario (ej: estado, notas, etc.)
+                predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
+            }
+
+            // 🎯 Filtros individuales
             if (criteria.getTrackingNumber() != null && !criteria.getTrackingNumber().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("trackingNumber")),
                         "%" + criteria.getTrackingNumber().toLowerCase() + "%"));

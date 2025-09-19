@@ -23,10 +23,14 @@ public class SaleOrderController {
 
     // 🔹 Listar todas las órdenes paginadas
     @GetMapping
-    public ResponseEntity<Page<SaleOrderDTO>> getAllOrders(Pageable pageable) {
-        Page<SaleOrderDTO> page = service.findAllOrders(pageable);
+    public ResponseEntity<Page<SaleOrderDTO>> getAllOrders(
+            @ModelAttribute SaleOrderSearchCriteria criteria,
+            Pageable pageable
+    ) {
+        Page<SaleOrderDTO> page = service.searchOrders(criteria, pageable);
         return ResponseEntity.ok(page);
     }
+
 
     // 🔹 Obtener orden por ID
     @GetMapping("/{id}")

@@ -4,6 +4,9 @@ import lombok.Data;
 
 @Data
 public class BookStockLocationSearchCriteria {
+
+    private String search;
+
     private String bookSku;         // filtra por SKU del libro
     private Long warehouseId;       // id del warehouse
     private Integer bookcase;       // número de estantería (bookcase)

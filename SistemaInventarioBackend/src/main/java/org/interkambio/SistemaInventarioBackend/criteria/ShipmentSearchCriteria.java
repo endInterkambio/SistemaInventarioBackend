@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class ShipmentSearchCriteria {
+
+    private String search;
+
     private String trackingNumber;
     private String address;
     private LocalDateTime shipmentDateFrom;

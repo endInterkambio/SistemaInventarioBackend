@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class PaymentReceivedCriteria {
+    private String search;
+
     private Long saleOrderId;
     private String paymentMethod;
     private LocalDateTime paymentDateFrom;

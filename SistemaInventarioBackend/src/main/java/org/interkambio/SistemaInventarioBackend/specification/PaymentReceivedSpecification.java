@@ -1,60 +1,60 @@
 package org.interkambio.SistemaInventarioBackend.specification;
 
+import jakarta.persistence.criteria.Predicate;
 import org.interkambio.SistemaInventarioBackend.criteria.PaymentReceivedCriteria;
 import org.interkambio.SistemaInventarioBackend.model.PaymentReceived;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PaymentReceivedSpecification {
 
     public static Specification<PaymentReceived> withFilters(PaymentReceivedCriteria criteria) {
         return (root, query, cb) -> {
-            var predicates = cb.conjunction();
+            List<Predicate> predicates = new ArrayList<>();
 
-            if (Objects.nonNull(criteria.getSaleOrderId())) {
-                predicates.getExpressions().add(
-                        cb.equal(root.get("saleOrder").get("id"), criteria.getSaleOrderId())
-                );
+            // 🔍 Búsqueda global
+            if (criteria.getSearch() != null && !criteria.getSearch().isBlank()) {
+                String search = "%" + criteria.getSearch().toLowerCase().trim() + "%";
+                List<Predicate> searchPredicates = new ArrayList<>();
+
+                searchPredicates.add(cb.like(cb.lower(root.get("paymentMethod")), search));
+                searchPredicates.add(cb.like(cb.lower(root.get("referenceNumber")), search));
+
+                predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
             }
 
-            if (Objects.nonNull(criteria.getPaymentMethod())) {
-                predicates.getExpressions().add(
-                        cb.like(cb.lower(root.get("paymentMethod")), "%" + criteria.getPaymentMethod().toLowerCase() + "%")
-                );
+            // 🎯 Filtros individuales
+            if (criteria.getSaleOrderId() != null) {
+                predicates.add(cb.equal(root.get("saleOrder").get("id"), criteria.getSaleOrderId()));
             }
 
-            if (Objects.nonNull(criteria.getPaymentDateFrom())) {
-                predicates.getExpressions().add(
-                        cb.greaterThanOrEqualTo(root.get("paymentDate"), criteria.getPaymentDateFrom())
-                );
+            if (criteria.getPaymentMethod() != null && !criteria.getPaymentMethod().isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("paymentMethod")), "%" + criteria.getPaymentMethod().toLowerCase() + "%"));
             }
 
-            if (Objects.nonNull(criteria.getPaymentDateTo())) {
-                predicates.getExpressions().add(
-                        cb.lessThanOrEqualTo(root.get("paymentDate"), criteria.getPaymentDateTo())
-                );
+            if (criteria.getPaymentDateFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("paymentDate"), criteria.getPaymentDateFrom()));
             }
 
-            if (Objects.nonNull(criteria.getMinAmount())) {
-                predicates.getExpressions().add(
-                        cb.greaterThanOrEqualTo(root.get("amount"), criteria.getMinAmount())
-                );
+            if (criteria.getPaymentDateTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("paymentDate"), criteria.getPaymentDateTo()));
             }
 
-            if (Objects.nonNull(criteria.getMaxAmount())) {
-                predicates.getExpressions().add(
-                        cb.lessThanOrEqualTo(root.get("amount"), criteria.getMaxAmount())
-                );
+            if (criteria.getMinAmount() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("amount"), criteria.getMinAmount()));
             }
 
-            if (Objects.nonNull(criteria.getReferenceNumber())) {
-                predicates.getExpressions().add(
-                        cb.like(cb.lower(root.get("referenceNumber")), "%" + criteria.getReferenceNumber().toLowerCase() + "%")
-                );
+            if (criteria.getMaxAmount() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("amount"), criteria.getMaxAmount()));
             }
 
-            return predicates;
+            if (criteria.getReferenceNumber() != null && !criteria.getReferenceNumber().isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("referenceNumber")), "%" + criteria.getReferenceNumber().toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }
