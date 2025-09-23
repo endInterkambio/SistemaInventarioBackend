@@ -58,7 +58,7 @@ public class ShipmentMapper implements GenericMapper<Shipment, ShipmentDTO> {
 
         // Asignar orderId
         if (entity.getOrder() != null) {
-            dto.setOrderId(entity.getOrder().getId());
+            dto.setOrder(new SimpleIdNameDTO(entity.getOrder().getId(), entity.getOrder().getOrderNumber()));
 
             // Opcional: mapear items de la orden para visualización
             if (entity.getOrder() != null && entity.getOrder().getItems() != null) {

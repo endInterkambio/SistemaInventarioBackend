@@ -7,6 +7,7 @@ import org.interkambio.SistemaInventarioBackend.service.ShipmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,10 +34,16 @@ public class ShipmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Eliminar envío por ID
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<String> deleteShipment(@PathVariable Long id) {
         boolean deleted = service.delete(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        if (deleted) {
+            return ResponseEntity.ok("Envío eliminado correctamente.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PatchMapping("/{id}")

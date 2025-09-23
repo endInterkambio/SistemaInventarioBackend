@@ -16,7 +16,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ShipmentDTO {
     private Long id;
-    private Long orderId; // referencia a la orden
+    private SimpleIdNameDTO order; // referencia a la orden
     private LocalDateTime shipmentDate;
     private String trackingNumber;
     private String address;

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ShipmentServiceImpl implements ShipmentService, GenericService<ShipmentDTO, Long> {
 
     private final ShipmentRepository repository;
@@ -58,6 +57,7 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
     }
 
     @Override
+    @Transactional
     public Optional<ShipmentDTO> partialUpdate(Long id, Map<String, Object> updates) {
         return repository.findById(id)
                 .map(shipment -> {
@@ -105,10 +105,10 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
         Shipment shipment = mapper.toEntity(shipmentDTO);
 
         SaleOrder order = null;
-        if (shipmentDTO.getOrderId() != null) {
-            order = saleOrderRepository.findById(shipmentDTO.getOrderId())
+        if (shipmentDTO.getOrder().getId() != null) {
+            order = saleOrderRepository.findById(shipmentDTO.getOrder().getId())
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "SaleOrder con id " + shipmentDTO.getOrderId() + " no encontrado"
+                            "SaleOrder con id " + shipmentDTO.getOrder().getId() + " no encontrado"
                     ));
             shipment.setOrder(order);
 
@@ -137,17 +137,27 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
     }
 
 
-    @Override
     @Transactional
+    @Override
     public boolean delete(Long id) {
-        Optional<Shipment> shipmentOpt = repository.findById(id);
-        if (shipmentOpt.isPresent()) {
-            repository.delete(shipmentOpt.get());
+        return repository.findById(id).map(shipment -> {
+            // Recuperamos la orden asociada
+            SaleOrder order = shipment.getOrder();
+            if (order != null) {
+                // Rompemos relación
+                order.setShipment(null);
+                // Devolvemos estado original
+                order.setStatus(SaleOrderStatus.PENDING); // Regresar al estado pendiente
+            }
+
+            // Borramos el envío
+            repository.delete(shipment);
+            repository.flush();
+
             return true;
-        } else {
-            return false;
-        }
+        }).orElse(false);
     }
+
 
     private BigDecimal parseBigDecimal(Object value) {
         if (value == null) return null;
