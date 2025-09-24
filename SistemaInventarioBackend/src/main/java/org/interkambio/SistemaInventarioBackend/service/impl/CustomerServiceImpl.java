@@ -9,6 +9,7 @@ import org.interkambio.SistemaInventarioBackend.model.DocumentType;
 import org.interkambio.SistemaInventarioBackend.repository.CustomerRepository;
 import org.interkambio.SistemaInventarioBackend.service.CustomerService;
 import org.interkambio.SistemaInventarioBackend.specification.CustomerSpecification;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,23 +35,58 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerDTO save(CustomerDTO dto) {
-        if (dto.getEmail() != null && repository.existsByEmail(dto.getEmail())) {
+        Customer entity = mapper.toEntity(dto);
+        entity.validateFields();
+
+        // Validar email duplicado antes de guardar
+        if (entity.getEmail() != null && repository.existsByEmail(entity.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico ya está registrado");
         }
 
-        Customer entity = mapper.toEntity(dto);
-        entity.validateFields(); // asegura coherencia antes de guardar
-        return mapper.toDTO(repository.save(entity));
+        // Manejo de contactos
+        if (entity.getCustomerType() == CustomerType.PERSON) {
+            entity.getContacts().clear();
+        } else if (entity.getContacts() != null) {
+            entity.getContacts().forEach(c -> c.setCustomer(entity));
+        }
+
+        try {
+            return mapper.toDTO(repository.save(entity));
+        } catch (DataIntegrityViolationException ex) {
+            throw handleDuplicateConstraint(ex);
+        }
     }
 
     @Override
+    @Transactional
     public List<CustomerDTO> saveAll(List<CustomerDTO> dtos) {
         List<Customer> entities = dtos.stream()
                 .map(mapper::toEntity)
-                .peek(Customer::validateFields) // valida cada entidad
+                .peek(Customer::validateFields)
                 .collect(Collectors.toList());
-        return repository.saveAll(entities).stream().map(mapper::toDTO).collect(Collectors.toList());
+
+        // Validar emails duplicados contra la BD antes de guardar
+        for (Customer customer : entities) {
+            if (customer.getEmail() != null && repository.existsByEmail(customer.getEmail())) {
+                throw new IllegalArgumentException(
+                        "El correo electrónico ya está registrado: " + customer.getEmail()
+                );
+            }
+
+            if (customer.getCustomerType() == CustomerType.PERSON) {
+                customer.getContacts().clear();
+            } else if (customer.getContacts() != null) {
+                customer.getContacts().forEach(c -> c.setCustomer(customer));
+            }
+        }
+
+        try {
+            return repository.saveAll(entities).stream().map(mapper::toDTO).collect(Collectors.toList());
+        } catch (DataIntegrityViolationException ex) {
+            throw handleDuplicateConstraint(ex);
+        }
     }
 
     @Override
@@ -81,9 +117,18 @@ public class CustomerServiceImpl implements CustomerService {
             Customer updated = mapper.toEntity(dto);
             updated.setId(existing.getId());
             updated.validateFields();
+
+            // Manejo de contactos según tipo
+            if (updated.getCustomerType() == CustomerType.PERSON) {
+                updated.getContacts().clear(); // eliminar contactos si es PERSON
+            } else if (updated.getCustomerType() == CustomerType.COMPANY && updated.getContacts() != null) {
+                updated.getContacts().forEach(c -> c.setCustomer(updated));
+            }
+
             return mapper.toDTO(repository.save(updated));
         });
     }
+
 
     @Override
     public boolean delete(Long id) {
@@ -107,6 +152,13 @@ public class CustomerServiceImpl implements CustomerService {
                         case "customerType" -> field.set(entity, CustomerType.valueOf(value.toString()));
                         case "documentType" -> field.set(entity, DocumentType.valueOf(value.toString()));
                         case "name", "companyName" -> field.set(entity, value.toString());
+                        case "email" -> {
+                            String newEmail = value.toString();
+                            if (!newEmail.equals(entity.getEmail()) && repository.existsByEmail(newEmail)) {
+                                throw new IllegalArgumentException("El correo electrónico ya está registrado");
+                            }
+                            field.set(entity, newEmail);
+                        }
                         default -> field.set(entity, value);
                     }
 
@@ -117,11 +169,14 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
 
-            // Llamada a validateFields() lanza excepción si hay incoherencia
             entity.validateFields();
 
-            Customer saved = repository.save(entity);
-            return mapper.toDTO(saved);
+            try {
+                Customer saved = repository.save(entity);
+                return mapper.toDTO(saved);
+            } catch (DataIntegrityViolationException ex) {
+                throw handleDuplicateConstraint(ex);
+            }
         });
     }
 
@@ -135,5 +190,18 @@ public class CustomerServiceImpl implements CustomerService {
 
         // Mapear entidades a DTO
         return customerPage.map(mapper::toDTO);
+    }
+
+    private RuntimeException handleDuplicateConstraint(DataIntegrityViolationException ex) {
+        String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null) {
+            if (msg.contains("customers.unique_email")) {
+                return new RuntimeException("El correo electrónico del cliente ya está registrado");
+            }
+            if (msg.contains("customers.dni")) {
+                return new RuntimeException("El número de documento ya está registrado para otro cliente");
+            }
+        }
+        return new RuntimeException("Error de integridad de datos: " + ex.getMessage());
     }
 }
