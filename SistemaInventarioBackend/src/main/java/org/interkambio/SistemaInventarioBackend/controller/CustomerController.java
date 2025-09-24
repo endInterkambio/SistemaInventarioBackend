@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.controller;
 
+import jakarta.validation.Valid;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.service.CustomerService;
@@ -22,7 +23,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> save(@RequestBody CustomerDTO dto) {
+    public ResponseEntity<CustomerDTO> save(@Valid @RequestBody CustomerDTO dto) {
         return ResponseEntity.ok(service.save(dto));
     }
 
@@ -39,7 +40,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> update(@PathVariable Long id, @RequestBody CustomerDTO dto) {
+    public ResponseEntity<CustomerDTO> update(@PathVariable Long id, @Valid @RequestBody CustomerDTO dto) {
         return service.update(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

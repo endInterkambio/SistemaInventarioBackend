@@ -38,7 +38,7 @@ public class Customer {
     @Column(name = "company_name")
     private String companyName; // solo se usa si customerType == COMPANY
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "phone_number")

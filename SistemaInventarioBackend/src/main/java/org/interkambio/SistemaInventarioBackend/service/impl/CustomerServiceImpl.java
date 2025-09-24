@@ -35,6 +35,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO save(CustomerDTO dto) {
+        if (dto.getEmail() != null && repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("El correo electrónico ya está registrado");
+        }
+
         Customer entity = mapper.toEntity(dto);
         entity.validateFields(); // asegura coherencia antes de guardar
         return mapper.toDTO(repository.save(entity));
@@ -69,9 +73,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Optional<CustomerDTO> update(Long id, CustomerDTO dto) {
         return repository.findById(id).map(existing -> {
+            if (dto.getEmail() != null && !dto.getEmail().equals(existing.getEmail())
+                    && repository.existsByEmail(dto.getEmail())) {
+                throw new IllegalArgumentException("El correo electrónico ya está registrado");
+            }
+
             Customer updated = mapper.toEntity(dto);
             updated.setId(existing.getId());
-            updated.validateFields(); // validar coherencia
+            updated.validateFields();
             return mapper.toDTO(repository.save(updated));
         });
     }

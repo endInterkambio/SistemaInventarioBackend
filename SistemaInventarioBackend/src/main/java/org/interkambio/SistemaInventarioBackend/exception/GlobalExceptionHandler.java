@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,10 +40,10 @@ public class GlobalExceptionHandler {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .map(FieldError::getDefaultMessage)
                 .collect(Collectors.toList());
 
-        String message = "Errores de validación: " + String.join(", ", errors);
+        String message = String.join(", ", errors);
 
         return new ResponseEntity<>(
                 buildResponse(HttpStatus.BAD_REQUEST, message, request),
@@ -116,6 +117,9 @@ public class GlobalExceptionHandler {
         } else if (ex.getMessage() != null && ex.getMessage().contains("fk_book_stock_locations_book_id")) {
             // Violación de clave foránea al intentar eliminar libro con ubicaciones
             message = "No se puede eliminar este libro porque tiene ubicaciones asociadas. Elimina primero las ubicaciones.";
+        } else if (ex.getMessage() != null && ex.getMessage().contains("customers.dni")) {
+            // Violación de restricción única en clientes (documento duplicado)
+            message = "Ya existe un cliente registrado con el mismo documento.";
         } else {
             // Cualquier otra violación de integridad de datos
             message = "Error de integridad de datos: " + ex.getMostSpecificCause().getMessage();
