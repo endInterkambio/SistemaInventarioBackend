@@ -25,4 +25,14 @@ public class UploadController {
 
         return ResponseEntity.ok(imageUrl);
     }
+
+    @PostMapping("/payment-proof")
+    public ResponseEntity<String> uploadPaymentProof(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("paymentId") Long paymentId,
+            @RequestParam("orderId") Long orderId) {
+
+        String proofUrl = uploadService.uploadPaymentProof(file, paymentId, orderId);
+        return ResponseEntity.ok(proofUrl);
+    }
 }
