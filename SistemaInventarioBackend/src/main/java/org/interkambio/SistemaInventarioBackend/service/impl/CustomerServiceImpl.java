@@ -1,7 +1,10 @@
 package org.interkambio.SistemaInventarioBackend.service.impl;
 
+import org.interkambio.SistemaInventarioBackend.DTO.common.ImportResult;
+import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
+import org.interkambio.SistemaInventarioBackend.exporter.CustomerExcelExporter;
 import org.interkambio.SistemaInventarioBackend.mapper.CustomerMapper;
 import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerType;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -203,5 +207,17 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         return new RuntimeException("Error de integridad de datos: " + ex.getMessage());
+    }
+
+    @Override
+    public ImportResult<CustomerDTO> importCustomersFromFile(MultipartFile file) {
+        return null;
+    }
+    
+    // TODO
+    @Override
+    public void exportCustomers(java.io.OutputStream os) throws Exception {
+        List<CustomerDTO> customers = this.findAll(Pageable.unpaged()).getContent();
+        CustomerExcelExporter.exportUnifiedExcel();
     }
 }
