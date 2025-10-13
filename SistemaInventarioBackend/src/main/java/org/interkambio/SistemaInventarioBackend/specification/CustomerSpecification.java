@@ -43,6 +43,10 @@ public class CustomerSpecification {
                     searchPredicates.add(builder.like(builder.lower(root.get("phoneNumber")), search));
                 }
 
+                if (root.get("documentNumber") != null) {
+                    searchPredicates.add(builder.like(builder.lower(root.get("documentNumber")), search));
+                }
+
                 predicates.add(builder.or(searchPredicates.toArray(new Predicate[0])));
             }
 
@@ -74,6 +78,10 @@ public class CustomerSpecification {
 
             if (criteria.getCustomerType() != null && !criteria.getCustomerType().isBlank()) {
                 predicates.add(builder.equal(root.get("customerType"), criteria.getCustomerType()));
+            }
+
+            if (criteria.getDocumentNumber() != null && !criteria.getDocumentNumber().isBlank()) {
+                predicates.add(builder.equal(root.get("documentNumber"), criteria.getDocumentNumber()));
             }
 
             return builder.and(predicates.toArray(new Predicate[0]));
