@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
+import static org.interkambio.SistemaInventarioBackend.importer.util.DataFieldParser.*;
 
 @Component
 @RequiredArgsConstructor

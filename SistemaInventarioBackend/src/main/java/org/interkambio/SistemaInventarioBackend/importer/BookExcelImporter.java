@@ -8,11 +8,11 @@ import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationD
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import static org.interkambio.SistemaInventarioBackend.importer.util.DataFieldParser.*;
 
 import java.io.InputStream;
 import java.util.*;
 
-import static org.interkambio.SistemaInventarioBackend.importer.util.BookFieldParser.*;
 
 @Component
 @RequiredArgsConstructor

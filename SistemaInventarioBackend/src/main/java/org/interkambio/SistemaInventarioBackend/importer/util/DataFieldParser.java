@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public class BookFieldParser {
+public class DataFieldParser {
 
     public static String parseString(String value) {
         return (value != null && !value.trim().isEmpty()) ? value.trim() : null;

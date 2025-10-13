@@ -5,6 +5,7 @@ import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerContactDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.CustomerDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.CustomerSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.exporter.CustomerExcelExporter;
+import org.interkambio.SistemaInventarioBackend.importer.CustomerExcelImporter;
 import org.interkambio.SistemaInventarioBackend.mapper.CustomerMapper;
 import org.interkambio.SistemaInventarioBackend.model.Customer;
 import org.interkambio.SistemaInventarioBackend.model.CustomerType;
@@ -32,10 +33,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository repository;
     private final CustomerMapper mapper;
+    private final CustomerExcelImporter customerImporter;
 
-    public CustomerServiceImpl(CustomerRepository repository, CustomerMapper mapper) {
+    public CustomerServiceImpl(CustomerRepository repository, CustomerMapper mapper, CustomerExcelImporter customerImporter) {
         this.repository = repository;
         this.mapper = mapper;
+        this.customerImporter = customerImporter;
     }
 
     @Override
@@ -211,9 +214,39 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportResult<CustomerDTO> importCustomersFromFile(MultipartFile file) {
-        return null;
+        ImportResult<CustomerDTO> result = new ImportResult<>();
+
+        try {
+            List<CustomerDTO> customers = customerImporter.parse(file);
+
+            if (customers == null || customers.isEmpty()) {
+                result.setSuccess(false);
+                result.setMessage("El archivo no contiene clientes válidos");
+                return result;
+            }
+
+            // Validar duplicados
+            for (CustomerDTO dto : customers) {
+                if (repository.existsByDocumentNumber(dto.getDocumentNumber())) {
+                    result.setSuccess(false);
+                    result.setMessage("Ya existe un cliente con el documento: " + dto.getDocumentNumber());
+                }
+            }
+
+            // Guardar en lote
+            List<CustomerDTO> savedCustomers = saveAll(customers);
+            result.setSuccess(true);
+            result.setMessage("Clientes importados correctamente");
+            result.setData(savedCustomers);
+            return result;
+
+        } catch (Exception ex) {
+            result.setSuccess(false);
+            result.setMessage("Error al importar: " + ex.getMessage());
+            return result;
+        }
     }
-    
+
     // TODO
     @Override
     public void exportCustomers(java.io.OutputStream os) throws Exception {
