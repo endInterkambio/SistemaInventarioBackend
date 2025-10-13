@@ -15,10 +15,18 @@ import java.util.Optional;
 
 public interface BookService extends GenericService<BookDTO, Long> {
     Page<BookDTO> findAllBooks(Pageable pageable);
+
     Optional<BookDTO> findBySku(String sku);
+
     Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates);
+
     Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable);
+
     ImportResult<BookDTO> importBooksFromFile(MultipartFile file) throws Exception;
+
     List<BookStockLocationDTO> getAllStockLocationsDTO();
+
     void exportBooksWithStock(OutputStream os) throws Exception;
+
+    void exportBooksWithBestStock(OutputStream os) throws Exception;
 }

@@ -107,14 +107,19 @@ public class BookController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/export")
-    public ResponseEntity<byte[]> exportBooks() throws Exception {
+    public ResponseEntity<byte[]> exportBooks(@RequestParam(defaultValue = "all") String mode) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        bookService.exportBooksWithStock(out);
+
+        if ("best-stock".equalsIgnoreCase(mode)) {
+            bookService.exportBooksWithBestStock(out);
+        } else {
+            bookService.exportBooksWithStock(out);
+        }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Books.xlsx");
-        headers.add(HttpHeaders.CONTENT_TYPE,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=" + ("best-stock".equalsIgnoreCase(mode) ? "Books_BestStock.xlsx" : "Books_AllStock.xlsx"));
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
         return ResponseEntity
                 .ok()

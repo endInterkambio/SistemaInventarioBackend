@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -281,9 +282,16 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
-    public void exportBooksWithStock(java.io.OutputStream os) throws Exception {
+    public void exportBooksWithStock(OutputStream os) throws Exception {
         List<BookDTO> books = this.findAllBooks(Pageable.unpaged()).getContent();
         List<BookStockLocationDTO> stockLocations = this.getAllStockLocationsDTO();
         BookExcelExporter.exportUnifiedExcel(books, stockLocations, os);
+    }
+
+    @Override
+    public void exportBooksWithBestStock(OutputStream os) throws Exception {
+        List<BookDTO> books = this.findAllBooks(Pageable.unpaged()).getContent();
+        List<BookStockLocationDTO> stockLocations = this.getAllStockLocationsDTO();
+        BookExcelExporter.exportHighestStockExcel(books, stockLocations, os);
     }
 }
