@@ -30,6 +30,7 @@ public class BookDTO {
     private BigDecimal purchasePrice;
     private BigDecimal sellingPrice;
     private BigDecimal fairPrice;
+    private BigDecimal offerPrice;
     private String tag;
     private String filter;
     private String productSaleType;

@@ -85,6 +85,9 @@ public class Book {
     @Column(name = "fair_price")
     private BigDecimal fairPrice;
 
+    @Column(name = "offer_price")
+    private BigDecimal offerPrice;
+
     // ========================
     // 6. Clasificación y filtros
     // ========================
