@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -31,6 +32,9 @@ public class BookDTO {
     private BigDecimal sellingPrice;
     private BigDecimal fairPrice;
     private BigDecimal offerPrice;
+    private LocalDate offerStartDate;
+    private LocalDate offerEndDate;
+    private Boolean isOfferActive;
     private String tag;
     private String filter;
     private String productSaleType;

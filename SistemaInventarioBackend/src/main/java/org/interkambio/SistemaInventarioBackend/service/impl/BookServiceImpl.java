@@ -31,6 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -164,6 +167,7 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     public Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates) {
         return bookRepository.findById(id).map(existing -> {
             BeanWrapper wrapper = new BeanWrapperImpl(existing);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             // Actualización de campos
             updates.forEach((key, value) -> {
@@ -191,6 +195,13 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
                             }
                             break;
 
+                        case "offerStartDate":
+                        case "offerEndDate":
+                            if (value instanceof String strDate && !strDate.isEmpty()) {
+                                wrapper.setPropertyValue(key, LocalDate.parse(strDate, formatter));
+                            }
+                            break;
+
                         default:
                             // Para el resto de campos, BeanWrapper usará el setter correspondiente
                             wrapper.setPropertyValue(key, value);
@@ -201,6 +212,9 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
                     );
                 }
             });
+
+            // Actualizar la fecha con la última modificación
+            existing.setUpdatedAt(OffsetDateTime.now());
 
             // Asignamos el usuario logueado como responsable de la actualización
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -221,7 +235,6 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
             return bookMapper.toDTO(saved);
         });
     }
-
 
     @Override
     public ImportResult<BookDTO> importBooksFromFile(MultipartFile file) {

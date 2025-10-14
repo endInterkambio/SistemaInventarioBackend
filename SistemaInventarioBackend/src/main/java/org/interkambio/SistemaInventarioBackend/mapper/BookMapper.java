@@ -49,6 +49,9 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         book.setSellingPrice(dto.getSellingPrice());
         book.setFairPrice(dto.getFairPrice());
         book.setOfferPrice(dto.getOfferPrice());
+        book.setOfferStartDate(dto.getOfferStartDate());
+        book.setOfferEndDate(dto.getOfferEndDate());
+        book.setIsOfferActive(dto.getIsOfferActive());
         book.setTag(dto.getTag());
         book.setFilter(dto.getFilter());
         book.setProductSaleType(dto.getProductSaleType());
@@ -110,6 +113,9 @@ public class BookMapper implements GenericMapper<Book, BookDTO> {
         dto.setSellingPrice(entity.getSellingPrice());
         dto.setFairPrice(entity.getFairPrice());
         dto.setOfferPrice(entity.getOfferPrice());
+        dto.setOfferStartDate(entity.getOfferStartDate());
+        dto.setOfferEndDate(entity.getOfferEndDate());
+        dto.setIsOfferActive(entity.getIsOfferActive());
         dto.setTag(entity.getTag());
         dto.setFilter(entity.getFilter());
         dto.setProductSaleType(entity.getProductSaleType());

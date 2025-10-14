@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +89,15 @@ public class Book {
 
     @Column(name = "offer_price")
     private BigDecimal offerPrice;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate offerStartDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate offerEndDate;
+
+    @Column(name = "is_offer_active")
+    private Boolean isOfferActive = false;
 
     // ========================
     // 6. Clasificación y filtros
