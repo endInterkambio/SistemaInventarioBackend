@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderItemDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrderItem;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,17 @@ public class SaleOrderItemMapper implements GenericMapper<SaleOrderItem, SaleOrd
         dto.setQuantity(entity.getQuantity());
         dto.setDiscount(entity.getDiscount());
         dto.setCustomPrice(entity.getCustomPrice());
+
+        // Mostrar precio de oferta dento del objeto solo si hay oferta activa
+        if (entity.getBookStockLocation() != null
+                && entity.getBookStockLocation().getBook() != null
+                && Boolean.TRUE.equals(entity.getBookStockLocation().getBook().getIsOfferActive())) {
+            dto.setOfferPrice(entity.getBookStockLocation().getBook().getOfferPrice());
+        } else {
+            dto.setOfferPrice(null);
+        }
+
+        dto.setIsOfferActive(entity.getBookStockLocation().getBook().getIsOfferActive());
 
         if (entity.getBookStockLocation() != null) {
             BookStockLocation bsl = entity.getBookStockLocation();

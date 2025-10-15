@@ -18,4 +18,6 @@ public class SaleOrderItemDTO {
     private Integer quantity;
     private BigDecimal discount;
     private BigDecimal customPrice;
+    private BigDecimal offerPrice;
+    private Boolean isOfferActive;
 }
