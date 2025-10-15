@@ -18,6 +18,8 @@ public interface BookService extends GenericService<BookDTO, Long> {
 
     Optional<BookDTO> findBySku(String sku);
 
+    Optional<BookDTO> findById(Long id);
+
     Optional<BookDTO> partialUpdate(Long id, Map<String, Object> updates);
 
     Page<BookDTO> searchBooks(BookSearchCriteria criteria, Pageable pageable);
@@ -29,4 +31,6 @@ public interface BookService extends GenericService<BookDTO, Long> {
     void exportBooksWithStock(OutputStream os) throws Exception;
 
     void exportBooksWithBestStock(OutputStream os) throws Exception;
+
+    void deactivateExpiredOffers();
 }

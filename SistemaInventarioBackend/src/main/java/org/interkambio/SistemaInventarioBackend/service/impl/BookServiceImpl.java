@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 import java.io.OutputStream;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,6 +48,7 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     private final BookStockLocationRepository stockLocationRepository;
     private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
+    private final Clock clock;
 
     public BookServiceImpl(
             BookRepository bookRepository,
@@ -53,7 +56,8 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
             UnifiedBookImporter bookImporter,
             BookStockLocationRepository stockLocationRepository,
             WarehouseRepository warehouseRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            Clock clock
     ) {
         super(bookRepository, bookMapper); // este es el constructor de GenericServiceImpl
         this.bookRepository = bookRepository;
@@ -62,6 +66,7 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         this.stockLocationRepository = stockLocationRepository;
         this.warehouseRepository = warehouseRepository;
         this.userRepository = userRepository;
+        this.clock = clock != null ? clock : Clock.systemDefaultZone();
     }
 
     @Override
@@ -70,9 +75,19 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
     }
 
     @Override
+    public Optional<BookDTO> findById(Long id) {
+        Optional<Book> bookOpt = bookRepository.findById(id);
+        bookOpt.ifPresent(this::checkAndDeactivateIfExpired);
+        return bookOpt.map(bookMapper::toDTO);
+    }
+
+    @Override
     public Optional<BookDTO> findBySku(String sku) {
         return bookRepository.findBySku(sku)
-                .map(bookMapper::toDTO);
+                .map(book -> {
+                    checkAndDeactivateIfExpired(book);
+                    return bookMapper.toDTO(book);
+                });
     }
 
     @Override
@@ -306,5 +321,37 @@ public class BookServiceImpl extends GenericServiceImpl<Book, BookDTO, Long> imp
         List<BookDTO> books = this.findAllBooks(Pageable.unpaged()).getContent();
         List<BookStockLocationDTO> stockLocations = this.getAllStockLocationsDTO();
         BookExcelExporter.exportHighestStockExcel(books, stockLocations, os);
+    }
+
+    private void checkAndDeactivateIfExpired(Book book) {
+        if (book.getIsOfferActive() && book.getOfferEndDate() != null) {
+            LocalDate today = OffsetDateTime.now(clock).toLocalDate();
+            if (book.getOfferEndDate().isBefore(today)) {
+                book.setIsOfferActive(false);
+                bookRepository.save(book);
+            }
+        }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 5 0 * * *", zone = "America/Lima")
+    public void deactivateExpiredOffersJob() {
+        int updated = bookRepository.deactiveExpiredOffers(OffsetDateTime.now(clock).toLocalDate());
+        if (updated > 0) {
+            System.out.println("✅ Ofertas vencidas desactivadas automáticamente: " + updated);
+        }
+    }
+
+    @Override
+    public void deactivateExpiredOffers() {
+        LocalDate today = OffsetDateTime.now(clock).toLocalDate();
+        List<Book> books = bookRepository.findAll();
+        for (Book book : books) {
+            if (book.getIsOfferActive() && book.getOfferEndDate() != null
+                    && book.getOfferEndDate().isBefore(today)) {
+                book.setIsOfferActive(false);
+                bookRepository.save(book);
+            }
+        }
     }
 }

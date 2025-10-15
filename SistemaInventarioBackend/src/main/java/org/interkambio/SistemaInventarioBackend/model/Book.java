@@ -2,8 +2,7 @@ package org.interkambio.SistemaInventarioBackend.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,10 +12,13 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Data
 @Entity
 @Table(name = "books")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Book {
 
     // ========================
