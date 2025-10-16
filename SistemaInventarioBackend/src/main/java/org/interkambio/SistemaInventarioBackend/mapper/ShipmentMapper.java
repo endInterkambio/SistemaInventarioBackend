@@ -2,7 +2,6 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
-import org.interkambio.SistemaInventarioBackend.DTO.sales.SaleOrderItemDTO;
 import org.interkambio.SistemaInventarioBackend.model.Shipment;
 import org.interkambio.SistemaInventarioBackend.model.ShipmentMethod;
 import org.springframework.stereotype.Component;
@@ -12,11 +11,9 @@ import java.util.stream.Collectors;
 @Component
 public class ShipmentMapper implements GenericMapper<Shipment, ShipmentDTO> {
 
-    private final ShipmentMethodMapper methodMapper;
     private final SaleOrderItemMapper saleOrderItemMapper;
 
-    public ShipmentMapper(ShipmentMethodMapper methodMapper, SaleOrderItemMapper saleOrderItemMapper) {
-        this.methodMapper = methodMapper;
+    public ShipmentMapper(SaleOrderItemMapper saleOrderItemMapper) {
         this.saleOrderItemMapper = saleOrderItemMapper;
     }
 

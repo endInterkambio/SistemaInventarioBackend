@@ -7,18 +7,15 @@ import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
 import org.interkambio.SistemaInventarioBackend.model.*;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 @Component
 public class SaleOrderMapper implements GenericMapper<SaleOrder, SaleOrderDTO> {
 
     private final SaleOrderItemMapper itemMapper;
-    private final ShipmentMapper shipmentMapper;
 
-    public SaleOrderMapper(SaleOrderItemMapper itemMapper, ShipmentMapper shipmentMapper) {
+    public SaleOrderMapper(SaleOrderItemMapper itemMapper) {
         this.itemMapper = itemMapper;
-        this.shipmentMapper = shipmentMapper;
     }
 
     @Override

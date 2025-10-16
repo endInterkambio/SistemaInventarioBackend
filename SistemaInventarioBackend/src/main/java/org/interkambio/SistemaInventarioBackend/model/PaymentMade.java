@@ -2,12 +2,14 @@ package org.interkambio.SistemaInventarioBackend.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @Table(name = "payment_mades")
 @AllArgsConstructor
 @NoArgsConstructor
