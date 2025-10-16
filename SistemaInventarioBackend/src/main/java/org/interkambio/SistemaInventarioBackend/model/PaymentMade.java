@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "payment_mades")
+@Table(name = "payment_made")
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentMade {

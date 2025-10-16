@@ -43,7 +43,9 @@ public class PaymentMadeMapper implements GenericMapper<PaymentMade, PaymentMade
         dto.setReferenceNumber(entity.getReferenceNumber());
 
         if (entity.getPurchaseOrder() != null) {
-            dto.setPurchaseOrderId(entity.getPurchaseOrder().getId());
+            PurchaseOrder po = new PurchaseOrder();
+            dto.setPurchaseOrderId(po.getId());
+            dto.setPurchaseOrderNumber(po.getPurchaseOrderNumber());
         }
 
         return dto;

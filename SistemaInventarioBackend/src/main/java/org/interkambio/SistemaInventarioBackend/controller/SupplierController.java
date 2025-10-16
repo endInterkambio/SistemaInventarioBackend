@@ -37,8 +37,11 @@ public class SupplierController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SupplierDTO>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<Page<SupplierDTO>> findAll(
+            SupplierSearchCriteria criteria,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(service.search(criteria, pageable));
     }
 
     @PutMapping("/{id}")

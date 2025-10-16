@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class PaymentMadeDTO {
     private Long id;
     private Long purchaseOrderId;
+    private String purchaseOrderNumber;
     private LocalDateTime paymentDate;
     private BigDecimal amount;
     private String referenceNumber;
