@@ -1,7 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.criteria;
 
 import lombok.Data;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
+import org.interkambio.SistemaInventarioBackend.model.OrderStatus;
 
 import java.time.OffsetDateTime;
 
@@ -14,7 +14,7 @@ public class SaleOrderSearchCriteria {
     private String saleChannel;
     private OffsetDateTime startDate;
     private OffsetDateTime endDate;
-    private SaleOrderStatus status;
+    private OrderStatus status;
 
     private String sortBy;
     private String sortDirection;

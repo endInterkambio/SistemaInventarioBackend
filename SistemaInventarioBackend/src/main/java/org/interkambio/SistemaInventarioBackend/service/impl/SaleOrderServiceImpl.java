@@ -117,7 +117,7 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
 
         // Marcar orden como pendiente por defecto
         if (order.getStatus() == null) {
-            order.setStatus(SaleOrderStatus.PENDING);
+            order.setStatus(OrderStatus.PENDING);
         }
 
         // Fecha de creación en UTC si no viene definida

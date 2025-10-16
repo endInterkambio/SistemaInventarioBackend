@@ -6,7 +6,7 @@ import org.interkambio.SistemaInventarioBackend.DTO.sales.ShipmentDTO;
 import org.interkambio.SistemaInventarioBackend.criteria.ShipmentSearchCriteria;
 import org.interkambio.SistemaInventarioBackend.mapper.ShipmentMapper;
 import org.interkambio.SistemaInventarioBackend.model.SaleOrder;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
+import org.interkambio.SistemaInventarioBackend.model.OrderStatus;
 import org.interkambio.SistemaInventarioBackend.model.Shipment;
 import org.interkambio.SistemaInventarioBackend.model.ShipmentMethod;
 import org.interkambio.SistemaInventarioBackend.repository.SaleOrderRepository;
@@ -113,8 +113,8 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
             shipment.setOrder(order);
 
             // Cambiar estado de la orden automáticamente
-            if (order.getStatus() == null || order.getStatus() == SaleOrderStatus.PENDING) {
-                order.setStatus(SaleOrderStatus.IN_PROGRESS);
+            if (order.getStatus() == null || order.getStatus() == OrderStatus.PENDING) {
+                order.setStatus(OrderStatus.IN_PROGRESS);
                 saleOrderRepository.save(order);
             }
         }
@@ -147,7 +147,7 @@ public class ShipmentServiceImpl implements ShipmentService, GenericService<Ship
                 // Rompemos relación
                 order.setShipment(null);
                 // Devolvemos estado original
-                order.setStatus(SaleOrderStatus.PENDING); // Regresar al estado pendiente
+                order.setStatus(OrderStatus.PENDING); // Regresar al estado pendiente
             }
 
             // Borramos el envío

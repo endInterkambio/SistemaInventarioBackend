@@ -44,7 +44,7 @@ public class SaleOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
-    private SaleOrderStatus status;
+    private OrderStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)

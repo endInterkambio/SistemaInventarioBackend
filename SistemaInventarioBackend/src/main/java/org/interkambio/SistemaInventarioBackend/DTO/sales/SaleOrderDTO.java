@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
-import org.interkambio.SistemaInventarioBackend.model.SaleOrderStatus;
+import org.interkambio.SistemaInventarioBackend.model.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -28,7 +28,7 @@ public class SaleOrderDTO {
     private BigDecimal additionalFee;
     private BigDecimal totalPaid; // suma de todos los PaymentReceived asociados
     private BigDecimal totalAmount; // Subtotal + envío + fee
-    private SaleOrderStatus status;
+    private OrderStatus status;
     private PaymentStatus paymentStatus;
     private SaleOrderCustomerDTO customer;
     private List<SaleOrderItemDTO> items;

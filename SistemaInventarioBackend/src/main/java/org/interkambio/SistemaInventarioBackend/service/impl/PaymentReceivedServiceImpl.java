@@ -162,12 +162,12 @@ public class PaymentReceivedServiceImpl implements PaymentReceivedService {
         // Actualizar SaleOrderStatus basado en pago y envío
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
             if (order.getAmountShipment() != null && order.getAmountShipment().compareTo(BigDecimal.ZERO) > 0) {
-                order.setStatus(SaleOrderStatus.SHIPPED);
+                order.setStatus(OrderStatus.SHIPPED);
             } else {
-                order.setStatus(SaleOrderStatus.COMPLETED);
+                order.setStatus(OrderStatus.COMPLETED);
             }
-        } else if (order.getStatus() == null || order.getStatus() == SaleOrderStatus.PENDING) {
-            order.setStatus(SaleOrderStatus.PENDING);
+        } else if (order.getStatus() == null || order.getStatus() == OrderStatus.PENDING) {
+            order.setStatus(OrderStatus.PENDING);
         }
 
         saleOrderRepository.save(order);

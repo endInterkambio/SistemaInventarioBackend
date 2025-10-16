@@ -28,5 +28,8 @@ public class Supplier {
     private String email;
 
     @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "address")
     private String address;
 }
