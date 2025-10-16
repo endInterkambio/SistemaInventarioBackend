@@ -61,6 +61,7 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
                             case "amount" -> order.setAmount(parseBigDecimal(value));
                             case "amountShipment" -> order.setAmountShipment(parseBigDecimal(value));
                             case "additionalFee" -> order.setAdditionalFee(parseBigDecimal(value));
+                            case "status" -> order.setStatus(OrderStatus.valueOf(value.toString()));
                         }
                     });
                     return mapper.toDTO(repository.save(order));
@@ -71,7 +72,7 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
     public Page<SaleOrderDTO> searchOrders(SaleOrderSearchCriteria criteria, Pageable pageable) {
         Specification<SaleOrder> specification = SaleOrderSpecification.withFilters(criteria);
 
-        // 📌 Construir Pageable con ordenamiento dinámico
+        // Construir Pageable con ordenamiento dinámico
         Pageable sortedPageable = pageable;
         if (criteria.getSortBy() != null && !criteria.getSortBy().isEmpty()) {
             Sort.Direction direction = "desc".equalsIgnoreCase(criteria.getSortDirection())
@@ -85,14 +86,14 @@ public class SaleOrderServiceImpl implements SaleOrderService, GenericService<Sa
             );
         }
 
-        // 📌 Primera query: solo IDs para respetar la paginación y ordenamiento
+        // Primera query: solo IDs para respetar la paginación y ordenamiento
         Page<Long> idsPage = repository.findAll(specification, sortedPageable)
                 .map(SaleOrder::getId);
 
-        // 📌 Segunda query: traer los registros con sus relaciones
+        // Segunda query: traer los registros con sus relaciones
         List<SaleOrder> orders = repository.findAllWithRelations(idsPage.getContent());
 
-        // 📌 Mapear a DTOs
+        // Mapear a DTOs
         List<SaleOrderDTO> dtos = orders.stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());

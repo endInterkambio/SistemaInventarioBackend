@@ -1,6 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.service;
 
 import org.interkambio.SistemaInventarioBackend.DTO.purchase.PurchaseOrderDTO;
+import org.interkambio.SistemaInventarioBackend.criteria.PurchaseOrderSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,8 +12,7 @@ public interface PurchaseOrderService extends GenericService<PurchaseOrderDTO, L
 
     Optional<PurchaseOrderDTO> findByPurchaseOrderNumber(String purchaseOrderNumber);
 
-    // TODO: Criterio de búsqueda
-    // Page<PurchaseOrderDTO> searchPurchaseOrders(PurchaseOrderSearchCriteria criteria, Pageable pageable);
+    Page<PurchaseOrderDTO> searchPurchaseOrders(PurchaseOrderSearchCriteria criteria, Pageable pageable);
 
     String getNextOrderNumber();
 }
