@@ -1,4 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.service;
 
-public interface SupplierService {
+import org.interkambio.SistemaInventarioBackend.DTO.purchase.SupplierDTO;
+
+public interface SupplierService extends GenericService<SupplierDTO, Long> {
+
 }
