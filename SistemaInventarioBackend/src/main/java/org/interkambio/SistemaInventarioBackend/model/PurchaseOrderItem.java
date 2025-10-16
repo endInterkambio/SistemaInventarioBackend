@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Entity
 @Table(name = "purchase_order_items")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +29,6 @@ public class PurchaseOrderItem {
     @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(name = "customer_price")
+    @Column(name = "custom_price")
     private BigDecimal customPrice;
 }

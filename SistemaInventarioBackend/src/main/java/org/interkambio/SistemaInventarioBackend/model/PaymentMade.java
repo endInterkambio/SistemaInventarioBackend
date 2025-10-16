@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
 @Table(name = "payment_mades")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +18,7 @@ public class PaymentMade {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "purchase_order_id")
     private  PurchaseOrder purchaseOrder;
 
     @Column(name = "payment_date")

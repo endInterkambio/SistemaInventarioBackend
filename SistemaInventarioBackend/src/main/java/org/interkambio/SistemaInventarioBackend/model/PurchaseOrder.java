@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
+@Entity
 @Table(name = "purchase_orders")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,6 +17,9 @@ public class PurchaseOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "purchase_order_number", unique = true, nullable = false, length = 20)
+    private String purchaseOrderNumber; // Ejemplo: PO-00001
 
     @Column(name= "purchase_date")
     private LocalDateTime purchaseDate;
