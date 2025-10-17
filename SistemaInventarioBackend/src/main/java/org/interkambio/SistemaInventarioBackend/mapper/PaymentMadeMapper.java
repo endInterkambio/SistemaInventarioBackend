@@ -1,5 +1,6 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.purchase.PaymentMadeDTO;
 import org.interkambio.SistemaInventarioBackend.model.PaymentMade;
 import org.interkambio.SistemaInventarioBackend.model.PurchaseOrder;
@@ -38,6 +39,14 @@ public class PaymentMadeMapper implements GenericMapper<PaymentMade, PaymentMade
             PurchaseOrder po = entity.getPurchaseOrder();
             dto.setPurchaseOrderId(po.getId());
             dto.setPurchaseOrderNumber(po.getPurchaseOrderNumber());
+
+            // Obtener proveedor para referencia
+            if (po.getSupplier() != null) {
+                dto.setSupplier(new SimpleIdNameDTO(
+                        po.getSupplier().getId(),
+                        po.getSupplier().getName()
+                ));
+            }
         }
 
         return dto;

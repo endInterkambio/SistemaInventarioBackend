@@ -24,7 +24,7 @@ public class PurchaseOrder {
     @Column(name = "purchase_order_number", unique = true, nullable = false, length = 20)
     private String purchaseOrderNumber; // Ejemplo: PO-00001
 
-    @Column(name= "purchase_date")
+    @Column(name = "purchase_date")
     private LocalDateTime purchaseDate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -59,7 +59,7 @@ public class PurchaseOrder {
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     // Relación con items (mappedBy = "order")
-    @OneToMany(mappedBy = "order", orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseOrderItem> items;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
