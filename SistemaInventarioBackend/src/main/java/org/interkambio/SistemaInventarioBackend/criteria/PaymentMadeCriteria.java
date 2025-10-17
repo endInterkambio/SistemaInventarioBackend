@@ -11,6 +11,7 @@ public class PaymentMadeCriteria {
 
     private Long purchaseOrderId;
     private String purchaseOrderNumber;
+    private String paymentMethod;
     private LocalDateTime paymentDateFrom;
     private LocalDateTime paymentDateTo;
     private String supplierName;

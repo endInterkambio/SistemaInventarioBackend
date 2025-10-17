@@ -47,6 +47,10 @@ public class PaymentMadeSpecification {
                 ));
             }
 
+            if (criteria.getPaymentMethod() != null && !criteria.getPaymentMethod().isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("paymentMethod")), "%" + criteria.getPaymentMethod().toLowerCase() + "%"));
+            }
+
             if (criteria.getPaymentDateFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("paymentDate"), criteria.getPaymentDateFrom()));
             }
