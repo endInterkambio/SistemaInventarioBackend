@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,6 +46,11 @@ public class PurchaseOrderController {
     public ResponseEntity<PurchaseOrderDTO> createOrder(@RequestBody PurchaseOrderDTO dto) {
         PurchaseOrderDTO saved = service.save(dto);
         return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<List<PurchaseOrderDTO>> createBulk(@RequestBody List<PurchaseOrderDTO> dtos) {
+        return ResponseEntity.ok(service.saveAll(dtos));
     }
 
     @GetMapping("/next-order-number")

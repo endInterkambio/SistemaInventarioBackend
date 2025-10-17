@@ -35,17 +35,19 @@ public class PurchaseOrderMapper implements GenericMapper<PurchaseOrder, Purchas
         order.setDeliveryDate(dto.getDeliveryDate());
 
         // Mapeo de usuario creador
-        if (dto.getCreatedById() != null && dto.getCreatedById().getId() != null) {
+        if (dto.getCreatedBy() != null && dto.getCreatedBy().getId() != null) {
             User user = new User();
-            user.setId(dto.getCreatedById().getId());
+            user.setId(dto.getCreatedBy().getId());
             order.setCreatedBy(user);
         }
 
         // Mapeo de proveedor
-        if (dto.getSupplierId() != null) {
+        if (dto.getSupplier() != null && dto.getSupplier().getId() != null) {
             Supplier supplier = new Supplier();
-            supplier.setId(dto.getSupplierId());
+            supplier.setId(dto.getSupplier().getId());
             order.setSupplier(supplier);
+        } else {
+            order.setSupplier(null);
         }
 
         // Mapeo de ítems
@@ -82,7 +84,7 @@ public class PurchaseOrderMapper implements GenericMapper<PurchaseOrder, Purchas
 
         // Mapeo de usuario creador
         if (entity.getCreatedBy() != null) {
-            dto.setCreatedById(new SimpleIdNameDTO(
+            dto.setCreatedBy(new SimpleIdNameDTO(
                     entity.getCreatedBy().getId(),
                     entity.getCreatedBy().getUsername()
             ));
@@ -90,9 +92,14 @@ public class PurchaseOrderMapper implements GenericMapper<PurchaseOrder, Purchas
 
         // Mapeo de proveedor
         if (entity.getSupplier() != null) {
-            dto.setSupplierId(entity.getSupplier().getId());
-            dto.setSupplierName(entity.getSupplier().getName());
+            dto.setSupplier(new SimpleIdNameDTO(
+                    entity.getSupplier().getId(),
+                    entity.getSupplier().getName()
+            ));
+        } else {
+            dto.setSupplier(null);
         }
+
 
         // Mapeo de ítems
         if (entity.getItems() != null && !entity.getItems().isEmpty()) {

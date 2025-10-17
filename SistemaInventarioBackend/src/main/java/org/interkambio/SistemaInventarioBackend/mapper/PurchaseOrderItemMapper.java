@@ -1,5 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.mapper;
 
+import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.purchase.PurchaseOrderItemDTO;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.PurchaseOrderItem;
@@ -19,9 +21,9 @@ public class PurchaseOrderItemMapper implements GenericMapper<PurchaseOrderItem,
         item.setCustomPrice(dto.getCustomPrice());
 
         // Relación con BookStockLocation
-        if (dto.getBookStockLocation() != null) {
+        if (dto.getBookStockLocation() != null && dto.getBookStockLocation().getId() != null) {
             BookStockLocation bsl = new BookStockLocation();
-            bsl.setId(dto.getBookStockLocation());
+            bsl.setId(dto.getBookStockLocation().getId());
             item.setBookStockLocation(bsl);
         }
 
@@ -39,23 +41,35 @@ public class PurchaseOrderItemMapper implements GenericMapper<PurchaseOrderItem,
         dto.setDiscount(entity.getDiscount());
         dto.setCustomPrice(entity.getCustomPrice());
 
-        // Relación BookStockLocation → DTO
+        // Mostrar precio de oferta dento del objeto solo si hay oferta activa
+        if (entity.getBookStockLocation() != null
+                && entity.getBookStockLocation().getBook() != null
+                && Boolean.TRUE.equals(entity.getBookStockLocation().getBook().getIsOfferActive())) {
+            dto.setOfferPrice(entity.getBookStockLocation().getBook().getOfferPrice());
+        } else {
+            dto.setOfferPrice(null);
+        }
+
+        dto.setIsOfferActive(entity.getBookStockLocation().getBook().getIsOfferActive());
+
         if (entity.getBookStockLocation() != null) {
             BookStockLocation bsl = entity.getBookStockLocation();
-            dto.setBookStockLocation(bsl.getId());
 
-            // Mapeo adicional del libro
+            // Mapear solo los campos útiles
+            dto.setBookStockLocation(new BookStockLocationDTO(
+                    bsl.getId(),
+                    bsl.getBook().getId(),
+                    bsl.getBook().getSku(),
+                    new SimpleIdNameDTO(bsl.getWarehouse().getId(), bsl.getWarehouse().getName()),
+                    bsl.getBookcase(),
+                    bsl.getBookcaseFloor(),
+                    bsl.getBookCondition().name(),
+                    bsl.getLocationType().name(),
+                    bsl.getStock()
+            ));
+
             if (bsl.getBook() != null) {
                 dto.setBookTitle(bsl.getBook().getTitle());
-
-                // Precio de oferta (si aplica)
-                if (Boolean.TRUE.equals(bsl.getBook().getIsOfferActive())) {
-                    dto.setOfferPrice(bsl.getBook().getOfferPrice());
-                } else {
-                    dto.setOfferPrice(null);
-                }
-
-                dto.setIsOfferActive(bsl.getBook().getIsOfferActive());
             }
         }
 

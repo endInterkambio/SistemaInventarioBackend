@@ -23,13 +23,11 @@ public class PurchaseOrderDTO {
 
     private LocalDateTime purchaseDate;
 
-    private Long supplierId; // Relación con Supplier
-
-    private String supplierName; // Campo adicional para mostrar nombre del proveedor
+    private SimpleIdNameDTO supplier;
 
     private LocalDateTime createdAt;
 
-    private SimpleIdNameDTO createdById;
+    private SimpleIdNameDTO createdBy;
 
     private String purchaseChannel;
 

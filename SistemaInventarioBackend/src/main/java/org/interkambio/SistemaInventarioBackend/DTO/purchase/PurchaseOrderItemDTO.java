@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.DTO.purchase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ public class PurchaseOrderItemDTO {
 
     private Long id;
     private String bookTitle;
-    private Long bookStockLocation;
+    private BookStockLocationDTO bookStockLocation;
     private Integer quantity;
     private BigDecimal discount;
     private BigDecimal customPrice;

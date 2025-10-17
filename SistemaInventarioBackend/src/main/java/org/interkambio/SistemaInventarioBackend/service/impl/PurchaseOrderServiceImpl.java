@@ -101,6 +101,11 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService, GenericSe
     public PurchaseOrderDTO save(PurchaseOrderDTO dto) {
         PurchaseOrder order = mapper.toEntity(dto);
 
+        // No permitir crear ordenes sin items
+        if (order.getItems() == null || order.getItems().isEmpty()) {
+            throw new IllegalArgumentException("No se puede crear una orden de compra sin ítems asociados");
+        }
+
         if (order.getStatus() == null) {
             order.setStatus(OrderStatus.PENDING);
         }
@@ -110,7 +115,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService, GenericSe
         }
 
         if (order.getPurchaseOrderNumber() == null || order.getPurchaseOrderNumber().isBlank()) {
-            String lastOrder = repository.findLastOrderNumber(PageRequest.of(0,1))
+            String lastOrder = repository.findLastOrderNumber(PageRequest.of(0, 1))
                     .stream().findFirst().orElse(null);
             order.setPurchaseOrderNumber(generateOrderNumber(lastOrder));
         }
@@ -150,6 +155,69 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService, GenericSe
 
     @Override
     @Transactional
+    public List<PurchaseOrderDTO> saveAll(List<PurchaseOrderDTO> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String nextOrderNumber = getNextOrderNumber();
+
+        // Extrae el número base
+        int nextNumber = Integer.parseInt(nextOrderNumber.substring(3));
+
+        List<PurchaseOrder> orders = new ArrayList<>();
+
+        for (PurchaseOrderDTO dto : dtos) {
+            PurchaseOrder order = mapper.toEntity(dto);
+
+            if (order.getItems() == null || order.getItems().isEmpty()) {
+                throw new IllegalArgumentException("Cada orden debe tener al menos un ítem asociado");
+            }
+
+            if (order.getStatus() == null) order.setStatus(OrderStatus.PENDING);
+            if (order.getCreatedAt() == null) order.setCreatedAt(LocalDateTime.now());
+
+            // Generar número de orden único secuencial
+            if (order.getPurchaseOrderNumber() == null || order.getPurchaseOrderNumber().isBlank()) {
+                order.setPurchaseOrderNumber(String.format("PO-%05d", nextNumber++));
+            }
+
+            if (order.getSupplier() != null && order.getSupplier().getId() != null) {
+                Supplier supplier = supplierRepository.findById(order.getSupplier().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier con id " + order.getSupplier().getId() + " no encontrado"));
+                order.setSupplier(supplier);
+            }
+
+            if (order.getItems() != null && !order.getItems().isEmpty()) {
+                List<Long> locationIds = order.getItems().stream()
+                        .map(item -> item.getBookStockLocation().getId())
+                        .collect(Collectors.toList());
+
+                List<BookStockLocation> locations = bookStockLocationRepository.findAllById(locationIds);
+                Map<Long, BookStockLocation> locationMap = locations.stream()
+                        .collect(Collectors.toMap(BookStockLocation::getId, loc -> loc));
+
+                for (var item : order.getItems()) {
+                    Long locId = item.getBookStockLocation().getId();
+                    BookStockLocation location = locationMap.get(locId);
+                    if (location == null)
+                        throw new EntityNotFoundException("BookStockLocation con id " + locId + " no encontrado");
+                    if (location.getBook() == null)
+                        throw new IllegalStateException("BookStockLocation con id " + locId + " no tiene Book asignado");
+                    item.setBookStockLocation(location);
+                    item.setOrder(order);
+                }
+            }
+
+            orders.add(order);
+        }
+
+        List<PurchaseOrder> saved = repository.saveAll(orders);
+        return saved.stream().map(mapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public boolean delete(Long id) {
         Optional<PurchaseOrder> orderOpt = repository.findById(id);
         if (orderOpt.isPresent()) {
@@ -177,16 +245,13 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService, GenericSe
         return String.format("PO-%05d", next);
     }
 
+
+
     // ===================== MÉTODOS GENÉRICOS NO IMPLEMENTADOS =====================
 
     @Override
     public List<PurchaseOrderDTO> findAll() {
         throw new UnsupportedOperationException("findAll no implementado para PurchaseOrder");
-    }
-
-    @Override
-    public List<PurchaseOrderDTO> saveAll(List<PurchaseOrderDTO> dtos) {
-        throw new UnsupportedOperationException("saveAll no implementado para PurchaseOrder");
     }
 
     @Override
