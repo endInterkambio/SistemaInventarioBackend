@@ -1,5 +1,7 @@
 package org.interkambio.SistemaInventarioBackend.DTO.purchase;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +17,19 @@ public class PurchaseOrderItemDTO {
 
     private Long id;
     private String bookTitle;
-    private BookStockLocationDTO bookStockLocation;
     private Integer quantity;
     private BigDecimal discount;
     private BigDecimal customPrice;
-    private BigDecimal offerPrice;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Long bookId;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String bookSku;
+
+    private BookStockLocationDTO bookStockLocation;
     private Boolean isOfferActive;
+    private BigDecimal offerPrice;
 }

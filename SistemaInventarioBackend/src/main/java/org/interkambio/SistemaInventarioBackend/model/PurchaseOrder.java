@@ -59,7 +59,7 @@ public class PurchaseOrder {
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     // Relación con items (mappedBy = "order")
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", orphanRemoval = true)
     private List<PurchaseOrderItem> items;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)

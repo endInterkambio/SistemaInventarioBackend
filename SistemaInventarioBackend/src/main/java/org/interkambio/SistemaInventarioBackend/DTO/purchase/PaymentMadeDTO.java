@@ -18,4 +18,5 @@ public class PaymentMadeDTO {
     private LocalDateTime paymentDate;
     private BigDecimal amount;
     private String referenceNumber;
+    private String paymentMethod;
 }

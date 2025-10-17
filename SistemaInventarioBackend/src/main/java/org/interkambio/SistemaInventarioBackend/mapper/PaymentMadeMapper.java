@@ -10,40 +10,32 @@ public class PaymentMadeMapper implements GenericMapper<PaymentMade, PaymentMade
 
     @Override
     public PaymentMade toEntity(PaymentMadeDTO dto) {
-        if (dto == null) {
-            return null;
-        }
+        if (dto == null) return null;
 
         PaymentMade entity = new PaymentMade();
         entity.setId(dto.getId());
         entity.setPaymentDate(dto.getPaymentDate());
         entity.setAmount(dto.getAmount());
         entity.setReferenceNumber(dto.getReferenceNumber());
+        entity.setPaymentMethod(dto.getPaymentMethod());
 
-        // Relación con PurchaseOrder: solo asignamos el ID
-        if (dto.getPurchaseOrderId() != null) {
-            PurchaseOrder order = new PurchaseOrder();
-            order.setId(dto.getPurchaseOrderId());
-            entity.setPurchaseOrder(order);
-        }
-
+        // No asignamos purchaseOrder aquí, lo hará el service
         return entity;
     }
 
     @Override
     public PaymentMadeDTO toDTO(PaymentMade entity) {
-        if (entity == null) {
-            return null;
-        }
+        if (entity == null) return null;
 
         PaymentMadeDTO dto = new PaymentMadeDTO();
         dto.setId(entity.getId());
         dto.setPaymentDate(entity.getPaymentDate());
         dto.setAmount(entity.getAmount());
         dto.setReferenceNumber(entity.getReferenceNumber());
+        dto.setPaymentMethod(entity.getPaymentMethod());
 
         if (entity.getPurchaseOrder() != null) {
-            PurchaseOrder po = new PurchaseOrder();
+            PurchaseOrder po = entity.getPurchaseOrder();
             dto.setPurchaseOrderId(po.getId());
             dto.setPurchaseOrderNumber(po.getPurchaseOrderNumber());
         }
@@ -51,3 +43,4 @@ public class PaymentMadeMapper implements GenericMapper<PaymentMade, PaymentMade
         return dto;
     }
 }
+

@@ -37,8 +37,16 @@ public interface BookStockLocationRepository extends
     /**
      * Recargar una ubicación por ID con warehouse y book
      */
-    @EntityGraph(attributePaths = { "warehouse", "book" })
+    @EntityGraph(attributePaths = {"warehouse", "book"})
     Optional<BookStockLocation> findById(Long id);
+
+    Optional<BookStockLocation> findByBookIdAndWarehouseIdAndLocationTypeAndBookConditionAndBookcaseIsNullAndBookcaseFloorIsNull(
+            Long bookId,
+            Long warehouseId,
+            LocationType locationType,
+            BookCondition bookCondition
+    );
+
 
     boolean existsByBookIdAndWarehouseIdAndLocationTypeAndIdNot(
             Long bookId,
@@ -61,7 +69,6 @@ public interface BookStockLocationRepository extends
             Long warehouseId,
             LocationType locationType
     );
-
 
 
 }

@@ -3,6 +3,7 @@ package org.interkambio.SistemaInventarioBackend.mapper;
 import org.interkambio.SistemaInventarioBackend.DTO.common.SimpleIdNameDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.inventory.BookStockLocationDTO;
 import org.interkambio.SistemaInventarioBackend.DTO.purchase.PurchaseOrderItemDTO;
+import org.interkambio.SistemaInventarioBackend.model.Book;
 import org.interkambio.SistemaInventarioBackend.model.BookStockLocation;
 import org.interkambio.SistemaInventarioBackend.model.PurchaseOrderItem;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,23 @@ public class PurchaseOrderItemMapper implements GenericMapper<PurchaseOrderItem,
         item.setDiscount(dto.getDiscount());
         item.setCustomPrice(dto.getCustomPrice());
 
+
         // Relación con BookStockLocation
         if (dto.getBookStockLocation() != null && dto.getBookStockLocation().getId() != null) {
             BookStockLocation bsl = new BookStockLocation();
             bsl.setId(dto.getBookStockLocation().getId());
             item.setBookStockLocation(bsl);
+        }
+
+        // Si viene bookId o bookSku, crear una referencia para uso posterior
+        if (dto.getBookId() != null) {
+            Book book = new Book();
+            book.setId(dto.getBookId());
+            if (dto.getBookSku() != null) {
+                book.setSku(dto.getBookSku());
+            }
+            // opcional: item.setBook(book);
+            // pero solo si el modelo tiene esa relación directa
         }
 
         // La relación con PurchaseOrder se establece en el mapper padre (PurchaseOrderMapper)

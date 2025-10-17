@@ -31,4 +31,7 @@ public class PaymentMade {
 
     @Column(name = "reference_number")
     private String referenceNumber;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
 }

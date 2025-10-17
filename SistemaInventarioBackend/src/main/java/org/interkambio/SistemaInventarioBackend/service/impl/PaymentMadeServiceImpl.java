@@ -5,12 +5,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.interkambio.SistemaInventarioBackend.DTO.purchase.PaymentMadeDTO;
 import org.interkambio.SistemaInventarioBackend.mapper.PaymentMadeMapper;
-import org.interkambio.SistemaInventarioBackend.model.PaymentMade;
-import org.interkambio.SistemaInventarioBackend.model.PurchaseOrder;
-import org.interkambio.SistemaInventarioBackend.model.PaymentStatus;
-import org.interkambio.SistemaInventarioBackend.model.OrderStatus;
-import org.interkambio.SistemaInventarioBackend.repository.PaymentMadeRepository;
-import org.interkambio.SistemaInventarioBackend.repository.PurchaseOrderRepository;
+import org.interkambio.SistemaInventarioBackend.model.*;
+import org.interkambio.SistemaInventarioBackend.repository.*;
 import org.interkambio.SistemaInventarioBackend.service.PaymentMadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,16 +27,20 @@ public class PaymentMadeServiceImpl implements PaymentMadeService {
     private final PaymentMadeRepository repository;
     private final PaymentMadeMapper mapper;
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final BookStockLocationRepository bookStockLocationRepository;
+    private final InventoryTransactionRepository inventoryTransactionRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final BookRepository bookRepository;
+
+    private static final Long QUECHUAS_WAREHOUSE_ID = 1L;
 
     @Override
     @Transactional
     public PaymentMadeDTO save(PaymentMadeDTO dto) {
         PaymentMade entity = mapper.toEntity(dto);
 
-        PurchaseOrder order = purchaseOrderRepository.findById(dto.getPurchaseOrderId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "PurchaseOrder con id " + dto.getPurchaseOrderId() + " no encontrado"));
-
+        // ✅ Obtener referencia sin cargar toda la entidad
+        PurchaseOrder order = purchaseOrderRepository.getReferenceById(dto.getPurchaseOrderId());
         entity.setPurchaseOrder(order);
 
         BigDecimal saldoPendiente = order.getTotalAmount().subtract(order.getTotalPaid());
@@ -86,6 +87,7 @@ public class PaymentMadeServiceImpl implements PaymentMadeService {
             existing.setPaymentDate(dto.getPaymentDate());
             existing.setAmount(dto.getAmount());
             existing.setReferenceNumber(dto.getReferenceNumber());
+            existing.setPaymentMethod(dto.getPaymentMethod());
 
             PaymentMade updated = repository.save(existing);
             updateOrderStatus(order);
@@ -151,10 +153,65 @@ public class PaymentMadeServiceImpl implements PaymentMadeService {
         // Actualizar estado general de la orden de compra
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
             order.setStatus(OrderStatus.COMPLETED);
+            addStockOnPayment(order);
         } else if (order.getStatus() == null || order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.PENDING);
         }
 
         purchaseOrderRepository.save(order);
     }
+
+    private void addStockOnPayment(PurchaseOrder order) {
+        Warehouse quechuas = warehouseRepository.getReferenceById(QUECHUAS_WAREHOUSE_ID);
+
+        order.getItems().forEach(item -> {
+            // ✅ usar el bookId correcto
+            Long bookId = item.getBookStockLocation().getBook().getId();
+
+            // ✅ cargar el libro real
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
+
+            Optional<BookStockLocation> existingTempLocation =
+                    bookStockLocationRepository.findByBookIdAndWarehouseIdAndLocationTypeAndBookConditionAndBookcaseIsNullAndBookcaseFloorIsNull(
+                            bookId,
+                            QUECHUAS_WAREHOUSE_ID,
+                            LocationType.MAIN_STORAGE,
+                            BookCondition.U
+                    );
+
+            BookStockLocation stockLocation = existingTempLocation.orElseGet(() -> {
+                BookStockLocation newLocation = new BookStockLocation();
+                newLocation.setBook(book);
+                newLocation.setBookSku(book.getSku());
+                newLocation.setWarehouse(quechuas);
+                newLocation.setLocationType(LocationType.MAIN_STORAGE);
+                newLocation.setBookCondition(BookCondition.U);
+                newLocation.setBookcase(null);
+                newLocation.setBookcaseFloor(null);
+                newLocation.setStock(0);
+                return bookStockLocationRepository.save(newLocation);
+            });
+
+            stockLocation.setStock(stockLocation.getStock() + item.getQuantity());
+            stockLocation.setLastUpdatedAt(OffsetDateTime.now());
+            bookStockLocationRepository.save(stockLocation);
+
+            InventoryTransaction tx = new InventoryTransaction();
+            tx.setTransactionDate(OffsetDateTime.now());
+            tx.setBook(book);
+            tx.setFromLocation(null);
+            tx.setToLocation(stockLocation);
+            tx.setTransactionType(TransactionType.PURCHASE);
+            tx.setQuantity(item.getQuantity());
+            tx.setReason("Pago completo de orden de compra #" + order.getPurchaseOrderNumber());
+            tx.setUser(order.getCreatedBy());
+
+            inventoryTransactionRepository.save(tx);
+        });
+    }
+
+
+
+
 }
